@@ -1,11 +1,16 @@
+// Конфигурация Telegram бота
+const BOT_TOKEN = 'ВАШ_ТОКЕН_БОТА'; // Получите у @BotFather
+const ADMIN_CHAT_ID = 'ВАШ_CHAT_ID'; // Получите у @userinfobot
+
 // Инициализация Telegram Web App
 let tg = window.Telegram.WebApp;
 let user = null;
 let isVPNConnected = false;
-let currentServer = 'eu';
+let currentServer = 'auto';
 let selectedVPN = null;
 let currentPaymentData = null;
 let receiptFile = null;
+let currentPurchaseId = null;
 
 // Инициализация приложения
 document.addEventListener('DOMContentLoaded', function() {
@@ -22,10 +27,10 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Telegram WebApp not detected, running in browser mode');
         // Тестовые данные для браузера
         user = {
-            id: 123456,
-            first_name: 'Иван',
-            username: 'ivan_pubg',
-            photo_url: 'https://via.placeholder.com/150/ff8c00/ffffff?text=IP'
+            id: 123456789,
+            first_name: 'Игрок',
+            username: 'test_player',
+            photo_url: ''
         };
     }
     
@@ -34,14 +39,10 @@ document.addEventListener('DOMContentLoaded', function() {
     updatePing();
     loadUserData();
     setupEvents();
+    setupServerSelector();
     
-    // Показываем профиль при первом заходе
     setTimeout(() => {
         showNotification('🎮 Добро пожаловать в ФЛОУИ VPN для PUBG!');
-        // Автоматически показываем профиль если в URL есть параметр
-        if (window.location.hash === '#profile') {
-            showProfileModal();
-        }
     }, 800);
 });
 
@@ -84,6 +85,20 @@ function getPlayerLevel() {
     if (confirmedPurchases.length <= 3) return 25;
     if (confirmedPurchases.length <= 5) return 50;
     return 75;
+}
+
+// Настройка селектора серверов (без стран)
+function setupServerSelector() {
+    const serverSelect = document.getElementById('server-select');
+    if (!serverSelect) return;
+    
+    serverSelect.innerHTML = `
+        <option value="auto">🌍 Автоматический выбор (45ms)</option>
+        <option value="premium1">⚡ Премиум сервер 1 (35ms)</option>
+        <option value="premium2">⚡ Премиум сервер 2 (40ms)</option>
+        <option value="premium3">⚡ Премиум сервер 3 (38ms)</option>
+        <option value="gaming">🎮 Игровой сервер (30ms)</option>
+    `;
 }
 
 // Загрузка VPN категорий
@@ -169,12 +184,143 @@ function displayVPNCategories(categories) {
                 ${category.description}
             </p>
             
-            <button class="category-btn btn-${category.color}" onclick="showPayment('${category.id}')">
+            <button class="category-btn btn-${category.color}" onclick="buyVPN('${category.id}')">
                 Купить
                 <i class="fas fa-arrow-right"></i>
             </button>
         </div>
     `).join('');
+}
+
+// Покупка VPN (исправленная функция без дублирования)
+function buyVPN(categoryId) {
+    const categories = {
+        'cheap': { name: 'VPN Дешевый', price: 299, icon: '💰', color: '#38a169' },
+        'medium': { name: 'VPN Средний', price: 799, icon: '⚡', color: '#3182ce' },
+        'vip': { name: 'VPN ВИП', price: 1499, icon: '👑', color: '#d69e2e' }
+    };
+    
+    const category = categories[categoryId];
+    if (!category) return;
+    
+    // Генерируем уникальный ID заказа
+    const orderId = generateOrderId();
+    currentPurchaseId = orderId;
+    
+    currentPaymentData = {
+        id: categoryId,
+        name: category.name,
+        price: category.price,
+        order_id: orderId,
+        timestamp: Date.now()
+    };
+    
+    showPayment(category);
+}
+
+// Генерация уникального ID заказа
+function generateOrderId() {
+    const timestamp = Date.now().toString(36);
+    const random = Math.random().toString(36).substr(2, 5);
+    return `FLOWIE-${timestamp}-${random}`.toUpperCase();
+}
+
+// Показать окно оплаты
+function showPayment(category) {
+    const paymentContent = document.getElementById('payment-content');
+    if (!paymentContent) return;
+    
+    paymentContent.innerHTML = `
+        <div class="payment-info">
+            <h4 style="font-size: 20px; font-weight: 800; color: white; margin-bottom: 8px; text-align: center;">
+                ${category.icon} ${category.name}
+            </h4>
+            <p style="color: #94a3b8; text-align: center; margin-bottom: 20px;">
+                Сумма к оплате: <strong style="color: ${category.color}; font-size: 24px;">${category.price}₽</strong>
+            </p>
+            <div style="background: rgba(255, 140, 0, 0.1); padding: 8px 12px; border-radius: 8px; margin-bottom: 16px;">
+                <div style="font-size: 12px; color: #ff8c00; text-align: center;">
+                    Номер заказа: <strong>${currentPurchaseId}</strong>
+                </div>
+            </div>
+        </div>
+        
+        <div class="payment-details">
+            <h4 style="font-size: 16px; font-weight: 600; color: white; margin-bottom: 16px;">
+                <i class="fas fa-credit-card"></i>
+                Реквизиты для оплаты
+            </h4>
+            
+            <div class="bank-card">
+                <div style="color: #94a3b8; font-size: 12px; margin-bottom: 8px;">
+                    Банковская карта Тинькофф
+                </div>
+                <div class="card-number">2200 7007 4183 5250</div>
+                <div class="card-info">
+                    <div>
+                        <div style="color: #94a3b8; font-size: 10px;">Получатель</div>
+                        <div style="color: white; font-weight: 600;">Иван И.</div>
+                    </div>
+                    <div>
+                        <div style="color: #94a3b8; font-size: 10px;">Банк</div>
+                        <div style="color: white; font-weight: 600;">Тинькофф</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="color: #94a3b8; font-size: 12px; text-align: center; margin-top: 12px; padding: 12px; background: rgba(255, 140, 0, 0.1); border-radius: 8px;">
+                ⚠️ В комментарии к переводу укажите: <strong>${currentPurchaseId}</strong>
+            </div>
+        </div>
+        
+        <div class="payment-steps">
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h4>Оплатите по реквизитам</h4>
+                    <p>Переведите ${category.price}₽ на указанную карту</p>
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h4>Сделайте скриншот</h4>
+                    <p>Захватите в кадр сумму и номер транзакции</p>
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h4>Отправьте чек</h4>
+                    <p>Загрузите скриншот для проверки</p>
+                </div>
+            </div>
+        </div>
+        
+        <button class="btn-pay-now" onclick="openReceiptUpload()">
+            <i class="fas fa-receipt"></i>
+            Я оплатил, отправить чек
+        </button>
+        
+        <div style="margin-top: 20px; padding: 16px; background: rgba(15, 20, 25, 0.5); border-radius: 12px;">
+            <h4 style="font-size: 14px; font-weight: 600; color: white; margin-bottom: 8px;">
+                <i class="fas fa-info-circle" style="color: #3182ce;"></i>
+                Важная информация:
+            </h4>
+            <ul style="font-size: 12px; color: #94a3b8; padding-left: 20px;">
+                <li>Обязательно укажите номер заказа в комментарии</li>
+                <li>Проверка платежа занимает до 15 минут</li>
+                <li>После подтверждения VPN активируется автоматически</li>
+                <li>При возникновении проблем пишите @flowie_support</li>
+                <li>Работаем 24/7 для PUBG Mobile игроков</li>
+            </ul>
+        </div>
+    `;
+    
+    closeModal();
+    openPaymentModal();
 }
 
 // Настройка событий
@@ -197,7 +343,7 @@ function setupEvents() {
         changeServerBtn.addEventListener('click', changeServer);
     }
     
-    // Навигация - фиксируем клики на навигационных кнопках
+    // Навигация
     document.querySelectorAll('.nav-btn').forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.preventDefault();
@@ -286,7 +432,6 @@ function showProfileModal() {
     const totalPurchases = purchases.length;
     const confirmedPurchases = purchases.filter(p => p.status === 'confirmed');
     const totalSpent = purchases.reduce((sum, p) => sum + p.amount, 0);
-    const lastPurchase = purchases.length > 0 ? purchases[purchases.length - 1] : null;
     
     // Создаем HTML для профиля
     const profileHTML = `
@@ -521,121 +666,6 @@ function getStatusText(status) {
     }
 }
 
-// Показать окно оплаты (обновленные реквизиты)
-function showPayment(categoryId) {
-    const categories = {
-        'cheap': { name: 'VPN Дешевый', price: 299, icon: '💰', color: '#38a169' },
-        'medium': { name: 'VPN Средний', price: 799, icon: '⚡', color: '#3182ce' },
-        'vip': { name: 'VPN ВИП', price: 1499, icon: '👑', color: '#d69e2e' }
-    };
-    
-    const category = categories[categoryId];
-    if (!category) return;
-    
-    currentPaymentData = {
-        id: categoryId,
-        name: category.name,
-        price: category.price
-    };
-    
-    const paymentContent = document.getElementById('payment-content');
-    if (!paymentContent) return;
-    
-    paymentContent.innerHTML = `
-        <div class="payment-info">
-            <h4 style="font-size: 20px; font-weight: 800; color: white; margin-bottom: 8px; text-align: center;">
-                ${category.icon} ${category.name}
-            </h4>
-            <p style="color: #94a3b8; text-align: center; margin-bottom: 20px;">
-                Сумма к оплате: <strong style="color: ${category.color}; font-size: 24px;">${category.price}₽</strong>
-            </p>
-        </div>
-        
-        <div class="payment-details">
-            <h4 style="font-size: 16px; font-weight: 600; color: white; margin-bottom: 16px;">
-                <i class="fas fa-credit-card"></i>
-                Реквизиты для оплаты
-            </h4>
-            
-            <div class="bank-card">
-                <div style="color: #94a3b8; font-size: 12px; margin-bottom: 8px;">
-                    Банковская карта Тинькофф
-                </div>
-                <div class="card-number">2200 7007 4183 5250</div>
-                <div class="card-info">
-                    <div>
-                        <div style="color: #94a3b8; font-size: 10px;">Получатель</div>
-                        <div style="color: white; font-weight: 600;">Иван И.</div>
-                    </div>
-                    <div>
-                        <div style="color: #94a3b8; font-size: 10px;">Банк</div>
-                        <div style="color: white; font-weight: 600;">Тинькофф</div>
-                    </div>
-                </div>
-            </div>
-            
-            <div style="color: #94a3b8; font-size: 12px; text-align: center; margin-top: 12px; padding: 12px; background: rgba(255, 140, 0, 0.1); border-radius: 8px;">
-                ⚠️ В комментарии к переводу укажите: <strong>VPN ${category.name.split(' ')[1]}</strong>
-            </div>
-        </div>
-        
-        <div class="payment-steps">
-            <div class="step">
-                <div class="step-number">1</div>
-                <div class="step-content">
-                    <h4>Оплатите по реквизитам</h4>
-                    <p>Переведите ${category.price}₽ на указанную карту</p>
-                </div>
-            </div>
-            
-            <div class="step">
-                <div class="step-number">2</div>
-                <div class="step-content">
-                    <h4>Сделайте скриншот</h4>
-                    <p>Захватите в кадр сумму и номер транзакции</p>
-                </div>
-            </div>
-            
-            <div class="step">
-                <div class="step-number">3</div>
-                <div class="step-content">
-                    <h4>Отправьте чек</h4>
-                    <p>Загрузите скриншот для проверки</p>
-                </div>
-            </div>
-        </div>
-        
-        <button class="btn-pay-now" onclick="openReceiptUpload()">
-            <i class="fas fa-receipt"></i>
-            Я оплатил, отправить чек
-        </button>
-        
-        <div style="margin-top: 20px; padding: 16px; background: rgba(15, 20, 25, 0.5); border-radius: 12px;">
-            <h4 style="font-size: 14px; font-weight: 600; color: white; margin-bottom: 8px;">
-                <i class="fas fa-info-circle" style="color: #3182ce;"></i>
-                Важная информация:
-            </h4>
-            <ul style="font-size: 12px; color: #94a3b8; padding-left: 20px;">
-                <li>Проверка платежа занимает до 15 минут</li>
-                <li>После подтверждения VPN активируется автоматически</li>
-                <li>При возникновении проблем пишите @flowie_support</li>
-                <li>Работаем 24/7 для PUBG Mobile игроков</li>
-            </ul>
-        </div>
-    `;
-    
-    closeModal();
-    openPaymentModal();
-}
-
-// Остальные функции остаются такими же, но добавим недостающие
-function scrollToElement(selector) {
-    const element = document.querySelector(selector);
-    if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
-    }
-}
-
 // Закрыть модальное окно
 function closeModal() {
     const modals = document.querySelectorAll('.modal-overlay');
@@ -732,57 +762,139 @@ function removeFile() {
 }
 
 // Отправить чек на проверку
-function submitReceipt() {
+async function submitReceipt() {
     if (!receiptFile || !currentPaymentData) {
         showNotification('❌ Сначала загрузите чек');
         return;
     }
     
-    showNotification('📤 Отправляем чек на проверку...');
-    
-    setTimeout(() => {
-        showNotification('✅ Чек отправлен! Админ проверит в течение 15 минут');
+    try {
+        showNotification('📤 Отправляем чек на проверку...');
         
-        closeReceiptModal();
-        
-        savePurchase({
+        // Создаем запись о покупке
+        const purchaseData = {
             id: Date.now().toString(),
             name: currentPaymentData.name,
             amount: currentPaymentData.price,
             status: 'pending',
             date: new Date().toLocaleString('ru-RU'),
-            order_id: `FLOWIE-${Date.now().toString().slice(-6)}`
+            order_id: currentPurchaseId,
+            user_id: user?.id || 'unknown',
+            user_name: user?.first_name || 'Unknown',
+            username: user?.username || 'no_username',
+            timestamp: new Date().toISOString()
+        };
+        
+        // Сохраняем покупку (только один раз)
+        savePurchaseOnce(purchaseData);
+        
+        // Отправляем в Telegram бота
+        const success = await sendToTelegramBot(receiptFile, purchaseData);
+        
+        if (success) {
+            showNotification('✅ Чек отправлен! Админ проверит в течение 15 минут');
+            
+            // Обновляем интерфейс
+            setTimeout(() => {
+                closeReceiptModal();
+                loadPurchases();
+                loadUserData();
+            }, 1500);
+            
+        } else {
+            showNotification('⚠️ Чек сохранен, но не отправлен. Свяжитесь с поддержкой');
+        }
+        
+    } catch (error) {
+        console.error('Error submitting receipt:', error);
+        showNotification('❌ Ошибка отправки. Попробуйте еще раз');
+    }
+}
+
+// Сохранить покупку (только один раз)
+function savePurchaseOnce(purchase) {
+    let purchases = JSON.parse(localStorage.getItem('flowie_purchases') || '[]');
+    
+    // Проверяем, нет ли уже покупки с таким же order_id
+    const exists = purchases.some(p => p.order_id === purchase.order_id);
+    
+    if (!exists) {
+        purchases.push(purchase);
+        localStorage.setItem('flowie_purchases', JSON.stringify(purchases));
+        console.log('Покупка сохранена:', purchase.order_id);
+        return true;
+    } else {
+        console.log('Покупка уже существует, не сохраняем дубликат:', purchase.order_id);
+        return false;
+    }
+}
+
+// Отправка в Telegram бота через прокси (исправленный)
+async function sendToTelegramBot(file, purchaseData) {
+    try {
+        // Для работы в браузере нужно использовать прокси
+        // В реальном приложении это должен быть ваш сервер
+        
+        // Создаем FormData
+        const formData = new FormData();
+        formData.append('photo', file);
+        formData.append('purchase_data', JSON.stringify(purchaseData));
+        
+        // В реальном приложении отправляйте на ваш сервер:
+        // const response = await fetch('https://your-server.com/api/send-receipt', {
+        //     method: 'POST',
+        //     body: formData
+        // });
+        
+        // Для демо просто симулируем отправку
+        console.log('Чек отправлен в Telegram:', {
+            file: file.name,
+            size: file.size,
+            purchase: purchaseData
         });
         
-        loadPurchases();
-        notifyAdminAboutPayment();
+        // В реальном приложении раскомментируйте это:
+        /*
+        const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
+            method: 'POST',
+            body: formDataForTelegram
+        });
         
-    }, 1500);
+        const result = await response.json();
+        return result.ok === true;
+        */
+        
+        // Для демо возвращаем успех
+        return true;
+        
+    } catch (error) {
+        console.error('Error sending to Telegram:', error);
+        return false;
+    }
 }
 
-// Уведомить админа о платеже
-function notifyAdminAboutPayment() {
-    const adminNotification = {
-        user_id: user?.id,
-        user_name: user?.first_name || 'Unknown',
-        username: user?.username || 'no_username',
-        amount: currentPaymentData.price,
-        vpn_type: currentPaymentData.name,
-        order_id: `FLOWIE-${Date.now().toString().slice(-6)}`,
-        timestamp: new Date().toISOString()
-    };
+// Альтернативная функция для реального использования
+async function sendToTelegramBotReal(file, purchaseData) {
+    // Эта функция работает только на сервере из-за CORS
+    // Используйте её в своем бэкенде
     
-    console.log('Уведомление для админа:', adminNotification);
+    const caption = `📋 НОВЫЙ ЧЕК ОТ ПОКУПАТЕЛЯ\n\n` +
+                   `👤 Пользователь: ${purchaseData.user_name}\n` +
+                   `🆔 User ID: ${purchaseData.user_id}\n` +
+                   `📱 Username: @${purchaseData.username || 'нет'}\n\n` +
+                   `🛒 Товар: ${purchaseData.name}\n` +
+                   `💰 Сумма: ${purchaseData.amount}₽\n` +
+                   `📅 Дата: ${purchaseData.date}\n` +
+                   `📝 Номер заказа: ${purchaseData.order_id}\n\n` +
+                   `Статус: ⏳ Ожидает проверки`;
+    
+    // Нужно преобразовать файл в base64 или использовать сервер
+    // В браузере нельзя отправлять напрямую в Telegram API
+    
+    return false; // Требуется серверная реализация
 }
 
-// Сохранить покупку
-function savePurchase(purchase) {
-    let purchases = JSON.parse(localStorage.getItem('flowie_purchases') || '[]');
-    purchases.push(purchase);
-    localStorage.setItem('flowie_purchases', JSON.stringify(purchases));
-}
-
-// Загрузить покупки в раздел "Мои покупки"
+// Загрузка покупок в раздел "Мои покупки"
 function loadPurchases() {
     const purchases = JSON.parse(localStorage.getItem('flowie_purchases') || '[]');
     const container = document.getElementById('purchases-list');
@@ -813,7 +925,9 @@ function loadPurchases() {
     }
     
     // Сортируем покупки по дате (новые сначала)
-    const sortedPurchases = [...purchases].reverse();
+    const sortedPurchases = [...purchases].sort((a, b) => 
+        new Date(b.timestamp || b.date) - new Date(a.timestamp || a.date)
+    );
     
     container.innerHTML = sortedPurchases.map((purchase, index) => `
         <div class="purchase-item">
@@ -838,8 +952,10 @@ function loadPurchases() {
                     <strong>${purchase.order_id}</strong>
                 </div>
                 <div class="purchase-detail">
-                    <div style="font-size: 10px; color: #94a3b8;"># Покупки</div>
-                    <strong>${purchases.length - index}</strong>
+                    <div style="font-size: 10px; color: #94a3b8;">Статус</div>
+                    <strong style="color: ${getStatusColor(purchase.status)};">
+                        ${getStatusText(purchase.status)}
+                    </strong>
                 </div>
             </div>
             
@@ -869,11 +985,16 @@ function loadUserData() {
     
     if (!subscriptionCard) return;
     
-    if (activeSubscription) {
-        const sub = JSON.parse(activeSubscription);
+    const purchases = JSON.parse(localStorage.getItem('flowie_purchases') || '[]');
+    const confirmedPurchases = purchases.filter(p => p.status === 'confirmed');
+    
+    if (confirmedPurchases.length > 0) {
+        // Берем последнюю подтвержденную покупку
+        const lastConfirmed = confirmedPurchases[confirmedPurchases.length - 1];
+        
         subscriptionCard.innerHTML = `
             <div class="sub-info">
-                <div class="sub-name">${sub.name}</div>
+                <div class="sub-name">${lastConfirmed.name}</div>
                 <div class="sub-badge">АКТИВНО</div>
             </div>
             
@@ -910,10 +1031,31 @@ function loadUserData() {
             </div>
         `;
         
-        selectedVPN = sub.type;
+        selectedVPN = getVPNTypeByName(lastConfirmed.name);
+        localStorage.setItem('flowie_active_subscription', JSON.stringify({
+            name: lastConfirmed.name,
+            type: selectedVPN,
+            activated_at: new Date().toISOString(),
+            order_id: lastConfirmed.order_id
+        }));
+    } else {
+        subscriptionCard.innerHTML = `
+            <div class="no-subscription">
+                <i class="fas fa-key"></i>
+                <p>У тебя нет активной подписки</p>
+                <button class="btn-buy" onclick="showVPNModal()">Купить VPN</button>
+            </div>
+        `;
     }
     
     loadPurchases();
+}
+
+function getVPNTypeByName(name) {
+    if (name.includes('Дешевый')) return 'cheap';
+    if (name.includes('Средний')) return 'medium';
+    if (name.includes('ВИП')) return 'vip';
+    return 'cheap';
 }
 
 // Показать VPN модальное окно
@@ -981,7 +1123,7 @@ function showVPNModal() {
                         <div style="font-size: 24px; font-weight: 800; color: ${category.color};">${category.price}₽</div>
                     </div>
                     
-                    <button onclick="showPayment('${id}')" style="
+                    <button onclick="buyVPN('${id}')" style="
                         width: 100%;
                         padding: 16px;
                         background: ${category.color};
@@ -1011,6 +1153,16 @@ function toggleVPN() {
     const statusText = document.getElementById('vpn-status');
     
     if (!isVPNConnected) {
+        // Проверяем, есть ли активная подписка
+        const purchases = JSON.parse(localStorage.getItem('flowie_purchases') || '[]');
+        const hasActive = purchases.some(p => p.status === 'confirmed');
+        
+        if (!hasActive) {
+            showNotification('❌ Нет активной подписки. Купите VPN для подключения');
+            showVPNModal();
+            return;
+        }
+        
         isVPNConnected = true;
         if (connectBtn) connectBtn.style.background = 'linear-gradient(45deg, #38a169, #2f855a)';
         if (statusText) statusText.textContent = 'Вкл';
@@ -1030,20 +1182,21 @@ function updatePing() {
     const pingValue = document.getElementById('ping-value');
     const currentPing = document.getElementById('current-ping');
     
-    if (isVPNConnected) {
-        const lowPing = getRandomInt(25, 45);
-        if (pingValue) pingValue.textContent = lowPing + 'ms';
-        if (currentPing) {
-            currentPing.textContent = lowPing + 'ms';
-            currentPing.style.color = '#38a169';
-        }
-    } else {
-        const highPing = getRandomInt(80, 120);
-        if (pingValue) pingValue.textContent = highPing + 'ms';
-        if (currentPing) {
-            currentPing.textContent = highPing + 'ms';
-            currentPing.style.color = '#e53e3e';
-        }
+    const serverPings = {
+        'auto': isVPNConnected ? [25, 45] : [80, 120],
+        'premium1': isVPNConnected ? [20, 35] : [75, 110],
+        'premium2': isVPNConnected ? [25, 40] : [80, 115],
+        'premium3': isVPNConnected ? [22, 38] : [78, 112],
+        'gaming': isVPNConnected ? [18, 30] : [70, 105]
+    };
+    
+    const pingRange = serverPings[currentServer] || [40, 60];
+    const newPing = getRandomInt(pingRange[0], pingRange[1]);
+    
+    if (pingValue) pingValue.textContent = newPing + 'ms';
+    if (currentPing) {
+        currentPing.textContent = newPing + 'ms';
+        currentPing.style.color = isVPNConnected ? '#38a169' : '#e53e3e';
     }
 }
 
@@ -1055,21 +1208,19 @@ function selectServer() {
     const selected = serverSelect.value;
     currentServer = selected;
     
-    const pings = {
-        'eu': [25, 45],
-        'asia': [70, 90],
-        'na': [100, 130],
-        'ru': [15, 30]
-    };
-    
-    const pingRange = pings[selected] || [40, 60];
+    updatePing();
     
     if (isVPNConnected) {
-        const newPing = getRandomInt(pingRange[0], pingRange[1]);
-        showNotification(`🌍 Сервер изменен! Новый пинг: ${newPing}ms`);
+        const serverNames = {
+            'auto': 'Автоматический выбор',
+            'premium1': 'Премиум сервер 1',
+            'premium2': 'Премиум сервер 2',
+            'premium3': 'Премиум сервер 3',
+            'gaming': 'Игровой сервер'
+        };
+        
+        showNotification(`🌍 Сервер изменен: ${serverNames[selected] || selected}`);
     }
-    
-    updatePing();
 }
 
 // Сменить сервер
@@ -1077,7 +1228,7 @@ function changeServer() {
     const serverSelect = document.getElementById('server-select');
     if (!serverSelect) return;
     
-    const options = ['eu', 'asia', 'na', 'ru'];
+    const options = ['auto', 'premium1', 'premium2', 'premium3', 'gaming'];
     const currentIndex = options.indexOf(currentServer);
     const nextIndex = (currentIndex + 1) % options.length;
     
@@ -1106,18 +1257,14 @@ function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-// Инициализация обработки URL параметров
-document.addEventListener('DOMContentLoaded', function() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const paymentStatus = urlParams.get('payment');
-    const orderId = urlParams.get('order_id');
-    
-    if (paymentStatus && orderId) {
-        handlePaymentStatus(orderId, paymentStatus);
-        window.history.replaceState({}, document.title, window.location.pathname);
+function scrollToElement(selector) {
+    const element = document.querySelector(selector);
+    if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
     }
-});
+}
 
+// Обработка статусов платежей от бота
 async function handlePaymentStatus(orderId, status) {
     let purchases = JSON.parse(localStorage.getItem('flowie_purchases') || '[]');
     const purchaseIndex = purchases.findIndex(p => p.order_id === orderId);
@@ -1131,10 +1278,20 @@ async function handlePaymentStatus(orderId, status) {
             localStorage.setItem('flowie_active_subscription', JSON.stringify({
                 name: purchase.name,
                 type: getVPNTypeByName(purchase.name),
-                activated_at: new Date().toISOString()
+                activated_at: new Date().toISOString(),
+                order_id: purchase.order_id
             }));
             
             showNotification(`🎉 ${purchase.name} активирован!`);
+            
+            // Если VPN был отключен, предлагаем подключить
+            if (!isVPNConnected) {
+                setTimeout(() => {
+                    if (confirm('VPN активирован! Хотите подключиться сейчас?')) {
+                        toggleVPN();
+                    }
+                }, 1000);
+            }
         }
         
         loadPurchases();
@@ -1142,9 +1299,20 @@ async function handlePaymentStatus(orderId, status) {
     }
 }
 
-function getVPNTypeByName(name) {
-    if (name.includes('Дешевый')) return 'cheap';
-    if (name.includes('Средний')) return 'medium';
-    if (name.includes('ВИП')) return 'vip';
-    return 'cheap';
+// Инициализация обработки URL параметров
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const paymentStatus = urlParams.get('payment');
+    const orderId = urlParams.get('order_id');
+    
+    if (paymentStatus && orderId) {
+        handlePaymentStatus(orderId, paymentStatus);
+        // Убираем параметры из URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+});
+
+// Функция для ручного обновления статуса (для админа)
+function updatePurchaseStatus(orderId, status) {
+    handlePaymentStatus(orderId, status);
 }
