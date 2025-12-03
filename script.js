@@ -23,8 +23,9 @@ document.addEventListener('DOMContentLoaded', function() {
         // Тестовые данные для браузера
         user = {
             id: 123456,
-            first_name: 'Игрок',
-            username: 'test_player'
+            first_name: 'Иван',
+            username: 'ivan_pubg',
+            photo_url: 'https://via.placeholder.com/150/ff8c00/ffffff?text=IP'
         };
     }
     
@@ -34,12 +35,17 @@ document.addEventListener('DOMContentLoaded', function() {
     loadUserData();
     setupEvents();
     
+    // Показываем профиль при первом заходе
     setTimeout(() => {
         showNotification('🎮 Добро пожаловать в ФЛОУИ VPN для PUBG!');
+        // Автоматически показываем профиль если в URL есть параметр
+        if (window.location.hash === '#profile') {
+            showProfileModal();
+        }
     }, 800);
 });
 
-// Настройка профиля игрока
+// Настройка профиля игрока в хедере
 function setupUserProfile() {
     const avatarImage = document.getElementById('avatar-image');
     const playerLevel = document.getElementById('player-level');
@@ -50,24 +56,34 @@ function setupUserProfile() {
         return;
     }
     
+    // Создаем аватарку
     if (user.photo_url) {
         avatarImage.innerHTML = `
             <img src="${user.photo_url}" alt="${user.first_name}" 
                  onerror="this.onerror=null; this.parentElement.innerHTML='<i class=\\'fas fa-user\\'></i>';">
         `;
     } else {
+        // Если нет фото, показываем инициалы
         const initials = (user.first_name?.[0] || 'U').toUpperCase();
         avatarImage.innerHTML = `
             <span style="font-weight: bold; font-size: 18px; color: white;">${initials}</span>
         `;
     }
     
+    // Устанавливаем уровень
     playerLevel.textContent = getPlayerLevel();
 }
 
+// Получить уровень игрока на основе активности
 function getPlayerLevel() {
-    // Простая логика определения уровня
-    return Math.floor(Math.random() * 100) + 1;
+    const purchases = JSON.parse(localStorage.getItem('flowie_purchases') || '[]');
+    const confirmedPurchases = purchases.filter(p => p.status === 'confirmed');
+    
+    if (confirmedPurchases.length === 0) return 1;
+    if (confirmedPurchases.length === 1) return 10;
+    if (confirmedPurchases.length <= 3) return 25;
+    if (confirmedPurchases.length <= 5) return 50;
+    return 75;
 }
 
 // Загрузка VPN категорий
@@ -181,16 +197,48 @@ function setupEvents() {
         changeServerBtn.addEventListener('click', changeServer);
     }
     
-    // Навигация
-    const navBtns = document.querySelectorAll('.nav-btn');
-    navBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const section = this.getAttribute('onclick')?.match(/showSection\('(\w+)'\)/)?.[1];
-            if (section) {
-                showSection(section);
+    // Навигация - фиксируем клики на навигационных кнопках
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const span = this.querySelector('span');
+            const section = span ? span.textContent.toLowerCase() : '';
+            
+            // Убираем активный класс у всех кнопок
+            document.querySelectorAll('.nav-btn').forEach(b => {
+                b.classList.remove('active');
+            });
+            
+            // Добавляем активный класс текущей кнопке
+            this.classList.add('active');
+            
+            // Обрабатываем клик
+            switch(section) {
+                case 'главная':
+                    scrollToElement('.welcome-section');
+                    break;
+                case 'vpn':
+                    scrollToElement('.vpn-categories');
+                    break;
+                case 'покупки':
+                    loadPurchases();
+                    scrollToElement('.my-purchases');
+                    break;
+                case 'поддержка':
+                    showNotification('💬 Техподдержка: @flowie_support');
+                    break;
+                case 'профиль':
+                    showProfileModal();
+                    break;
             }
         });
     });
+    
+    // Клик на аватар в хедере
+    const avatarImage = document.getElementById('avatar-image');
+    if (avatarImage) {
+        avatarImage.parentElement.parentElement.addEventListener('click', showProfileModal);
+    }
     
     // Модальные окна
     const closeModalBtns = document.querySelectorAll('.close-modal');
@@ -215,9 +263,265 @@ function setupEvents() {
     if (submitBtn) {
         submitBtn.addEventListener('click', submitReceipt);
     }
+    
+    // Кнопка апгрейда подписки
+    const upgradeBtn = document.querySelector('.btn-upgrade');
+    if (upgradeBtn) {
+        upgradeBtn.addEventListener('click', showVPNModal);
+    }
+    
+    // Кнопка покупки VPN
+    const buyBtn = document.querySelector('.btn-buy');
+    if (buyBtn) {
+        buyBtn.addEventListener('click', showVPNModal);
+    }
 }
 
-// Показать окно оплаты
+// Показать модальное окно профиля
+function showProfileModal() {
+    const purchases = JSON.parse(localStorage.getItem('flowie_purchases') || '[]');
+    const activeSubscription = localStorage.getItem('flowie_active_subscription');
+    
+    // Статистика покупок
+    const totalPurchases = purchases.length;
+    const confirmedPurchases = purchases.filter(p => p.status === 'confirmed');
+    const totalSpent = purchases.reduce((sum, p) => sum + p.amount, 0);
+    const lastPurchase = purchases.length > 0 ? purchases[purchases.length - 1] : null;
+    
+    // Создаем HTML для профиля
+    const profileHTML = `
+        <div class="profile-modal" style="color: white;">
+            <!-- Заголовок профиля -->
+            <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, rgba(255, 140, 0, 0.1) 0%, rgba(255, 140, 0, 0.05) 100%); border-radius: 16px; margin-bottom: 20px;">
+                <div style="width: 100px; height: 100px; margin: 0 auto 16px; border-radius: 50%; overflow: hidden; border: 3px solid var(--pubg-orange);">
+                    ${user?.photo_url ? 
+                        `<img src="${user.photo_url}" alt="${user.first_name}" style="width: 100%; height: 100%; object-fit: cover;">` : 
+                        `<div style="width: 100%; height: 100%; background: linear-gradient(45deg, #1a202c, #2d3748); display: flex; align-items: center; justify-content: center; font-size: 36px; color: white; font-weight: bold;">
+                            ${(user?.first_name?.[0] || 'U').toUpperCase()}
+                        </div>`
+                    }
+                </div>
+                <h3 style="font-size: 24px; font-weight: 800; margin-bottom: 8px;">
+                    ${user?.first_name || 'Игрок'}
+                </h3>
+                <p style="color: var(--pubg-orange); font-size: 16px; margin-bottom: 4px;">
+                    @${user?.username || 'username'}
+                </p>
+                <div style="display: inline-block; background: rgba(255, 140, 0, 0.2); color: var(--pubg-orange); padding: 4px 12px; border-radius: 20px; font-size: 14px; font-weight: 700;">
+                    Уровень ${getPlayerLevel()}
+                </div>
+            </div>
+            
+            <!-- Статистика -->
+            <div style="margin-bottom: 24px;">
+                <h4 style="font-size: 18px; font-weight: 700; margin-bottom: 16px; color: white; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-chart-bar" style="color: var(--pubg-orange);"></i>
+                    Статистика покупок
+                </h4>
+                
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px;">
+                    <div style="background: rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 16px; text-align: center; border: 1px solid rgba(255, 255, 255, 0.1);">
+                        <div style="font-size: 32px; font-weight: 800; color: var(--pubg-orange);">${totalPurchases}</div>
+                        <div style="font-size: 12px; color: #94a3b8; text-transform: uppercase;">Всего покупок</div>
+                    </div>
+                    
+                    <div style="background: rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 16px; text-align: center; border: 1px solid rgba(255, 255, 255, 0.1);">
+                        <div style="font-size: 32px; font-weight: 800; color: #38a169;">${confirmedPurchases.length}</div>
+                        <div style="font-size: 12px; color: #94a3b8; text-transform: uppercase;">Подтверждено</div>
+                    </div>
+                    
+                    <div style="background: rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 16px; text-align: center; border: 1px solid rgba(255, 255, 255, 0.1);">
+                        <div style="font-size: 32px; font-weight: 800; color: #3182ce;">${totalSpent}₽</div>
+                        <div style="font-size: 12px; color: #94a3b8; text-transform: uppercase;">Всего потрачено</div>
+                    </div>
+                    
+                    <div style="background: rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 16px; text-align: center; border: 1px solid rgba(255, 255, 255, 0.1);">
+                        <div style="font-size: 32px; font-weight: 800; color: #d69e2e;">${activeSubscription ? 'Да' : 'Нет'}</div>
+                        <div style="font-size: 12px; color: #94a3b8; text-transform: uppercase;">Активна подписка</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- История покупок -->
+            <div style="margin-bottom: 24px;">
+                <h4 style="font-size: 18px; font-weight: 700; margin-bottom: 16px; color: white; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-history" style="color: var(--pubg-orange);"></i>
+                    История покупок
+                </h4>
+                
+                <div style="max-height: 300px; overflow-y: auto; padding-right: 8px;">
+                    ${purchases.length > 0 ? purchases.map((purchase, index) => `
+                        <div style="background: rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 16px; margin-bottom: 12px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                <div style="font-size: 16px; font-weight: 700; color: white;">${purchase.name}</div>
+                                <div style="font-size: 14px; color: ${getStatusColor(purchase.status)}; font-weight: 700;">
+                                    ${getStatusText(purchase.status)}
+                                </div>
+                            </div>
+                            
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 12px;">
+                                <div>
+                                    <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase;">Сумма</div>
+                                    <div style="font-size: 14px; font-weight: 600; color: white;">${purchase.amount}₽</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase;">Дата</div>
+                                    <div style="font-size: 14px; font-weight: 600; color: white;">${purchase.date}</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase;">Заказ</div>
+                                    <div style="font-size: 14px; font-weight: 600; color: white;">${purchase.order_id}</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase;">#</div>
+                                    <div style="font-size: 14px; font-weight: 600; color: white;">${index + 1}</div>
+                                </div>
+                            </div>
+                            
+                            ${purchase.status === 'pending' ? 
+                                '<div style="background: rgba(245, 158, 11, 0.1); color: #f59e0b; padding: 8px; border-radius: 8px; font-size: 12px; text-align: center;">⏳ Ожидает проверки администратором</div>' : 
+                                purchase.status === 'confirmed' ? 
+                                '<div style="background: rgba(34, 197, 94, 0.1); color: #22c55e; padding: 8px; border-radius: 8px; font-size: 12px; text-align: center;">✅ VPN активирован</div>' : 
+                                '<div style="background: rgba(239, 68, 68, 0.1); color: #ef4444; padding: 8px; border-radius: 8px; font-size: 12px; text-align: center;">❌ Отклонено администратором</div>'
+                            }
+                        </div>
+                    `).reverse().join('') : `
+                        <div style="text-align: center; padding: 40px 20px; color: #94a3b8;">
+                            <i class="fas fa-shopping-cart" style="font-size: 48px; margin-bottom: 16px;"></i>
+                            <p>У вас пока нет покупок</p>
+                            <button onclick="closeModal(); showVPNModal();" style="
+                                background: linear-gradient(45deg, var(--pubg-orange), #ffa500);
+                                border: none;
+                                border-radius: 12px;
+                                padding: 12px 24px;
+                                color: white;
+                                font-weight: 700;
+                                margin-top: 16px;
+                                cursor: pointer;
+                            ">
+                                Сделать первую покупку
+                            </button>
+                        </div>
+                    `}
+                </div>
+            </div>
+            
+            <!-- Действия -->
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <button onclick="closeModal(); showVPNModal();" style="
+                    width: 100%;
+                    padding: 16px;
+                    background: linear-gradient(45deg, var(--pubg-orange), #ffa500);
+                    border: none;
+                    border-radius: 12px;
+                    color: white;
+                    font-weight: 700;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 10px;
+                ">
+                    <i class="fas fa-shopping-cart"></i>
+                    Купить VPN
+                </button>
+                
+                <button onclick="closeModal(); showSection('purchases');" style="
+                    width: 100%;
+                    padding: 16px;
+                    background: rgba(255, 255, 255, 0.1);
+                    border: 1px solid rgba(255, 255, 255, 0.2);
+                    border-radius: 12px;
+                    color: white;
+                    font-weight: 700;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 10px;
+                ">
+                    <i class="fas fa-history"></i>
+                    Полная история
+                </button>
+                
+                <button onclick="window.open('https://t.me/flowie_support', '_blank');" style="
+                    width: 100%;
+                    padding: 16px;
+                    background: rgba(56, 161, 105, 0.2);
+                    border: 1px solid rgba(56, 161, 105, 0.4);
+                    border-radius: 12px;
+                    color: #38a169;
+                    font-weight: 700;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 10px;
+                ">
+                    <i class="fas fa-headset"></i>
+                    Поддержка @flowie_support
+                </button>
+            </div>
+        </div>
+    `;
+    
+    // Создаем или обновляем модальное окно профиля
+    let profileModal = document.getElementById('profile-modal');
+    if (!profileModal) {
+        profileModal = document.createElement('div');
+        profileModal.id = 'profile-modal';
+        profileModal.className = 'modal-overlay';
+        profileModal.innerHTML = `
+            <div class="modal pubg-modal">
+                <div class="modal-header">
+                    <h3>
+                        <i class="fas fa-user-circle"></i>
+                        Профиль игрока
+                    </h3>
+                    <button class="close-modal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    ${profileHTML}
+                </div>
+            </div>
+        `;
+        document.body.appendChild(profileModal);
+        
+        // Добавляем обработчик закрытия
+        profileModal.querySelector('.close-modal').addEventListener('click', closeModal);
+        profileModal.addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+    } else {
+        profileModal.querySelector('.modal-body').innerHTML = profileHTML;
+    }
+    
+    // Показываем модальное окно
+    profileModal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function getStatusColor(status) {
+    switch(status) {
+        case 'pending': return '#f59e0b';
+        case 'confirmed': return '#38a169';
+        case 'rejected': return '#e53e3e';
+        default: return '#94a3b8';
+    }
+}
+
+function getStatusText(status) {
+    switch(status) {
+        case 'pending': return 'ОЖИДАНИЕ';
+        case 'confirmed': return 'ПОДТВЕРЖДЕНО';
+        case 'rejected': return 'ОТКЛОНЕНО';
+        default: return 'НЕИЗВЕСТНО';
+    }
+}
+
+// Показать окно оплаты (обновленные реквизиты)
 function showPayment(categoryId) {
     const categories = {
         'cheap': { name: 'VPN Дешевый', price: 299, icon: '💰', color: '#38a169' },
@@ -255,24 +559,23 @@ function showPayment(categoryId) {
             
             <div class="bank-card">
                 <div style="color: #94a3b8; font-size: 12px; margin-bottom: 8px;">
-                    Банковская карта
+                    Банковская карта Тинькофф
                 </div>
-                <div class="card-number">2200 0000 0000 0000</div>
+                <div class="card-number">2200 7007 4183 5250</div>
                 <div class="card-info">
                     <div>
-                        <div style="color: #94a3b8; font-size: 10px;">Срок действия</div>
-                        <div style="color: white; font-weight: 600;">01/28</div>
+                        <div style="color: #94a3b8; font-size: 10px;">Получатель</div>
+                        <div style="color: white; font-weight: 600;">Иван И.</div>
                     </div>
                     <div>
-                        <div style="color: #94a3b8; font-size: 10px;">CVC</div>
-                        <div style="color: white; font-weight: 600;">123</div>
+                        <div style="color: #94a3b8; font-size: 10px;">Банк</div>
+                        <div style="color: white; font-weight: 600;">Тинькофф</div>
                     </div>
                 </div>
             </div>
             
-            <div style="color: #94a3b8; font-size: 12px; text-align: center; margin-top: 12px;">
-                Получатель: Иван Иванов<br>
-                Банк: Тинькофф
+            <div style="color: #94a3b8; font-size: 12px; text-align: center; margin-top: 12px; padding: 12px; background: rgba(255, 140, 0, 0.1); border-radius: 8px;">
+                ⚠️ В комментарии к переводу укажите: <strong>VPN ${category.name.split(' ')[1]}</strong>
             </div>
         </div>
         
@@ -306,10 +609,44 @@ function showPayment(categoryId) {
             <i class="fas fa-receipt"></i>
             Я оплатил, отправить чек
         </button>
+        
+        <div style="margin-top: 20px; padding: 16px; background: rgba(15, 20, 25, 0.5); border-radius: 12px;">
+            <h4 style="font-size: 14px; font-weight: 600; color: white; margin-bottom: 8px;">
+                <i class="fas fa-info-circle" style="color: #3182ce;"></i>
+                Важная информация:
+            </h4>
+            <ul style="font-size: 12px; color: #94a3b8; padding-left: 20px;">
+                <li>Проверка платежа занимает до 15 минут</li>
+                <li>После подтверждения VPN активируется автоматически</li>
+                <li>При возникновении проблем пишите @flowie_support</li>
+                <li>Работаем 24/7 для PUBG Mobile игроков</li>
+            </ul>
+        </div>
     `;
     
     closeModal();
     openPaymentModal();
+}
+
+// Остальные функции остаются такими же, но добавим недостающие
+function scrollToElement(selector) {
+    const element = document.querySelector(selector);
+    if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+    }
+}
+
+// Закрыть модальное окно
+function closeModal() {
+    const modals = document.querySelectorAll('.modal-overlay');
+    modals.forEach(modal => {
+        modal.classList.remove('active');
+    });
+    document.body.style.overflow = '';
+    
+    if (navigator.vibrate) {
+        navigator.vibrate(30);
+    }
 }
 
 // Открыть модальное окно оплаты
@@ -428,6 +765,7 @@ function notifyAdminAboutPayment() {
     const adminNotification = {
         user_id: user?.id,
         user_name: user?.first_name || 'Unknown',
+        username: user?.username || 'no_username',
         amount: currentPaymentData.price,
         vpn_type: currentPaymentData.name,
         order_id: `FLOWIE-${Date.now().toString().slice(-6)}`,
@@ -435,7 +773,6 @@ function notifyAdminAboutPayment() {
     };
     
     console.log('Уведомление для админа:', adminNotification);
-    // Здесь должна быть отправка на сервер
 }
 
 // Сохранить покупку
@@ -445,7 +782,7 @@ function savePurchase(purchase) {
     localStorage.setItem('flowie_purchases', JSON.stringify(purchases));
 }
 
-// Загрузить покупки
+// Загрузить покупки в раздел "Мои покупки"
 function loadPurchases() {
     const purchases = JSON.parse(localStorage.getItem('flowie_purchases') || '[]');
     const container = document.getElementById('purchases-list');
@@ -457,16 +794,28 @@ function loadPurchases() {
         container.innerHTML = `
             <div class="no-purchases" style="text-align: center; padding: 40px 20px; color: #94a3b8;">
                 <i class="fas fa-shopping-cart" style="font-size: 48px; margin-bottom: 16px;"></i>
-                <p>У вас пока нет покупок</p>
+                <p style="margin-bottom: 20px;">У вас пока нет покупок</p>
+                <button onclick="showVPNModal()" style="
+                    background: linear-gradient(45deg, var(--pubg-orange), #ffa500);
+                    border: none;
+                    border-radius: 12px;
+                    padding: 12px 24px;
+                    color: white;
+                    font-weight: 700;
+                    cursor: pointer;
+                ">
+                    Сделать первую покупку
+                </button>
             </div>
         `;
-        purchasesSection.style.display = 'none';
+        purchasesSection.style.display = 'block';
         return;
     }
     
-    purchasesSection.style.display = 'block';
+    // Сортируем покупки по дате (новые сначала)
+    const sortedPurchases = [...purchases].reverse();
     
-    container.innerHTML = purchases.map(purchase => `
+    container.innerHTML = sortedPurchases.map((purchase, index) => `
         <div class="purchase-item">
             <div class="purchase-header">
                 <div class="purchase-name">${purchase.name}</div>
@@ -477,13 +826,20 @@ function loadPurchases() {
             
             <div class="purchase-details">
                 <div class="purchase-detail">
-                    Сумма: <strong>${purchase.amount}₽</strong>
+                    <div style="font-size: 10px; color: #94a3b8;">Сумма</div>
+                    <strong>${purchase.amount}₽</strong>
                 </div>
                 <div class="purchase-detail">
-                    Дата: <strong>${purchase.date}</strong>
+                    <div style="font-size: 10px; color: #94a3b8;">Дата</div>
+                    <strong>${purchase.date}</strong>
                 </div>
                 <div class="purchase-detail">
-                    Заказ: <strong>${purchase.order_id}</strong>
+                    <div style="font-size: 10px; color: #94a3b8;">Заказ</div>
+                    <strong>${purchase.order_id}</strong>
+                </div>
+                <div class="purchase-detail">
+                    <div style="font-size: 10px; color: #94a3b8;"># Покупки</div>
+                    <strong>${purchases.length - index}</strong>
                 </div>
             </div>
             
@@ -502,15 +858,8 @@ function loadPurchases() {
             `}
         </div>
     `).join('');
-}
-
-function getStatusText(status) {
-    switch(status) {
-        case 'pending': return 'ОЖИДАНИЕ';
-        case 'confirmed': return 'ПОДТВЕРЖДЕНО';
-        case 'rejected': return 'ОТКЛОНЕНО';
-        default: return 'НЕИЗВЕСТНО';
-    }
+    
+    purchasesSection.style.display = 'block';
 }
 
 // Загрузка данных пользователя
@@ -567,82 +916,39 @@ function loadUserData() {
     loadPurchases();
 }
 
-// Показать профиль
-function showProfile() {
-    if (!user) {
-        showNotification('👤 Профиль пользователя');
-        return;
-    }
-    
-    const userName = user.first_name || 'Игрок';
-    const userId = user.id || 'Неизвестно';
-    
-    if (tg && tg.showPopup) {
-        tg.showPopup({
-            title: '👤 Профиль игрока',
-            message: `🎮 ${userName}\n🆔 ID: ${userId}\n\n📊 Управление аккаунтом:\n• История покупок\n• Настройки VPN\n• Поддержка\n\nСвяжитесь с @flowie_cfg для помощи`,
-            buttons: [
-                { id: 'purchases', type: 'default', text: '📦 Мои покупки' },
-                { type: 'cancel', text: 'Закрыть' }
-            ]
-        }, (buttonId) => {
-            if (buttonId === 'purchases') {
-                showSection('purchases');
-            }
-        });
-    } else {
-        alert(`Профиль игрока:\n\n🎮 ${userName}\n🆔 ID: ${userId}\n\nСвяжитесь с @flowie_cfg для помощи`);
-        showSection('purchases');
-    }
-}
-
-// Показать раздел
-function showSection(section) {
-    // Обновляем активные кнопки
-    document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    
-    // Находим и активируем нужную кнопку
-    const navBtns = document.querySelectorAll('.nav-btn');
-    navBtns.forEach(btn => {
-        const btnText = btn.querySelector('span').textContent.toLowerCase();
-        if ((section === 'home' && btnText === 'главная') ||
-            (section === 'vpn' && btnText === 'vpn') ||
-            (section === 'purchases' && btnText === 'покупки') ||
-            (section === 'support' && btnText === 'поддержка') ||
-            (section === 'profile' && btnText === 'профиль')) {
-            btn.classList.add('active');
-        }
-    });
-    
-    // Прокрутка к нужному разделу
-    let element = null;
-    switch(section) {
-        case 'vpn':
-            element = document.querySelector('.vpn-categories');
-            break;
-        case 'purchases':
-            loadPurchases();
-            element = document.getElementById('my-purchases');
-            break;
-        case 'support':
-            showNotification('💬 Поддержка: @flowie_cfg');
-            break;
-        default:
-            element = document.querySelector('.welcome-section');
-    }
-    
-    if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
-    }
-}
-
 // Показать VPN модальное окно
 function showVPNModal() {
     const modal = document.getElementById('vpn-modal');
-    if (modal) {
-        modal.classList.add('active');
+    if (!modal) {
+        // Создаем модальное окно если его нет
+        const vpnModal = document.createElement('div');
+        vpnModal.id = 'vpn-modal';
+        vpnModal.className = 'modal-overlay';
+        vpnModal.innerHTML = `
+            <div class="modal pubg-modal">
+                <div class="modal-header">
+                    <h3>
+                        <i class="fas fa-gamepad"></i>
+                        Выбор VPN
+                    </h3>
+                    <button class="close-modal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body" id="vpn-selection"></div>
+            </div>
+        `;
+        document.body.appendChild(vpnModal);
+        
+        vpnModal.querySelector('.close-modal').addEventListener('click', closeModal);
+        vpnModal.addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+    }
+    
+    const modalElement = document.getElementById('vpn-modal');
+    if (modalElement) {
+        modalElement.classList.add('active');
         document.body.style.overflow = 'hidden';
         
         // Загружаем контент VPN
@@ -699,20 +1005,6 @@ function showVPNModal() {
     }
 }
 
-// Закрыть модальное окно
-function closeModal() {
-    const modals = document.querySelectorAll('.modal-overlay');
-    modals.forEach(modal => {
-        modal.classList.remove('active');
-    });
-    document.body.style.overflow = '';
-    
-    // Вибрация
-    if (navigator.vibrate) {
-        navigator.vibrate(30);
-    }
-}
-
 // Включить/выключить VPN
 function toggleVPN() {
     const connectBtn = document.getElementById('connect-btn');
@@ -720,14 +1012,14 @@ function toggleVPN() {
     
     if (!isVPNConnected) {
         isVPNConnected = true;
-        connectBtn.style.background = 'linear-gradient(45deg, #38a169, #2f855a)';
-        statusText.textContent = 'Вкл';
+        if (connectBtn) connectBtn.style.background = 'linear-gradient(45deg, #38a169, #2f855a)';
+        if (statusText) statusText.textContent = 'Вкл';
         showNotification('✅ VPN подключен! Пинг оптимизирован');
         updatePing();
     } else {
         isVPNConnected = false;
-        connectBtn.style.background = 'linear-gradient(45deg, var(--pubg-orange), #ffa500)';
-        statusText.textContent = 'Выкл';
+        if (connectBtn) connectBtn.style.background = 'linear-gradient(45deg, var(--pubg-orange), #ffa500)';
+        if (statusText) statusText.textContent = 'Выкл';
         showNotification('❌ VPN отключен');
         updatePing();
     }
@@ -740,20 +1032,26 @@ function updatePing() {
     
     if (isVPNConnected) {
         const lowPing = getRandomInt(25, 45);
-        pingValue.textContent = lowPing + 'ms';
-        currentPing.textContent = lowPing + 'ms';
-        currentPing.style.color = '#38a169';
+        if (pingValue) pingValue.textContent = lowPing + 'ms';
+        if (currentPing) {
+            currentPing.textContent = lowPing + 'ms';
+            currentPing.style.color = '#38a169';
+        }
     } else {
         const highPing = getRandomInt(80, 120);
-        pingValue.textContent = highPing + 'ms';
-        currentPing.textContent = highPing + 'ms';
-        currentPing.style.color = '#e53e3e';
+        if (pingValue) pingValue.textContent = highPing + 'ms';
+        if (currentPing) {
+            currentPing.textContent = highPing + 'ms';
+            currentPing.style.color = '#e53e3e';
+        }
     }
 }
 
 // Выбор сервера
 function selectServer() {
     const serverSelect = document.getElementById('server-select');
+    if (!serverSelect) return;
+    
     const selected = serverSelect.value;
     currentServer = selected;
     
@@ -765,9 +1063,9 @@ function selectServer() {
     };
     
     const pingRange = pings[selected] || [40, 60];
-    const newPing = getRandomInt(pingRange[0], pingRange[1]);
     
     if (isVPNConnected) {
+        const newPing = getRandomInt(pingRange[0], pingRange[1]);
         showNotification(`🌍 Сервер изменен! Новый пинг: ${newPing}ms`);
     }
     
@@ -777,6 +1075,8 @@ function selectServer() {
 // Сменить сервер
 function changeServer() {
     const serverSelect = document.getElementById('server-select');
+    if (!serverSelect) return;
+    
     const options = ['eu', 'asia', 'na', 'ru'];
     const currentIndex = options.indexOf(currentServer);
     const nextIndex = (currentIndex + 1) % options.length;
@@ -806,16 +1106,18 @@ function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function getCategoryColor(color) {
-    switch(color) {
-        case 'cheap': return '#38a169';
-        case 'medium': return '#3182ce';
-        case 'vip': return '#d69e2e';
-        default: return '#ff8c00';
+// Инициализация обработки URL параметров
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const paymentStatus = urlParams.get('payment');
+    const orderId = urlParams.get('order_id');
+    
+    if (paymentStatus && orderId) {
+        handlePaymentStatus(orderId, paymentStatus);
+        window.history.replaceState({}, document.title, window.location.pathname);
     }
-}
+});
 
-// Обработка статуса платежа
 async function handlePaymentStatus(orderId, status) {
     let purchases = JSON.parse(localStorage.getItem('flowie_purchases') || '[]');
     const purchaseIndex = purchases.findIndex(p => p.order_id === orderId);
@@ -846,15 +1148,3 @@ function getVPNTypeByName(name) {
     if (name.includes('ВИП')) return 'vip';
     return 'cheap';
 }
-
-// Обработка URL параметров
-document.addEventListener('DOMContentLoaded', function() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const paymentStatus = urlParams.get('payment');
-    const orderId = urlParams.get('order_id');
-    
-    if (paymentStatus && orderId) {
-        handlePaymentStatus(orderId, paymentStatus);
-        window.history.replaceState({}, document.title, window.location.pathname);
-    }
-});
