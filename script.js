@@ -1,6 +1,6 @@
 // Конфигурация Telegram бота
-const BOT_TOKEN = 'ВАШ_ТОКЕН_БОТА'; // Получите у @BotFather
-const ADMIN_CHAT_ID = 'ВАШ_CHAT_ID'; // Получите у @userinfobot
+const BOT_TOKEN = '8164840278:AAFHOBOBc564w5VsVYbQEbdwB9srGbtZq_g'; // Получите у @BotFather
+const ADMIN_CHAT_ID = '7620973293'; // Получите у @userinfobot
 
 // Инициализация Telegram Web App
 let tg = window.Telegram.WebApp;
@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Тестовые данные для браузера
         user = {
             id: 123456789,
-            first_name: 'Игрок',
+            first_name: 'Пользователь',
             username: 'test_player',
             photo_url: ''
         };
