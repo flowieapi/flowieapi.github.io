@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHIELD VPN - Ваша безопасность в сети</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+    <!-- Шапка -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <i class="fas fa-shield-alt"></i>
+                <h1>SHIELD <span>VPN</span></h1>
+            </div>
+            <div class="user-info">
+                <div class="balance">
+                    <i class="fas fa-wallet"></i>
+                    <span id="user-balance">0 ₽</span>
+                </div>
+                <div class="avatar" id="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Основной контент -->
+    <main class="main">
+        <!-- Приветственный баннер -->
+        <section class="hero">
+            <div class="container">
+                <div class="hero-content">
+                    <h2>Ваша цифровая <span class="highlight">безопасность</span></h2>
+                    <p>Быстрый, безопасный и анонимный доступ к интернету</p>
+                    <div class="stats">
+                        <div class="stat">
+                            <i class="fas fa-bolt"></i>
+                            <span>1 Гбит/с</span>
+                            <small>Скорость</small>
+                        </div>
+                        <div class="stat">
+                            <i class="fas fa-server"></i>
+                            <span>100+</span>
+                            <small>Серверов</small>
+                        </div>
+                        <div class="stat">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>24/7</span>
+                            <small>Защита</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="hero-image">
+                    <div class="vpn-animation">
+                        <div class="earth"></div>
+                        <div class="connection-line"></div>
+                        <div class="shield"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Тарифы -->
+        <section class="tariffs" id="tariffs">
+            <div class="container">
+                <h2 class="section-title">Выберите ваш <span>тариф</span></h2>
+                <p class="section-subtitle">Лучшее предложение для вашей безопасности</p>
+                
+                <div class="tariffs-grid" id="tariffs-container">
+                    <!-- Тарифы загружаются через JavaScript -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Как это работает -->
+        <section class="how-it-works">
+            <div class="container">
+                <h2 class="section-title">Как <span>работает</span> VPN</h2>
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-icon">
+                            <i class="fas fa-download"></i>
+                        </div>
+                        <h3>1. Выберите тариф</h3>
+                        <p>Подберите оптимальный вариант по цене и сроку</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-icon">
+                            <i class="fas fa-credit-card"></i>
+                        </div>
+                        <h3>2. Оплатите</h3>
+                        <p>Быстрая и безопасная оплата через Telegram</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-icon">
+                            <i class="fas fa-key"></i>
+                        </div>
+                        <h3>3. Получите ключ</h3>
+                        <p>Мгновенная выдача конфигурационного файла</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-icon">
+                            <i class="fas fa-lock"></i>
+                        </div>
+                        <h3>4. Подключитесь</h3>
+                        <p>Импортируйте конфиг и пользуйтесь безопасным интернетом</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Мои подписки -->
+        <section class="my-subscriptions" id="subscriptions">
+            <div class="container">
+                <h2 class="section-title">Мои <span>подписки</span></h2>
+                <div class="subscriptions-list" id="subscriptions-container">
+                    <!-- Подписки загружаются через JavaScript -->
+                    <div class="empty-state">
+                        <i class="fas fa-key"></i>
+                        <p>У вас пока нет активных подписок</p>
+                        <button class="btn-primary" onclick="showTariffs()">Выбрать тариф</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ -->
+        <section class="faq">
+            <div class="container">
+                <h2 class="section-title">Частые <span>вопросы</span></h2>
+                <div class="faq-list">
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <h3>Как установить VPN?</h3>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <p>Скачайте WireGuard из официального магазина приложений, импортируйте полученный конфиг и активируйте подключение.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <h3>Сколько стоит VPN?</h3>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <p>Мы предлагаем тарифы от 299₽ в месяц. При оплате на больший срок вы получаете существенную скидку.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <h3>Есть ли пробный период?</h3>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <p>Да, мы предоставляем 24-часовой пробный период для тестирования нашего сервиса.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Футер -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <i class="fas fa-shield-alt"></i>
+                    <h3>SHIELD VPN</h3>
+                    <p>Ваша безопасность в интернете</p>
+                </div>
+                <div class="footer-links">
+                    <a href="#tariffs">Тарифы</a>
+                    <a href="#subscriptions">Мои подписки</a>
+                    <a href="#" onclick="openSupport()">Поддержка</a>
+                </div>
+                <div class="footer-social">
+                    <a href="#"><i class="fab fa-telegram"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-github"></i></a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2024 SHIELD VPN. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Модальное окно оплаты -->
+    <div class="modal" id="payment-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Оплата тарифа</h3>
+                <button class="close-modal" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="tariff-summary" id="selected-tariff-info">
+                    <!-- Информация о выбранном тарифе -->
+                </div>
+                <div class="payment-methods">
+                    <h4>Способы оплаты:</h4>
+                    <div class="payment-options">
+                        <button class="payment-option" onclick="processPayment('card')">
+                            <i class="fas fa-credit-card"></i>
+                            <span>Банковская карта</span>
+                        </button>
+                        <button class="payment-option" onclick="processPayment('crypto')">
+                            <i class="fab fa-bitcoin"></i>
+                            <span>Криптовалюта</span>
+                        </button>
+                        <button class="payment-option" onclick="processPayment('telegram')">
+                            <i class="fab fa-telegram"></i>
+                            <span>Telegram Stars</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="payment-card" id="card-payment" style="display: none;">
+                    <h4>Оплата картой</h4>
+                    <div class="card-input">
+                        <input type="text" placeholder="Номер карты" maxlength="19" id="card-number">
+                        <input type="text" placeholder="Срок действия (MM/YY)" maxlength="5" id="card-expiry">
+                        <input type="text" placeholder="CVV" maxlength="3" id="card-cvv">
+                    </div>
+                    <button class="btn-primary" onclick="submitCardPayment()">Оплатить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно успешной оплаты -->
+    <div class="modal success-modal" id="success-modal">
+        <div class="modal-content">
+            <div class="success-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h3>Оплата прошла успешно!</h3>
+            <p id="success-message">Ваш тариф активирован</p>
+            <button class="btn-primary" onclick="closeSuccessModal()">Продолжить</button>
+        </div>
+    </div>
+
+    <!-- Загрузка -->
+    <div class="loader" id="loader">
+        <div class="loader-content">
+            <div class="loader-spinner"></div>
+            <p>Загрузка...</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script src="payments.js"></script>
+</body>
+</html>
