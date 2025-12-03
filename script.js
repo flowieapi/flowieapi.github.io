@@ -10,61 +10,64 @@ let receiptFile = null;
 // Инициализация приложения
 document.addEventListener('DOMContentLoaded', function() {
     // Настройки для PUBG стиля
-    tg.expand();
-    tg.enableClosingConfirmation();
-    tg.setHeaderColor('#0f1419');
-    tg.setBackgroundColor('#0f1419');
+    if (tg && tg.expand) {
+        tg.expand();
+        tg.enableClosingConfirmation();
+        tg.setHeaderColor('#0f1419');
+        tg.setBackgroundColor('#0f1419');
+        
+        // Получаем данные пользователя
+        user = tg.initDataUnsafe?.user || tg.initDataUnsafe?.sender;
+    } else {
+        console.log('Telegram WebApp not detected, running in browser mode');
+        // Тестовые данные для браузера
+        user = {
+            id: 123456,
+            first_name: 'Игрок',
+            username: 'test_player'
+        };
+    }
     
-    // Получаем данные пользователя
-    user = tg.initDataUnsafe?.user || tg.initDataUnsafe?.sender;
     setupUserProfile();
-    
-    // Загружаем VPN категории
     loadVPNCategories();
-    
-    // Инициализируем пинг
     updatePing();
-    
-    // Загружаем данные пользователя
     loadUserData();
-    
-    // Настраиваем события
     setupEvents();
     
-    // Показываем приветственное сообщение
     setTimeout(() => {
         showNotification('🎮 Добро пожаловать в ФЛОУИ VPN для PUBG!');
     }, 800);
 });
 
-// Настройка профиля игрока - ИСПРАВЛЕННЫЙ КОД
+// Настройка профиля игрока
 function setupUserProfile() {
     const avatarImage = document.getElementById('avatar-image');
     const playerLevel = document.getElementById('player-level');
     
     if (!user) {
-        // Если нет пользователя
         avatarImage.innerHTML = '<i class="fas fa-user"></i>';
         playerLevel.textContent = '1';
         return;
     }
     
-    // Создаем аватарку
     if (user.photo_url) {
         avatarImage.innerHTML = `
             <img src="${user.photo_url}" alt="${user.first_name}" 
-                 onerror="this.onerror=null; this.innerHTML='<i class=\\'fas fa-user\\'></i>';">
+                 onerror="this.onerror=null; this.parentElement.innerHTML='<i class=\\'fas fa-user\\'></i>';">
         `;
     } else {
-        // Если нет фото, показываем инициалы
         const initials = (user.first_name?.[0] || 'U').toUpperCase();
         avatarImage.innerHTML = `
             <span style="font-weight: bold; font-size: 18px; color: white;">${initials}</span>
         `;
     }
     
-    // Устанавливаем уровень
     playerLevel.textContent = getPlayerLevel();
+}
+
+function getPlayerLevel() {
+    // Простая логика определения уровня
+    return Math.floor(Math.random() * 100) + 1;
 }
 
 // Загрузка VPN категорий
@@ -120,12 +123,12 @@ function loadVPNCategories() {
     ];
     
     displayVPNCategories(vpnCategories);
-    setupVPNModal(vpnCategories);
 }
 
 // Отображение категорий VPN
 function displayVPNCategories(categories) {
     const container = document.getElementById('categories-container');
+    if (!container) return;
     
     container.innerHTML = categories.map(category => `
         <div class="vpn-category-card ${category.color}">
@@ -158,70 +161,68 @@ function displayVPNCategories(categories) {
     `).join('');
 }
 
-// Настройка модального окна VPN
-function setupVPNModal(categories) {
-    const modalContent = document.getElementById('vpn-selection');
+// Настройка событий
+function setupEvents() {
+    // Подключение VPN
+    const connectBtn = document.getElementById('connect-btn');
+    if (connectBtn) {
+        connectBtn.addEventListener('click', toggleVPN);
+    }
     
-    modalContent.innerHTML = categories.map(category => `
-        <div class="vpn-modal-card ${category.color}" style="
-            background: linear-gradient(135deg, rgba(26, 32, 44, 0.9) 0%, rgba(45, 55, 72, 0.9) 100%);
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 16px;
-            border-left: 4px solid ${getCategoryColor(category.color)};
-        ">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <span style="font-size: 32px;">${category.icon}</span>
-                    <div>
-                        <h4 style="font-size: 18px; font-weight: 800; color: white; margin-bottom: 4px;">
-                            ${category.name}
-                        </h4>
-                        <p style="color: #94a3b8; font-size: 12px;">${category.description}</p>
-                    </div>
-                </div>
-                <div style="font-size: 24px; font-weight: 800; color: ${getCategoryColor(category.color)};">
-                    ${category.price}₽
-                </div>
-            </div>
-            
-            <div style="margin-bottom: 20px;">
-                ${category.features.map(feature => `
-                    <div style="display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
-                        <i class="fas fa-check" style="color: #38a169; font-size: 12px;"></i>
-                        <span style="font-size: 14px;">${feature}</span>
-                    </div>
-                `).join('')}
-            </div>
-            
-            <button onclick="showPayment('${category.id}')" style="
-                width: 100%;
-                padding: 16px;
-                background: ${getCategoryColor(category.color)};
-                border: none;
-                border-radius: 12px;
-                color: white;
-                font-weight: 700;
-                font-size: 16px;
-                cursor: pointer;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                gap: 10px;
-            ">
-                <i class="fas fa-shopping-cart"></i>
-                Купить за ${category.price}₽
-            </button>
-        </div>
-    `).join('');
+    // Выбор сервера
+    const serverSelect = document.getElementById('server-select');
+    if (serverSelect) {
+        serverSelect.addEventListener('change', selectServer);
+    }
+    
+    // Кнопка смены сервера
+    const changeServerBtn = document.querySelector('.btn-change-server');
+    if (changeServerBtn) {
+        changeServerBtn.addEventListener('click', changeServer);
+    }
+    
+    // Навигация
+    const navBtns = document.querySelectorAll('.nav-btn');
+    navBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const section = this.getAttribute('onclick')?.match(/showSection\('(\w+)'\)/)?.[1];
+            if (section) {
+                showSection(section);
+            }
+        });
+    });
+    
+    // Модальные окна
+    const closeModalBtns = document.querySelectorAll('.close-modal');
+    closeModalBtns.forEach(btn => {
+        btn.addEventListener('click', closeModal);
+    });
+    
+    // Загрузка файла
+    const fileInput = document.getElementById('receipt-file');
+    if (fileInput) {
+        fileInput.addEventListener('change', handleReceiptUpload);
+    }
+    
+    // Кнопка удаления файла
+    const removeBtn = document.querySelector('.btn-remove');
+    if (removeBtn) {
+        removeBtn.addEventListener('click', removeFile);
+    }
+    
+    // Отправка чека
+    const submitBtn = document.getElementById('submit-receipt');
+    if (submitBtn) {
+        submitBtn.addEventListener('click', submitReceipt);
+    }
 }
 
 // Показать окно оплаты
 function showPayment(categoryId) {
     const categories = {
-        'cheap': { name: 'VPN Дешевый', price: 299 },
-        'medium': { name: 'VPN Средний', price: 799 },
-        'vip': { name: 'VPN ВИП', price: 1499 }
+        'cheap': { name: 'VPN Дешевый', price: 299, icon: '💰', color: '#38a169' },
+        'medium': { name: 'VPN Средний', price: 799, icon: '⚡', color: '#3182ce' },
+        'vip': { name: 'VPN ВИП', price: 1499, icon: '👑', color: '#d69e2e' }
     };
     
     const category = categories[categoryId];
@@ -234,13 +235,15 @@ function showPayment(categoryId) {
     };
     
     const paymentContent = document.getElementById('payment-content');
+    if (!paymentContent) return;
+    
     paymentContent.innerHTML = `
         <div class="payment-info">
             <h4 style="font-size: 20px; font-weight: 800; color: white; margin-bottom: 8px; text-align: center;">
-                ${category.name}
+                ${category.icon} ${category.name}
             </h4>
             <p style="color: #94a3b8; text-align: center; margin-bottom: 20px;">
-                Сумма к оплате: <strong style="color: var(--pubg-orange); font-size: 24px;">${category.price}₽</strong>
+                Сумма к оплате: <strong style="color: ${category.color}; font-size: 24px;">${category.price}₽</strong>
             </p>
         </div>
         
@@ -268,7 +271,8 @@ function showPayment(categoryId) {
             </div>
             
             <div style="color: #94a3b8; font-size: 12px; text-align: center; margin-top: 12px;">
-                Получатель: Иван Иванов
+                Получатель: Иван Иванов<br>
+                Банк: Тинькофф
             </div>
         </div>
         
@@ -311,15 +315,19 @@ function showPayment(categoryId) {
 // Открыть модальное окно оплаты
 function openPaymentModal() {
     const modal = document.getElementById('payment-modal');
-    modal.classList.add('active');
-    document.body.style.overflow = 'hidden';
+    if (modal) {
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
 }
 
 // Закрыть модальное окно оплаты
 function closePaymentModal() {
     const modal = document.getElementById('payment-modal');
-    modal.classList.remove('active');
-    document.body.style.overflow = '';
+    if (modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
 }
 
 // Открыть загрузку чека
@@ -327,15 +335,19 @@ function openReceiptUpload() {
     closePaymentModal();
     
     const modal = document.getElementById('receipt-modal');
-    modal.classList.add('active');
-    document.body.style.overflow = 'hidden';
+    if (modal) {
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
 }
 
 // Закрыть загрузку чека
 function closeReceiptModal() {
     const modal = document.getElementById('receipt-modal');
-    modal.classList.remove('active');
-    document.body.style.overflow = '';
+    if (modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
 }
 
 // Обработка загрузки файла
@@ -343,13 +355,11 @@ function handleReceiptUpload(event) {
     const file = event.target.files[0];
     if (!file) return;
     
-    // Проверка размера файла (макс 5MB)
     if (file.size > 5 * 1024 * 1024) {
         showNotification('❌ Файл слишком большой (макс 5MB)');
         return;
     }
     
-    // Проверка типа файла
     if (!file.type.startsWith('image/')) {
         showNotification('❌ Пожалуйста, загрузите изображение');
         return;
@@ -357,16 +367,17 @@ function handleReceiptUpload(event) {
     
     receiptFile = file;
     
-    // Показываем выбранный файл
     const uploadArea = document.getElementById('upload-area');
     const selectedFile = document.getElementById('selected-file');
     const fileName = document.getElementById('file-name');
     const submitBtn = document.getElementById('submit-receipt');
     
-    uploadArea.style.display = 'none';
-    selectedFile.style.display = 'flex';
-    fileName.textContent = file.name;
-    submitBtn.disabled = false;
+    if (uploadArea) uploadArea.style.display = 'none';
+    if (selectedFile) {
+        selectedFile.style.display = 'flex';
+        if (fileName) fileName.textContent = file.name;
+    }
+    if (submitBtn) submitBtn.disabled = false;
 }
 
 // Удалить файл
@@ -376,10 +387,10 @@ function removeFile() {
     const fileInput = document.getElementById('receipt-file');
     const submitBtn = document.getElementById('submit-receipt');
     
-    uploadArea.style.display = 'block';
-    selectedFile.style.display = 'none';
-    fileInput.value = '';
-    submitBtn.disabled = true;
+    if (uploadArea) uploadArea.style.display = 'block';
+    if (selectedFile) selectedFile.style.display = 'none';
+    if (fileInput) fileInput.value = '';
+    if (submitBtn) submitBtn.disabled = true;
     receiptFile = null;
 }
 
@@ -390,33 +401,13 @@ function submitReceipt() {
         return;
     }
     
-    // Создаем FormData
-    const formData = new FormData();
-    formData.append('receipt', receiptFile);
-    formData.append('payment_data', JSON.stringify({
-        user_id: user?.id || 'unknown',
-        user_name: user?.first_name || 'Unknown',
-        vpn_type: currentPaymentData.id,
-        vpn_name: currentPaymentData.name,
-        amount: currentPaymentData.price,
-        timestamp: new Date().toISOString()
-    }));
-    
-    // Показываем уведомление
     showNotification('📤 Отправляем чек на проверку...');
     
-    // Имитация отправки на сервер
     setTimeout(() => {
-        // Здесь должен быть реальный fetch запрос к вашему бэкенду
-        // Например: fetch('/api/submit-receipt', { method: 'POST', body: formData })
-        
-        // Имитируем успешную отправку
         showNotification('✅ Чек отправлен! Админ проверит в течение 15 минут');
         
-        // Закрываем модальное окно
         closeReceiptModal();
         
-        // Сохраняем покупку в локальное хранилище
         savePurchase({
             id: Date.now().toString(),
             name: currentPaymentData.name,
@@ -426,11 +417,7 @@ function submitReceipt() {
             order_id: `FLOWIE-${Date.now().toString().slice(-6)}`
         });
         
-        // Обновляем список покупок
         loadPurchases();
-        
-        // Отправляем уведомление админу через Telegram Bot API
-        // (Это нужно настроить на вашем сервере)
         notifyAdminAboutPayment();
         
     }, 1500);
@@ -438,10 +425,6 @@ function submitReceipt() {
 
 // Уведомить админа о платеже
 function notifyAdminAboutPayment() {
-    // Эта функция должна отправлять запрос к вашему боту
-    // для уведомления админа о новом платеже
-    
-    // Примерная структура данных для бота:
     const adminNotification = {
         user_id: user?.id,
         user_name: user?.first_name || 'Unknown',
@@ -452,7 +435,7 @@ function notifyAdminAboutPayment() {
     };
     
     console.log('Уведомление для админа:', adminNotification);
-    // fetch('/api/notify-admin', { method: 'POST', body: JSON.stringify(adminNotification) })
+    // Здесь должна быть отправка на сервер
 }
 
 // Сохранить покупку
@@ -467,6 +450,8 @@ function loadPurchases() {
     const purchases = JSON.parse(localStorage.getItem('flowie_purchases') || '[]');
     const container = document.getElementById('purchases-list');
     const purchasesSection = document.getElementById('my-purchases');
+    
+    if (!container || !purchasesSection) return;
     
     if (purchases.length === 0) {
         container.innerHTML = `
@@ -530,9 +515,10 @@ function getStatusText(status) {
 
 // Загрузка данных пользователя
 function loadUserData() {
-    // Проверяем активную подписку
     const activeSubscription = localStorage.getItem('flowie_active_subscription');
     const subscriptionCard = document.getElementById('subscription-card');
+    
+    if (!subscriptionCard) return;
     
     if (activeSubscription) {
         const sub = JSON.parse(activeSubscription);
@@ -575,17 +561,10 @@ function loadUserData() {
             </div>
         `;
         
-        // Активируем VPN
         selectedVPN = sub.type;
     }
     
-    // Загружаем покупки
     loadPurchases();
-}
-
-// Случайное число
-function getRandomInt(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 // Показать профиль
@@ -598,47 +577,129 @@ function showProfile() {
     const userName = user.first_name || 'Игрок';
     const userId = user.id || 'Неизвестно';
     
-    tg.showPopup({
-        title: '👤 Профиль игрока',
-        message: `🎮 ${userName}\n🆔 ID: ${userId}\n\n📊 Управление аккаунтом:\n• История покупок\n• Настройки VPN\n• Поддержка\n\nСвяжитесь с @flowie_cfg для помощи`,
-        buttons: [
-            { id: 'purchases', type: 'default', text: '📦 Мои покупки' },
-            { type: 'cancel', text: 'Закрыть' }
-        ]
-    }, (buttonId) => {
-        if (buttonId === 'purchases') {
-            showSection('purchases');
-        }
-    });
+    if (tg && tg.showPopup) {
+        tg.showPopup({
+            title: '👤 Профиль игрока',
+            message: `🎮 ${userName}\n🆔 ID: ${userId}\n\n📊 Управление аккаунтом:\n• История покупок\n• Настройки VPN\n• Поддержка\n\nСвяжитесь с @flowie_cfg для помощи`,
+            buttons: [
+                { id: 'purchases', type: 'default', text: '📦 Мои покупки' },
+                { type: 'cancel', text: 'Закрыть' }
+            ]
+        }, (buttonId) => {
+            if (buttonId === 'purchases') {
+                showSection('purchases');
+            }
+        });
+    } else {
+        alert(`Профиль игрока:\n\n🎮 ${userName}\n🆔 ID: ${userId}\n\nСвяжитесь с @flowie_cfg для помощи`);
+        showSection('purchases');
+    }
 }
 
-// Показать раздел покупок
+// Показать раздел
 function showSection(section) {
-    if (section === 'purchases') {
-        loadPurchases();
-        const element = document.getElementById('my-purchases');
-        if (element) {
-            element.scrollIntoView({ behavior: 'smooth' });
-        }
-    }
-    
-    // Обновляем активную кнопку
+    // Обновляем активные кнопки
     document.querySelectorAll('.nav-btn').forEach(btn => {
         btn.classList.remove('active');
     });
-    event.target.closest('.nav-btn').classList.add('active');
+    
+    // Находим и активируем нужную кнопку
+    const navBtns = document.querySelectorAll('.nav-btn');
+    navBtns.forEach(btn => {
+        const btnText = btn.querySelector('span').textContent.toLowerCase();
+        if ((section === 'home' && btnText === 'главная') ||
+            (section === 'vpn' && btnText === 'vpn') ||
+            (section === 'purchases' && btnText === 'покупки') ||
+            (section === 'support' && btnText === 'поддержка') ||
+            (section === 'profile' && btnText === 'профиль')) {
+            btn.classList.add('active');
+        }
+    });
+    
+    // Прокрутка к нужному разделу
+    let element = null;
+    switch(section) {
+        case 'vpn':
+            element = document.querySelector('.vpn-categories');
+            break;
+        case 'purchases':
+            loadPurchases();
+            element = document.getElementById('my-purchases');
+            break;
+        case 'support':
+            showNotification('💬 Поддержка: @flowie_cfg');
+            break;
+        default:
+            element = document.querySelector('.welcome-section');
+    }
+    
+    if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+    }
 }
 
-// Остальной код остается таким же как в предыдущей версии...
-// (updatePing, toggleVPN, changeServer, showNotification, etc.)
-
-// Функции для работы с модальными окнами
+// Показать VPN модальное окно
 function showVPNModal() {
     const modal = document.getElementById('vpn-modal');
-    modal.classList.add('active');
-    document.body.style.overflow = 'hidden';
+    if (modal) {
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        
+        // Загружаем контент VPN
+        const vpnContent = document.getElementById('vpn-selection');
+        if (vpnContent) {
+            const categories = {
+                'cheap': { name: 'VPN Дешевый', price: 299, icon: '💰', color: '#38a169', description: 'Для начинающих' },
+                'medium': { name: 'VPN Средний', price: 799, icon: '⚡', color: '#3182ce', description: 'Для опытных' },
+                'vip': { name: 'VPN ВИП', price: 1499, icon: '👑', color: '#d69e2e', description: 'Для профессионалов' }
+            };
+            
+            vpnContent.innerHTML = Object.entries(categories).map(([id, category]) => `
+                <div class="vpn-modal-card" style="
+                    background: linear-gradient(135deg, rgba(26, 32, 44, 0.9) 0%, rgba(45, 55, 72, 0.9) 100%);
+                    border-radius: 16px;
+                    padding: 20px;
+                    margin-bottom: 16px;
+                    border-left: 4px solid ${category.color};
+                ">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <span style="font-size: 32px;">${category.icon}</span>
+                            <div>
+                                <h4 style="font-size: 18px; font-weight: 800; color: white; margin-bottom: 4px;">
+                                    ${category.name}
+                                </h4>
+                                <p style="color: #94a3b8; font-size: 12px;">${category.description}</p>
+                            </div>
+                        </div>
+                        <div style="font-size: 24px; font-weight: 800; color: ${category.color};">${category.price}₽</div>
+                    </div>
+                    
+                    <button onclick="showPayment('${id}')" style="
+                        width: 100%;
+                        padding: 16px;
+                        background: ${category.color};
+                        border: none;
+                        border-radius: 12px;
+                        color: white;
+                        font-weight: 700;
+                        font-size: 16px;
+                        cursor: pointer;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        gap: 10px;
+                    ">
+                        <i class="fas fa-shopping-cart"></i>
+                        Купить за ${category.price}₽
+                    </button>
+                </div>
+            `).join('');
+        }
+    }
 }
 
+// Закрыть модальное окно
 function closeModal() {
     const modals = document.querySelectorAll('.modal-overlay');
     modals.forEach(modal => {
@@ -646,15 +707,116 @@ function closeModal() {
     });
     document.body.style.overflow = '';
     
+    // Вибрация
     if (navigator.vibrate) {
         navigator.vibrate(30);
     }
 }
 
-// Вебхук для получения статуса платежа от бота
-// (Этот код должен быть на вашем сервере)
+// Включить/выключить VPN
+function toggleVPN() {
+    const connectBtn = document.getElementById('connect-btn');
+    const statusText = document.getElementById('vpn-status');
+    
+    if (!isVPNConnected) {
+        isVPNConnected = true;
+        connectBtn.style.background = 'linear-gradient(45deg, #38a169, #2f855a)';
+        statusText.textContent = 'Вкл';
+        showNotification('✅ VPN подключен! Пинг оптимизирован');
+        updatePing();
+    } else {
+        isVPNConnected = false;
+        connectBtn.style.background = 'linear-gradient(45deg, var(--pubg-orange), #ffa500)';
+        statusText.textContent = 'Выкл';
+        showNotification('❌ VPN отключен');
+        updatePing();
+    }
+}
+
+// Обновить пинг
+function updatePing() {
+    const pingValue = document.getElementById('ping-value');
+    const currentPing = document.getElementById('current-ping');
+    
+    if (isVPNConnected) {
+        const lowPing = getRandomInt(25, 45);
+        pingValue.textContent = lowPing + 'ms';
+        currentPing.textContent = lowPing + 'ms';
+        currentPing.style.color = '#38a169';
+    } else {
+        const highPing = getRandomInt(80, 120);
+        pingValue.textContent = highPing + 'ms';
+        currentPing.textContent = highPing + 'ms';
+        currentPing.style.color = '#e53e3e';
+    }
+}
+
+// Выбор сервера
+function selectServer() {
+    const serverSelect = document.getElementById('server-select');
+    const selected = serverSelect.value;
+    currentServer = selected;
+    
+    const pings = {
+        'eu': [25, 45],
+        'asia': [70, 90],
+        'na': [100, 130],
+        'ru': [15, 30]
+    };
+    
+    const pingRange = pings[selected] || [40, 60];
+    const newPing = getRandomInt(pingRange[0], pingRange[1]);
+    
+    if (isVPNConnected) {
+        showNotification(`🌍 Сервер изменен! Новый пинг: ${newPing}ms`);
+    }
+    
+    updatePing();
+}
+
+// Сменить сервер
+function changeServer() {
+    const serverSelect = document.getElementById('server-select');
+    const options = ['eu', 'asia', 'na', 'ru'];
+    const currentIndex = options.indexOf(currentServer);
+    const nextIndex = (currentIndex + 1) % options.length;
+    
+    serverSelect.value = options[nextIndex];
+    currentServer = options[nextIndex];
+    selectServer();
+}
+
+// Показать уведомление
+function showNotification(message) {
+    const notification = document.getElementById('notification');
+    const notifyText = document.getElementById('notify-text');
+    
+    if (!notification || !notifyText) return;
+    
+    notifyText.textContent = message;
+    notification.classList.add('show');
+    
+    setTimeout(() => {
+        notification.classList.remove('show');
+    }, 3000);
+}
+
+// Вспомогательные функции
+function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function getCategoryColor(color) {
+    switch(color) {
+        case 'cheap': return '#38a169';
+        case 'medium': return '#3182ce';
+        case 'vip': return '#d69e2e';
+        default: return '#ff8c00';
+    }
+}
+
+// Обработка статуса платежа
 async function handlePaymentStatus(orderId, status) {
-    // Обновляем статус покупки
     let purchases = JSON.parse(localStorage.getItem('flowie_purchases') || '[]');
     const purchaseIndex = purchases.findIndex(p => p.order_id === orderId);
     
@@ -662,7 +824,6 @@ async function handlePaymentStatus(orderId, status) {
         purchases[purchaseIndex].status = status;
         localStorage.setItem('flowie_purchases', JSON.stringify(purchases));
         
-        // Если платеж подтвержден, активируем подписку
         if (status === 'confirmed') {
             const purchase = purchases[purchaseIndex];
             localStorage.setItem('flowie_active_subscription', JSON.stringify({
@@ -671,10 +832,9 @@ async function handlePaymentStatus(orderId, status) {
                 activated_at: new Date().toISOString()
             }));
             
-            showNotification(`🎉 ${purchase.name} активирован! Перезагрузите страницу.`);
+            showNotification(`🎉 ${purchase.name} активирован!`);
         }
         
-        // Обновляем интерфейс
         loadPurchases();
         loadUserData();
     }
@@ -687,16 +847,14 @@ function getVPNTypeByName(name) {
     return 'cheap';
 }
 
-// Инициализация при загрузке
+// Обработка URL параметров
 document.addEventListener('DOMContentLoaded', function() {
-    // Проверяем параметры URL для обработки коллбэков от бота
     const urlParams = new URLSearchParams(window.location.search);
     const paymentStatus = urlParams.get('payment');
     const orderId = urlParams.get('order_id');
     
     if (paymentStatus && orderId) {
         handlePaymentStatus(orderId, paymentStatus);
-        // Убираем параметры из URL
         window.history.replaceState({}, document.title, window.location.pathname);
     }
 });
