@@ -7,14 +7,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎯</text></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔰</text></svg>">
 </head>
 <body>
     <!-- PUBG стильный хедер -->
     <header class="pubg-header">
         <div class="header-top">
             <div class="logo-section">
-                <div class="logo-icon">🎯</div>
+                <div class="logo-icon">🔰</div>
                 <div class="logo-text">
                     <h1>ФЛОУИ VPN</h1>
                     <p class="tagline">Для PUBG Mobile</p>
@@ -26,11 +26,13 @@
                     <i class="fas fa-bolt"></i>
                     <span>Пинг: <span id="current-ping">45ms</span></span>
                 </div>
-                <div class="player-avatar" id="player-avatar">
-                    <div class="avatar-img">
-                        <i class="fas fa-skull-crossbones"></i>
+                <div class="player-avatar" id="player-avatar" onclick="showProfile()">
+                    <div class="avatar-container">
+                        <div class="avatar-placeholder" id="avatar-image">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="player-level" id="player-level">99</div>
                     </div>
-                    <div class="player-level">99</div>
                 </div>
             </div>
         </div>
@@ -48,7 +50,7 @@
 
     <!-- Основной контент -->
     <main class="pubg-main">
-        <!-- Приветственный баннер в PUBG стиле -->
+        <!-- Приветственный баннер -->
         <section class="welcome-section">
             <div class="banner-content">
                 <div class="banner-title">
@@ -128,48 +130,30 @@
                     <i class="fas fa-crown"></i>
                     Твоя подписка
                 </h3>
-                <button class="btn-upgrade" onclick="showUpgrade()">
+                <button class="btn-upgrade" onclick="showVPNModal()">
                     Апгрейд
                 </button>
             </div>
             
-            <div class="subscription-card">
-                <div class="sub-info">
-                    <div class="sub-name">VIP VPN</div>
-                    <div class="sub-badge">АКТИВНО</div>
+            <div class="subscription-card" id="subscription-card">
+                <!-- Подписка загружается через JS -->
+                <div class="no-subscription">
+                    <i class="fas fa-key"></i>
+                    <p>У тебя нет активной подписки</p>
+                    <button class="btn-buy" onclick="showVPNModal()">Купить VPN</button>
                 </div>
-                
-                <div class="sub-features">
-                    <div class="feature">
-                        <i class="fas fa-check-circle"></i>
-                        <span>Все фичи разблокированы</span>
-                    </div>
-                    <div class="feature">
-                        <i class="fas fa-infinity"></i>
-                        <span>Безлимитный трафик</span>
-                    </div>
-                    <div class="feature">
-                        <i class="fas fa-headset"></i>
-                        <span>Приоритетная поддержка</span>
-                    </div>
-                </div>
-                
-                <div class="sub-stats">
-                    <div class="stat">
-                        <div class="stat-icon">🎮</div>
-                        <div class="stat-data">
-                            <div class="stat-value">156</div>
-                            <div class="stat-label">Матчей сыграно</div>
-                        </div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-icon">⚡</div>
-                        <div class="stat-data">
-                            <div class="stat-value">32ms</div>
-                            <div class="stat-label">Средний пинг</div>
-                        </div>
-                    </div>
-                </div>
+            </div>
+        </section>
+
+        <!-- Мои покупки -->
+        <section class="my-purchases" id="my-purchases" style="display: none;">
+            <h3 class="section-title">
+                <i class="fas fa-shopping-cart"></i>
+                Мои покупки
+            </h3>
+            
+            <div class="purchases-list" id="purchases-list">
+                <!-- Покупки загружаются через JS -->
             </div>
         </section>
 
@@ -206,46 +190,6 @@
                 </div>
             </div>
         </section>
-
-        <!-- Частые вопросы -->
-        <section class="faq-section">
-            <h2 class="section-title">
-                <i class="fas fa-question-circle"></i>
-                Частые вопросы
-            </h2>
-            
-            <div class="faq-list">
-                <div class="faq-item" onclick="toggleFAQ(this)">
-                    <div class="faq-question">
-                        <span>Как VPN улучшает игру в PUBG?</span>
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
-                    <div class="faq-answer">
-                        <p>VPN оптимизирует маршрут данных до игровых серверов, снижает пинг, уменьшает потери пакетов и стабилизирует соединение.</p>
-                    </div>
-                </div>
-                
-                <div class="faq-item" onclick="toggleFAQ(this)">
-                    <div class="faq-question">
-                        <span>Это безопасно? Не забанят?</span>
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
-                    <div class="faq-answer">
-                        <p>ФЛОУИ VPN использует только оптимизацию соединения, не вмешивается в игровой процесс. Полностью безопасно и не нарушает правила PUBG.</p>
-                    </div>
-                </div>
-                
-                <div class="faq-item" onclick="toggleFAQ(this)">
-                    <div class="faq-question">
-                        <span>Как быстро работает поддержка?</span>
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
-                    <div class="faq-answer">
-                        <p>VIP пользователи получают ответ в течение 5 минут. Базовая поддержка отвечает до 30 минут. Мы всегда на связи!</p>
-                    </div>
-                </div>
-            </div>
-        </section>
     </main>
 
     <!-- Нижняя навигация -->
@@ -260,9 +204,9 @@
             <span>VPN</span>
         </button>
         
-        <button class="nav-btn" onclick="showSection('stats')">
-            <i class="fas fa-chart-line"></i>
-            <span>Статы</span>
+        <button class="nav-btn" onclick="showSection('purchases')">
+            <i class="fas fa-shopping-cart"></i>
+            <span>Покупки</span>
         </button>
         
         <button class="nav-btn" onclick="showSection('support')">
@@ -270,7 +214,7 @@
             <span>Поддержка</span>
         </button>
         
-        <button class="nav-btn" onclick="showSection('profile')">
+        <button class="nav-btn" onclick="showProfile()">
             <i class="fas fa-user"></i>
             <span>Профиль</span>
         </button>
@@ -291,6 +235,76 @@
             
             <div class="modal-body" id="vpn-selection">
                 <!-- Список VPN загружается через JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно оплаты -->
+    <div class="modal-overlay" id="payment-modal">
+        <div class="modal pubg-modal payment-modal">
+            <div class="modal-header">
+                <h3>
+                    <i class="fas fa-credit-card"></i>
+                    Оплата VPN
+                </h3>
+                <button class="close-modal" onclick="closePaymentModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="modal-body" id="payment-content">
+                <!-- Контент оплаты загружается через JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно загрузки чека -->
+    <div class="modal-overlay" id="receipt-modal">
+        <div class="modal pubg-modal receipt-modal">
+            <div class="modal-header">
+                <h3>
+                    <i class="fas fa-receipt"></i>
+                    Отправить чек
+                </h3>
+                <button class="close-modal" onclick="closeReceiptModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="receipt-upload">
+                    <div class="upload-area" id="upload-area" onclick="document.getElementById('receipt-file').click()">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Нажмите чтобы загрузить скриншот чека</p>
+                        <span class="file-size">PNG, JPG до 5MB</span>
+                    </div>
+                    
+                    <input type="file" id="receipt-file" accept="image/*" capture="environment" 
+                           style="display: none;" onchange="handleReceiptUpload(event)">
+                    
+                    <div class="selected-file" id="selected-file" style="display: none;">
+                        <i class="fas fa-file-image"></i>
+                        <span id="file-name"></span>
+                        <button class="btn-remove" onclick="removeFile()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="payment-instructions">
+                        <h4>Инструкция:</h4>
+                        <ol>
+                            <li>Оплатите по реквизитам выше</li>
+                            <li>Сделайте скриншот чека</li>
+                            <li>Загрузите его здесь</li>
+                            <li>Админ проверит в течение 15 минут</li>
+                        </ol>
+                    </div>
+                    
+                    <button class="btn-submit-receipt" id="submit-receipt" onclick="submitReceipt()" disabled>
+                        <i class="fas fa-paper-plane"></i>
+                        Отправить на проверку
+                    </button>
+                </div>
             </div>
         </div>
     </div>
