@@ -691,3 +691,132 @@ if (navigator.platform.indexOf('iPhone') !== -1 ||
         }
     });
 }
+
+// Функция для применения безопасных зон
+function applySafeAreas() {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    
+    if (isIOS) {
+        document.body.classList.add('safe-area-padding');
+    }
+}
+
+// Функция для оптимизации карточек тарифов
+function optimizeTariffCards() {
+    const tariffCards = document.querySelectorAll('.tariff-card');
+    
+    tariffCards.forEach(card => {
+        const badge = card.querySelector('.tariff-badge');
+        const button = card.querySelector('.buy-btn');
+        
+        if (badge && button) {
+            // Принудительное позиционирование
+            badge.style.position = 'absolute';
+            badge.style.top = '-12px';
+            badge.style.left = '50%';
+            badge.style.transform = 'translateX(-50%)';
+            
+            // Выравнивание кнопки
+            button.style.margin = 'auto auto 1.5rem';
+            button.style.width = 'calc(100% - 2rem)';
+        }
+    });
+}
+
+// Функция для скрытия ненужных элементов
+function hideUnnecessaryElements() {
+    // Скрываем кнопку камеры в профиле
+    document.querySelectorAll('.edit-avatar').forEach(el => el.style.display = 'none');
+    
+    // Скрываем кнопку QR кода
+    document.querySelectorAll('.icon-btn .fa-qrcode').forEach(el => {
+        el.closest('.icon-btn').style.display = 'none';
+    });
+    
+    // Скрываем кнопку поиска в настройках
+    document.querySelectorAll('.icon-btn .fa-search').forEach(el => {
+        el.closest('.icon-btn').style.display = 'none';
+    });
+}
+
+// Функция для исправления высоты элементов
+function fixElementHeights() {
+    // Исправляем иконку в карточке подписки
+    const subscriptionIcon = document.querySelector('.subscription-icon');
+    if (subscriptionIcon) {
+        subscriptionIcon.style.width = '50px';
+        subscriptionIcon.style.height = '50px';
+        subscriptionIcon.style.minWidth = '50px';
+    }
+}
+
+// Функция для оптимизации сеток
+function optimizeGrids() {
+    const screenWidth = window.innerWidth;
+    
+    // Адаптируем сетку преимуществ
+    const benefitsGrid = document.querySelector('.benefits-grid');
+    if (benefitsGrid && screenWidth <= 480) {
+        benefitsGrid.style.gridTemplateColumns = 'repeat(2, 1fr)';
+        benefitsGrid.style.gap = '0.75rem';
+    }
+    
+    // Адаптируем сетку достижений
+    const achievementsGrid = document.querySelector('.achievements-grid');
+    if (achievementsGrid && screenWidth <= 480) {
+        achievementsGrid.style.gridTemplateColumns = 'repeat(2, 1fr)';
+        achievementsGrid.style.gap = '0.75rem';
+    }
+}
+
+// Функция для исправления кнопки проверки пинга
+function fixPingButton() {
+    const pingBtn = document.querySelector('.btn-ping');
+    if (pingBtn) {
+        pingBtn.classList.add('glass-btn');
+        pingBtn.style.background = 'rgba(255, 255, 255, 0.1)';
+        pingBtn.style.backdropFilter = 'blur(10px)';
+        pingBtn.style.border = '1px solid rgba(255, 255, 255, 0.2)';
+        pingBtn.style.color = 'var(--text-primary)';
+    }
+}
+
+// Инициализация всех исправлений
+document.addEventListener('DOMContentLoaded', function() {
+    // Применяем все исправления
+    applySafeAreas();
+    optimizeTariffCards();
+    hideUnnecessaryElements();
+    fixElementHeights();
+    optimizeGrids();
+    fixPingButton();
+    
+    // Оригинальная инициализация
+    if (tg) {
+        initTelegramWebApp();
+    } else {
+        console.log('Telegram Web App не обнаружен, используем демо данные');
+        loadDemoData();
+    }
+    
+    animateOnScroll();
+    initPingCheck();
+    initBuyButtons();
+    initModals();
+    initNotifications();
+    loadUserData();
+});
+
+// Ресайз обработчик
+window.addEventListener('resize', function() {
+    optimizeTariffCards();
+    optimizeGrids();
+});
+
+// Обработчик ориентации
+window.addEventListener('orientationchange', function() {
+    setTimeout(() => {
+        optimizeTariffCards();
+        optimizeGrids();
+    }, 300);
+});

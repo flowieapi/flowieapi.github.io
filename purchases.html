@@ -2,37 +2,46 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Покупки - ФЛОУИ VPN</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
 </head>
 <body>
-    <!-- Шапка -->
-    <header class="header">
-        <div class="container">
-            <div class="logo">
-                <div class="logo-icon">🛒</div>
-                <h1>Мои <span class="highlight">Покупки</span></h1>
+    <!-- Фон -->
+    <div class="background"></div>
+    
+    <div class="app-container">
+        <!-- Шапка -->
+        <header class="glass-header">
+            <div class="header-content">
+                <a href="index.html" class="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <div class="header-title">
+                    <h1>Мои покупки</h1>
+                    <p class="subtitle">История транзакций</p>
+                </div>
+                <div class="header-actions">
+                    <!-- Убрали ненужные кнопки -->
+                </div>
             </div>
-            <a href="index.html" class="btn btn-outline" style="padding: 8px 15px;">
-                <i class="fas fa-arrow-left"></i> Назад
-            </a>
-        </div>
-    </header>
+        </header>
 
-    <!-- Контент -->
-    <main class="main-content">
-        <div class="container">
+        <!-- Основной контент -->
+        <main class="main-content">
             <!-- История покупок -->
-            <section class="card">
-                <h2><i class="fas fa-history"></i> История покупок</h2>
+            <section class="glass-card animate__animated animate__fadeIn">
+                <div class="section-header">
+                    <h2><i class="fas fa-history"></i> История покупок</h2>
+                </div>
                 
                 <div class="purchases-list">
                     <div class="purchase-item active">
-                        <div class="purchase-icon" style="background: rgba(156, 39, 176, 0.1);">
-                            <i class="fas fa-gem" style="color: #9C27B0;"></i>
+                        <div class="purchase-icon">
+                            <i class="fas fa-gem" style="color: #9d4edd;"></i>
                         </div>
                         <div class="purchase-info">
                             <h4>Флоуи VPN</h4>
@@ -45,8 +54,8 @@
                     </div>
                     
                     <div class="purchase-item">
-                        <div class="purchase-icon" style="background: rgba(33, 150, 243, 0.1);">
-                            <i class="fas fa-rocket" style="color: #2196F3;"></i>
+                        <div class="purchase-icon">
+                            <i class="fas fa-rocket" style="color: #00ccff;"></i>
                         </div>
                         <div class="purchase-info">
                             <h4>Про VPN</h4>
@@ -59,8 +68,8 @@
                     </div>
                     
                     <div class="purchase-item">
-                        <div class="purchase-icon" style="background: rgba(76, 175, 80, 0.1);">
-                            <i class="fas fa-bolt" style="color: #4CAF50;"></i>
+                        <div class="purchase-icon">
+                            <i class="fas fa-bolt" style="color: #00ff88;"></i>
                         </div>
                         <div class="purchase-info">
                             <h4>Лайт VPN</h4>
@@ -73,8 +82,8 @@
                     </div>
                     
                     <div class="purchase-item">
-                        <div class="purchase-icon" style="background: rgba(76, 175, 80, 0.1);">
-                            <i class="fas fa-bolt" style="color: #4CAF50;"></i>
+                        <div class="purchase-icon">
+                            <i class="fas fa-bolt" style="color: #00ff88;"></i>
                         </div>
                         <div class="purchase-info">
                             <h4>Лайт VPN</h4>
@@ -107,20 +116,25 @@
                 </div>
             </section>
 
-            <!-- Кнопка новой покупки -->
-            <section class="card">
-                <h2><i class="fas fa-plus-circle"></i> Новая покупка</h2>
-                <p style="margin-bottom: 20px; color: var(--text-secondary);">
+            <!-- Новая покупка -->
+            <section class="glass-card animate__animated animate__fadeInUp" style="animation-delay: 0.1s">
+                <div class="section-header">
+                    <h2><i class="fas fa-plus-circle"></i> Новая покупка</h2>
+                </div>
+                <p style="margin-bottom: 1.5rem; color: var(--text-secondary); line-height: 1.5;">
                     Выберите подходящий тариф VPN для максимальной производительности в PUBG Mobile
                 </p>
-                <a href="index.html" class="btn btn-primary btn-block">
+                <a href="index.html" class="glass-btn btn-primary btn-block">
                     <i class="fas fa-shopping-cart"></i> Перейти к выбору тарифа
                 </a>
             </section>
 
             <!-- Инструкция -->
-            <section class="card">
-                <h2><i class="fas fa-question-circle"></i> Как активировать VPN?</h2>
+            <section class="glass-card animate__animated animate__fadeInUp" style="animation-delay: 0.2s">
+                <div class="section-header">
+                    <h2><i class="fas fa-question-circle"></i> Как активировать VPN?</h2>
+                </div>
+                
                 <div class="instructions">
                     <div class="instruction-step">
                         <div class="step-number">1</div>
@@ -145,28 +159,36 @@
                     </div>
                 </div>
             </section>
-        </div>
-    </main>
+        </main>
 
-    <!-- Навигация -->
-    <nav class="bottom-nav">
-        <a href="index.html" class="nav-item">
-            <i class="fas fa-vpnlock"></i>
-            <span>VPN</span>
-        </a>
-        <a href="purchases.html" class="nav-item active">
-            <i class="fas fa-shopping-bag"></i>
-            <span>Покупки</span>
-        </a>
-        <a href="profile.html" class="nav-item">
-            <i class="fas fa-user"></i>
-            <span>Профиль</span>
-        </a>
-        <a href="settings.html" class="nav-item">
-            <i class="fas fa-cog"></i>
-            <span>Настройки</span>
-        </a>
-    </nav>
+        <!-- Навигация -->
+        <nav class="glass-nav">
+            <a href="index.html" class="nav-item">
+                <div class="nav-icon">
+                    <i class="fas fa-server"></i>
+                </div>
+                <span class="nav-label">VPN</span>
+            </a>
+            <a href="purchases.html" class="nav-item active">
+                <div class="nav-icon">
+                    <i class="fas fa-shopping-bag"></i>
+                </div>
+                <span class="nav-label">Покупки</span>
+            </a>
+            <a href="profile.html" class="nav-item">
+                <div class="nav-icon">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <span class="nav-label">Профиль</span>
+            </a>
+            <a href="settings.html" class="nav-item">
+                <div class="nav-icon">
+                    <i class="fas fa-sliders-h"></i>
+                </div>
+                <span class="nav-label">Настройки</span>
+            </a>
+        </nav>
+    </div>
 
     <script src="script.js"></script>
 </body>

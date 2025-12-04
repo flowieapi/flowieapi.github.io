@@ -2014,3 +2014,684 @@ input:checked + .toggle-slider:before {
         filter: blur(10px);
     }
 }
+
+/* ============================
+   ФИКСЫ ДЛЯ МОБИЛЬНЫХ УСТРОЙСТВ
+============================ */
+
+/* Фон для всех страниц */
+body {
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+    padding: 0;
+    margin: 0;
+    overflow-x: hidden;
+}
+
+/* Улучшение для iOS */
+@supports (-webkit-touch-callout: none) {
+    body {
+        min-height: -webkit-fill-available;
+    }
+}
+
+/* Фикс для безопасных зон (iPhone X и новее) */
+.safe-area-padding {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+}
+
+/* ============================
+   ФИКСЫ ДЛЯ ТАРИФНЫХ КАРТОЧЕК
+============================ */
+
+.tariff-card {
+    position: relative;
+    margin-bottom: 1.5rem;
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+    padding-top: 2.5rem !important; /* Место для бейджей */
+}
+
+.tariff-badge {
+    position: absolute !important;
+    top: -12px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    z-index: 10 !important;
+    padding: 6px 16px !important;
+    font-size: 0.75rem !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+    max-width: 90% !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+/* Фикс для кнопки "Выбрать тариф" */
+.tariff-card .glass-btn {
+    width: calc(100% - 2rem) !important;
+    margin: 0 1rem 1.5rem !important;
+    position: absolute !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+}
+
+/* Выравнивание контента в карточках */
+.tariff-features {
+    flex-grow: 1;
+    margin-bottom: 4rem; /* Место для кнопки */
+}
+
+/* ============================
+   ФИКСЫ ДЛЯ КНОПКИ ПРОВЕРКИ ПИНГА
+============================ */
+
+.btn-ping {
+    background: rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    color: var(--text-primary) !important;
+    margin: 1.5rem auto !important;
+    display: block !important;
+    max-width: 90% !important;
+}
+
+.btn-ping:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+    transform: translateY(-2px) !important;
+}
+
+/* ============================
+   ФИКСЫ ДЛЯ ПРОФИЛЯ
+============================ */
+
+/* Убираем ненужные кнопки */
+.edit-avatar,
+.icon-btn[title="QR Code"] {
+    display: none !important;
+}
+
+/* Карточка активной подписки */
+.subscription-card {
+    padding: 1rem !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 1rem !important;
+    align-items: stretch !important;
+}
+
+.subscription-info {
+    display: flex !important;
+    align-items: center !important;
+    gap: 1rem !important;
+    flex: 1 !important;
+}
+
+.subscription-icon {
+    width: 50px !important;
+    height: 50px !important;
+    min-width: 50px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: var(--primary-gradient) !important;
+    border-radius: 12px !important;
+    font-size: 1.5rem !important;
+}
+
+.subscription-details {
+    flex: 1 !important;
+    min-width: 0 !important; /* Предотвращает переполнение */
+}
+
+.subscription-details h4 {
+    font-size: 1.1rem !important;
+    margin-bottom: 0.25rem !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+
+.subscription-details p {
+    font-size: 0.85rem !important;
+    color: var(--text-secondary) !important;
+    margin-bottom: 0.25rem !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+
+.subscription-card .glass-btn {
+    align-self: center !important;
+    min-width: 120px !important;
+}
+
+/* ============================
+   ФИКСЫ ДЛЯ СТРАНИЦЫ ПОКУПОК
+============================ */
+
+/* Стили для purchases.html */
+.purchases-list {
+    margin-bottom: 1.5rem;
+}
+
+.purchase-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    margin-bottom: 0.75rem;
+    gap: 1rem;
+}
+
+.purchase-item.active {
+    background: rgba(0, 255, 136, 0.1);
+    border: 1px solid rgba(0, 255, 136, 0.3);
+}
+
+.purchase-icon {
+    width: 50px;
+    height: 50px;
+    min-width: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    font-size: 1.25rem;
+}
+
+.purchase-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.purchase-info h4 {
+    font-size: 1.1rem;
+    margin-bottom: 0.25rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.purchase-info p {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.25rem;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.status-badge.active {
+    background: rgba(0, 255, 136, 0.2);
+    color: var(--success-color);
+}
+
+.status-badge.expired {
+    background: rgba(255, 107, 107, 0.2);
+    color: var(--danger-color);
+}
+
+.purchase-price {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--primary-color);
+    min-width: 80px;
+    text-align: right;
+}
+
+.purchases-summary {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.summary-item:last-child {
+    border-bottom: none;
+}
+
+.summary-value {
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.instructions {
+    margin-top: 1.5rem;
+}
+
+.instruction-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.step-number {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    background: var(--primary-gradient);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.step-content h4 {
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+}
+
+.step-content p {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+/* ============================
+   ФИКСЫ ДЛЯ СТРАНИЦЫ НАСТРОЕК
+============================ */
+
+/* Убираем ненужную кнопку поиска */
+.icon-btn[title="Поиск"] {
+    display: none !important;
+}
+
+/* Настройка списка настроек */
+.settings-list {
+    padding: 0 !important;
+    overflow: hidden;
+}
+
+.setting-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    gap: 1rem;
+}
+
+.setting-item:last-child {
+    border-bottom: none;
+}
+
+.setting-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex: 1;
+    min-width: 0;
+}
+
+.setting-icon {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    font-size: 1.1rem;
+    color: var(--primary-color);
+}
+
+.setting-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.setting-text h4 {
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.setting-text p {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Исправляем селект */
+.select-wrapper {
+    position: relative;
+    min-width: 130px;
+}
+
+.select-wrapper select {
+    width: 100%;
+    padding: 0.5rem 2rem 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.9rem;
+    appearance: none;
+    cursor: pointer;
+}
+
+.select-wrapper::after {
+    content: '▼';
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    pointer-events: none;
+}
+
+/* Тоггл-переключатели */
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 26px;
+    min-width: 50px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.2);
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+    background-color: var(--primary-color);
+}
+
+input:checked + .toggle-slider:before {
+    transform: translateX(24px);
+}
+
+/* Сетка поддержки */
+.support-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.support-card {
+    padding: 1.25rem !important;
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+
+.support-card:hover {
+    transform: translateY(-5px);
+}
+
+.support-icon {
+    width: 50px;
+    height: 50px;
+    margin: 0 auto 1rem;
+    background: var(--primary-gradient);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.support-card h4 {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.support-card p {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+/* Опасная зона */
+.danger-zone {
+    margin-top: 2rem;
+}
+
+.danger-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.danger-warning {
+    background: rgba(255, 107, 107, 0.1);
+    border: 1px solid rgba(255, 107, 107, 0.3);
+    border-radius: 12px;
+    padding: 1rem;
+    color: var(--danger-color);
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+/* ============================
+   АДАПТИВНОСТЬ ДЛЯ МОБИЛЬНЫХ
+============================ */
+
+@media (max-width: 480px) {
+    /* Общие фиксы */
+    .glass-header {
+        padding: 0.75rem 0;
+    }
+    
+    .header-title h1 {
+        font-size: 1.25rem !important;
+    }
+    
+    .header-title .subtitle {
+        font-size: 0.85rem !important;
+    }
+    
+    /* Тарифные карточки */
+    .tariffs-container {
+        grid-template-columns: 1fr !important;
+        gap: 1rem !important;
+    }
+    
+    .tariff-card {
+        min-height: 380px !important;
+    }
+    
+    /* Статистика профиля */
+    .profile-stats {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 0.75rem !important;
+    }
+    
+    .achievements-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 0.75rem !important;
+    }
+    
+    /* Сетка поддержки */
+    .support-grid {
+        grid-template-columns: 1fr !important;
+    }
+    
+    /* Навигация */
+    .glass-nav {
+        padding: 0.5rem !important;
+        gap: 0.25rem !important;
+    }
+    
+    .nav-label {
+        font-size: 0.7rem !important;
+    }
+    
+    .nav-icon {
+        width: 24px !important;
+        height: 24px !important;
+        font-size: 0.9rem !important;
+    }
+}
+
+@media (max-width: 360px) {
+    /* Еще более мелкие экраны */
+    .tariff-price .price {
+        font-size: 2rem !important;
+    }
+    
+    .profile-stats {
+        grid-template-columns: 1fr !important;
+    }
+    
+    .setting-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+    
+    .setting-info {
+        width: 100%;
+    }
+    
+    .toggle-switch,
+    .select-wrapper {
+        align-self: flex-end;
+    }
+}
+
+/* ============================
+   ФИКСЫ ДЛЯ КОНТЕЙНЕРОВ
+============================ */
+
+.app-container {
+    max-width: 100%;
+    width: 100%;
+    margin: 0 auto;
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.main-content {
+    flex: 1;
+    padding: 1rem;
+    padding-bottom: 5rem; /* Для навигации */
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Фикс для переполнения текста */
+.text-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Улучшение скролла */
+.main-content {
+    -webkit-overflow-scrolling: touch;
+    overflow-y: auto;
+}
+
+/* ============================
+   УЛУЧШЕНИЕ АНИМАЦИЙ
+============================ */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Плавный скролл */
+html {
+    scroll-behavior: smooth;
+}
+
+/* ============================
+   ФИКСЫ ДЛЯ ТЕКСТОВЫХ ПОЛЕЙ И КНОПОК
+============================ */
+
+.glass-input,
+.glass-btn,
+select {
+    font-size: 16px !important; /* Предотвращает зум на iOS */
+}
+
+.glass-btn:active {
+    transform: scale(0.98) !important;
+}
+
+/* ============================
+   УЛУЧШЕНИЕ КАРТОЧЕК
+============================ */
+
+.glass-card {
+    box-sizing: border-box;
+    width: 100%;
+    margin: 0.5rem 0;
+}
+
+/* Фикс для теней на iOS */
+@supports (-webkit-touch-callout: none) {
+    .glass-card {
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        backdrop-filter: blur(20px) saturate(180%);
+    }
+}
