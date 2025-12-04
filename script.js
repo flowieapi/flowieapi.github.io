@@ -44,6 +44,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     setupUserProfile();
     loadVPNCategories();
     updatePing();
+    startAutoSync();
     setupEvents();
     setupFixedScrollIndicator();
     setupTouchScrollIndicator();
@@ -64,84 +65,182 @@ document.addEventListener('DOMContentLoaded', async function () {
     }, 3000);
 });
 
+let syncInterval = null;
+
+function startAutoSync() {
+    if (syncInterval) clearInterval(syncInterval);
+    
+    syncInterval = setInterval(async () => {
+        if (db && navigator.onLine) {
+            try {
+                await offlineStorage.syncWithFirebase();
+            } catch (error) {
+                console.warn('Ошибка автосинхронизации:', error);
+            }
+        }
+    }, 30000); // Каждые 30 секунд
+    
+    console.log('Автосинхронизация запущена');
+}
+
 async function testConnections() {
     console.log('=== ТЕСТ ПОДКЛЮЧЕНИЙ ===');
 
-    // Тест Firebase
-    let firebaseOk = false;
+    const results = {
+        firebase: '❌ Не проверен',
+        telegram: '❌ Не проверен',
+        internet: '❌ Не проверен'
+    };
+
+    // Тест интернета
     try {
-        if (db) {
-            const testRef = db.collection('test').doc('test');
-            await testRef.set({ test: new Date().toISOString() });
-            await testRef.delete();
-            firebaseOk = true;
-            console.log('✅ Firebase: OK');
-        }
-    } catch (firebaseError) {
-        console.error('❌ Firebase Error:', firebaseError);
+        const internetTest = await fetch('https://httpbin.org/get', {
+            method: 'GET',
+            mode: 'no-cors' // Без CORS для простой проверки
+        });
+        results.internet = '✅ Доступен';
+        console.log('✅ Интернет: OK');
+    } catch (internetError) {
+        results.internet = '❌ Нет подключения';
+        console.warn('❌ Интернет недоступен:', internetError.message);
     }
 
-    // Тест Telegram
-    let telegramOk = false;
+    // Тест Telegram (упрощенный)
     try {
         const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getMe`);
-        const data = await response.json();
-        telegramOk = data.ok;
-        if (telegramOk) {
+        if (response.ok) {
+            results.telegram = '✅ Доступен';
             console.log('✅ Telegram: OK');
         } else {
-            console.error('❌ Telegram Error:', data);
+            results.telegram = '❌ Ошибка API';
+            console.error('❌ Telegram Error:', await response.text());
         }
     } catch (telegramError) {
-        console.error('❌ Telegram Connection Error:', telegramError);
+        results.telegram = '❌ Нет подключения';
+        console.error('❌ Telegram Connection Error:', telegramError.message);
     }
 
-    // Тест ImgBB (только соединение)
-    let imgbbOk = false;
-    try {
-        const response = await fetch('https://api.imgbb.com', { method: 'HEAD' });
-        imgbbOk = response.ok;
-        console.log(imgbbOk ? '✅ ImgBB: Доступен' : '❌ ImgBB: Недоступен');
-    } catch (imgbbError) {
-        console.error('❌ ImgBB Connection Error:', imgbbError);
+    // Тест Firebase
+    if (db) {
+        try {
+            // Простой тест без записи
+            const testRef = db.collection('test').doc('connection');
+            const doc = await testRef.get();
+            results.firebase = '✅ Доступен (чтение)';
+            console.log('✅ Firebase: Доступен для чтения');
+
+            // Пробуем запись если есть права
+            try {
+                await testRef.set({
+                    test: true,
+                    timestamp: new Date().toISOString()
+                });
+                results.firebase = '✅ Доступен (чтение/запись)';
+                console.log('✅ Firebase: Доступен для записи');
+                await testRef.delete();
+            } catch (writeError) {
+                console.warn('Firebase: только чтение', writeError.message);
+            }
+
+        } catch (firebaseError) {
+            results.firebase = `❌ ${firebaseError.message || 'Ошибка подключения'}`;
+            console.error('❌ Firebase Error:', firebaseError);
+        }
+    } else {
+        results.firebase = '❌ Не инициализирован';
+        console.log('❌ Firebase: db не инициализирован');
     }
 
     console.log('=== РЕЗУЛЬТАТЫ ===');
-    console.log('Firebase:', firebaseOk ? 'OK' : 'FAIL');
-    console.log('Telegram:', telegramOk ? 'OK' : 'FAIL');
-    console.log('ImgBB:', imgbbOk ? 'OK' : 'FAIL (не критично)');
+    console.table(results);
 
-    return { firebaseOk, telegramOk, imgbbOk };
+    return results;
 }
 
 // Инициализация Firebase
+// Упрощенная инициализация Firebase
 async function initFirebase() {
-    try {
-        console.log('Инициализация Firebase...');
+    console.log('Инициализация Firebase...');
 
-        // Проверяем, загружена ли библиотека Firebase
+    // Ждем загрузки Firebase
+    if (typeof firebase === 'undefined') {
+        console.log('Firebase не загружен, ждем 2 секунды...');
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
         if (typeof firebase === 'undefined') {
-            console.error('Firebase не загружен');
+            console.error('Firebase все еще не загружен после ожидания');
+            showNotification('⚠️ База данных не загружена. Работаем в оффлайн режиме.');
             return false;
         }
+    }
 
-        // Проверяем, инициализировано ли уже приложение
+    try {
+        console.log('Firebase доступен, версия:', firebase.SDK_VERSION);
+
+        // Проверяем конфигурацию
+        if (!firebaseConfig.apiKey || firebaseConfig.apiKey === 'AIzaSyDG7SJfMbSiIbTkBxV6BBoPAsTAKQsLPv8') {
+            console.log('Используется тестовый API ключ Firebase');
+        }
+
+        // Инициализируем Firebase
+        let app;
         if (firebase.apps.length === 0) {
-            console.error('Firebase не инициализирован');
+            console.log('Инициализируем Firebase приложение...');
+            app = firebase.initializeApp(firebaseConfig);
+        } else {
+            app = firebase.apps[0];
+            console.log('Firebase уже инициализирован');
+        }
+
+        // Инициализируем Firestore
+        if (typeof firebase.firestore !== 'undefined') {
+            db = firebase.firestore();
+
+            // Настраиваем настройки для мобильных устройств
+            const settings = {
+                cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED,
+                experimentalForceLongPolling: true // Для некоторых сетей
+            };
+
+            db.settings(settings);
+            console.log('✅ Firestore инициализирован');
+        } else {
+            console.error('Firestore не доступен в Firebase SDK');
+            showNotification('⚠️ Firestore не доступен');
             return false;
         }
 
-        // Получаем Firestore
-        if (firebase.firestore) {
-            db = firebase.firestore();
-            console.log('Firestore успешно инициализирован');
-            return true;
-        } else {
-            console.error('Firestore недоступен');
-            return false;
+        // Пробуем подключиться
+        console.log('Проверяем соединение с Firestore...');
+        try {
+            const testRef = db.collection('connection_test').doc('test');
+            await testRef.set({
+                test: true,
+                timestamp: new Date().toISOString()
+            });
+            await testRef.delete();
+            console.log('✅ Соединение с Firestore успешно');
+        } catch (connectionError) {
+            console.warn('Предупреждение: не удалось подключиться к Firestore:', connectionError);
+            console.log('Продолжаем в оффлайн режиме...');
         }
+
+        // Анонимная аутентификация (не обязательно)
+        try {
+            await firebase.auth().signInAnonymously();
+            console.log('✅ Анонимная аутентификация успешна');
+        } catch (authError) {
+            console.warn('Аутентификация не требуется:', authError.message);
+        }
+
+        return true;
+
     } catch (error) {
-        console.error('Ошибка инициализации Firebase:', error);
+        console.error('❌ Ошибка инициализации Firebase:', error);
+        console.error('Код ошибки:', error.code);
+        console.error('Сообщение:', error.message);
+
+        showNotification('⚠️ База данных недоступна. Работаем в оффлайн режиме.');
         return false;
     }
 }
@@ -964,7 +1063,7 @@ function getVpnTariff(name) {
 // Обновить функцию submitReceipt в script.js:
 async function submitReceipt() {
     console.log('=== НАЧАЛО submitReceipt ===');
-    
+
     if (!currentPaymentData) {
         console.error('❌ currentPaymentData отсутствует');
         showNotification('❌ Ошибка: данные покупки не найдены');
@@ -988,8 +1087,8 @@ async function submitReceipt() {
             timestamp: new Date().toISOString(),
             vpn_tariff: getVpnTariff(currentPaymentData.name),
             has_receipt: !!receiptFile,
-            created_at: firebase.firestore.FieldValue.serverTimestamp ? 
-                firebase.firestore.FieldValue.serverTimestamp() : 
+            created_at: firebase.firestore.FieldValue.serverTimestamp ?
+                firebase.firestore.FieldValue.serverTimestamp() :
                 new Date().toISOString()
         };
 
@@ -1016,28 +1115,28 @@ async function submitReceipt() {
         // Сохраняем локально
         console.log('5. Сохраняем локально...');
         const savedLocally = savePurchaseOnce(purchaseData);
-        
+
         if (!savedLocally) {
             console.warn('6. Заказ уже существует локально');
             showNotification('⚠️ Этот заказ уже был отправлен ранее');
             closeReceiptModal();
             return;
         }
-        
+
         console.log('6. Локальное сохранение успешно');
 
         // Сохраняем в Firebase
         console.log('7. Пытаемся сохранить в Firebase...');
         console.log('db доступен?', !!db);
         console.log('firebase доступен?', typeof firebase !== 'undefined');
-        
+
         let firebaseResult = null;
         let firebaseError = null;
-        
+
         if (db) {
             try {
                 console.log('8. Добавляем документ в коллекцию purchases...');
-                
+
                 // Тест соединения
                 console.log('8.1. Тест соединения...');
                 try {
@@ -1048,34 +1147,34 @@ async function submitReceipt() {
                 } catch (testError) {
                     console.error('8.2. Тест соединения не пройден:', testError);
                 }
-                
+
                 // Сохраняем покупку
                 console.log('9. Сохраняем purchaseData в Firestore...');
                 const docRef = await db.collection('purchases').add(purchaseData);
                 console.log('10. Документ создан с ID:', docRef.id);
-                
+
                 purchaseData.firebase_id = docRef.id;
-                
+
                 // Обновляем документ с ID
                 console.log('11. Обновляем документ с firebase_id...');
                 await docRef.update({
                     firebase_id: docRef.id,
                     updated_at: new Date().toISOString()
                 });
-                
+
                 firebaseResult = {
                     success: true,
                     docId: docRef.id
                 };
-                
+
                 console.log('12. Firebase сохранение успешно!');
-                
+
             } catch (firebaseError) {
                 console.error('13. Ошибка Firebase сохранения:', firebaseError);
                 console.error('Код ошибки:', firebaseError.code);
                 console.error('Сообщение:', firebaseError.message);
                 console.error('Подробности:', firebaseError);
-                
+
                 firebaseError = firebaseError;
             }
         } else {
@@ -1087,7 +1186,7 @@ async function submitReceipt() {
             console.log('15. Отправляем уведомление в Telegram...');
             // Отправляем уведомление в Telegram
             await sendReceiptToTelegramSimple(purchaseData, firebaseResult.docId);
-            
+
             showNotification('✅ Данные отправлены! Админ проверит в течение 15 минут');
 
             // Обновляем локальную копию
@@ -1104,13 +1203,13 @@ async function submitReceipt() {
             closeReceiptModal();
             loadPurchases();
             loadUserData();
-            
+
             // Очищаем данные
             currentPaymentData = null;
             currentPurchaseId = null;
             receiptFile = null;
             removeFile();
-            
+
             console.log('17. Операция завершена');
         }, 1500);
 
@@ -1120,32 +1219,32 @@ async function submitReceipt() {
         console.error('Stack:', error.stack);
         showNotification('❌ Ошибка сохранения данных. Проверьте подключение.');
     }
-    
+
     console.log('=== КОНЕЦ submitReceipt ===');
 }
 
 // Добавьте эту функцию в script.js
 async function checkFirebaseStatus() {
     console.log('=== ПРОВЕРКА FIREBASE ===');
-    
+
     try {
         // Проверяем загружена ли библиотека
         console.log('1. Firebase загружен?', typeof firebase !== 'undefined');
         if (typeof firebase === 'undefined') {
             throw new Error('Firebase библиотека не загружена');
         }
-        
+
         // Проверяем инициализацию
         console.log('2. Firebase инициализирован?', firebase.apps.length > 0);
         console.log('3. Имя приложения:', firebase.apps[0]?.name);
-        
+
         // Проверяем Firestore
         console.log('4. Firestore доступен?', typeof firebase.firestore !== 'undefined');
-        
+
         // Проверяем подключение
         if (db) {
             console.log('5. db существует');
-            
+
             // Тест записи
             console.log('6. Тест записи...');
             const testDocRef = db.collection('test_connection').doc('test_' + Date.now());
@@ -1155,17 +1254,17 @@ async function checkFirebaseStatus() {
                 test_field: 'test_value'
             });
             console.log('7. Запись создана');
-            
+
             // Чтение
             console.log('8. Чтение записи...');
             const testDoc = await testDocRef.get();
             console.log('9. Документ существует?', testDoc.exists);
-            
+
             // Удаление
             console.log('10. Удаление тестовой записи...');
             await testDocRef.delete();
             console.log('11. Запись удалена');
-            
+
             // Проверяем коллекцию purchases
             console.log('12. Проверяем коллекцию purchases...');
             try {
@@ -1174,7 +1273,7 @@ async function checkFirebaseStatus() {
             } catch (purchasesError) {
                 console.error('13. Ошибка доступа к purchases:', purchasesError);
             }
-            
+
             return {
                 success: true,
                 message: '✅ Firebase работает корректно',
@@ -1199,12 +1298,12 @@ async function checkFirebaseStatus() {
                 }
             };
         }
-        
+
     } catch (error) {
         console.error('❌ Ошибка проверки Firebase:', error);
         console.error('Код ошибки:', error.code);
         console.error('Сообщение:', error.message);
-        
+
         return {
             success: false,
             message: '❌ Firebase ошибка: ' + error.message,
