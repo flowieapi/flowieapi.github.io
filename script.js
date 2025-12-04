@@ -297,7 +297,7 @@ function loadVPNCategories() {
     const vpnCategories = [
         {
             id: 'cheap',
-            name: 'VPN Базовый',
+            name: 'Лайт VPN',
             icon: '🚀',
             price: 299,
             color: 'cheap',
@@ -311,7 +311,7 @@ function loadVPNCategories() {
         },
         {
             id: 'medium',
-            name: 'VPN Продвинутый',
+            name: 'Про VPN',
             icon: '⚡',
             price: 799,
             color: 'medium',
@@ -326,7 +326,7 @@ function loadVPNCategories() {
         },
         {
             id: 'vip',
-            name: 'VPN Профессиональный',
+            name: 'Vip VPN',
             icon: '👑',
             price: 1499,
             color: 'vip',
@@ -446,11 +446,11 @@ function showPayment(category) {
                 <div style="color: var(--ios-text-secondary); font-size: 12px; margin-bottom: 8px;">
                     Банковская карта Тинькофф
                 </div>
-                <div class="card-number">2200 7007 4183 5250</div>
+                <div class="card-number">2200 7013 3827 9851</div>
                 <div class="card-info">
                     <div>
                         <div style="color: var(--ios-text-secondary); font-size: 10px;">Получатель</div>
-                        <div style="color: white; font-weight: 600;">Иван И.</div>
+                        <div style="color: white; font-weight: 600;">Исбагиев И.</div>
                     </div>
                     <div>
                         <div style="color: var(--ios-text-secondary); font-size: 10px;">Банк</div>
