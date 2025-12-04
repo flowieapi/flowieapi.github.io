@@ -1,5 +1,13 @@
 // Инициализация приложения
 document.addEventListener('DOMContentLoaded', function() {
+    // Инициализация Telegram Web App
+    if (tg) {
+        initTelegramWebApp();
+    } else {
+        console.log('Telegram Web App не обнаружен, используем демо данные');
+        loadDemoData();
+    }
+    
     // Анимация появления
     animateOnScroll();
     
@@ -15,9 +23,36 @@ document.addEventListener('DOMContentLoaded', function() {
     // Уведомления
     initNotifications();
     
-    // Загрузка данных
+    // Загрузка данных пользователя
     loadUserData();
 });
+
+
+const tg = window.Telegram?.WebApp;
+
+function initTelegramWebApp() {
+    console.log('Telegram Web App инициализирован');
+    
+    // Расширяем приложение на весь экран
+    tg.expand();
+    
+    // Включаем кнопку назад
+    tg.BackButton.show();
+    tg.BackButton.onClick(() => {
+        window.history.back();
+    });
+    
+    // Обработка изменений видимости кнопки назад
+    tg.onEvent('backButtonClicked', () => {
+        if (window.location.pathname.includes('index.html') || 
+            window.location.pathname.includes('/')) {
+            tg.BackButton.hide();
+        }
+    });
+    
+    // Отправляем данные о готовности приложения
+    tg.ready();
+}
 
 // Анимация появления элементов
 function animateOnScroll() {
@@ -386,39 +421,177 @@ function showNotification(message, type = 'info') {
 
 // Загрузка данных пользователя
 function loadUserData() {
-    // В реальном приложении здесь будет запрос к API
-    const userData = {
-        username: 'gamerpro',
-        nickname: 'PUBG_MASTER',
-        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=user1&backgroundType=gradientLinear',
-        balance: 0,
-        activePlan: 'flowi',
-        purchases: [
-            { plan: 'flowi', date: '2024-11-15', price: 999 },
-            { plan: 'pro', date: '2024-10-15', price: 599 }
-        ]
-    };
+    if (tg) {
+        const user = tg.initDataUnsafe?.user;
+        
+        if (user) {
+            // Используем реальные данные из Telegram
+            const userData = {
+                id: user.id,
+                username: user.username || `user_${user.id}`,
+                nickname: user.first_name + (user.last_name ? ` ${user.last_name}` : ''),
+                avatar: user.photo_url || generateAvatar(user.id),
+                language_code: user.language_code || 'ru',
+                isPremium: user.is_premium || false
+            };
+            
+            // Сохраняем в localStorage для использования на других страницах
+            localStorage.setItem('flowi_vpn_user', JSON.stringify(userData));
+            
+            // Обновляем интерфейс
+            updateUserInterface(userData);
+            
+            // Если это страница профиля, обновляем данные профиля
+            if (window.location.pathname.includes('profile.html')) {
+                updateProfilePage(userData);
+            }
+        } else {
+            // Если данные пользователя недоступны, пробуем получить из localStorage
+            const savedUser = localStorage.getItem('flowi_vpn_user');
+            if (savedUser) {
+                updateUserInterface(JSON.parse(savedUser));
+            } else {
+                loadDemoData();
+            }
+        }
+    } else {
+        // Для демо без Telegram
+        loadDemoData();
+    }
+}
+
+function updateProfilePage(userData) {
+    // Обновляем аватар
+    const avatarImg = document.querySelector('.profile-avatar img');
+    if (avatarImg && userData.avatar) {
+        avatarImg.src = userData.avatar;
+        avatarImg.alt = userData.nickname;
+    }
     
-    // Сохраняем в localStorage для демо
-    localStorage.setItem('flowi_vpn_user', JSON.stringify(userData));
+    // Обновляем никнейм
+    const nicknameEl = document.querySelector('.profile-info h2');
+    if (nicknameEl) {
+        nicknameEl.textContent = userData.nickname;
+    }
     
-    // Обновляем интерфейс
-    updateUserInterface(userData);
+    // Обновляем юзернейм
+    const usernameEl = document.querySelector('.profile-username');
+    if (usernameEl) {
+        usernameEl.textContent = `@${userData.username}`;
+    }
+    
+    // Если пользователь премиум, показываем бейдж
+    if (userData.isPremium) {
+        const profileHeader = document.querySelector('.profile-header');
+        if (profileHeader) {
+            const premiumBadge = document.createElement('div');
+            premiumBadge.className = 'premium-badge';
+            premiumBadge.innerHTML = '<i class="fas fa-crown"></i> Telegram Premium';
+            premiumBadge.style.cssText = `
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                background: linear-gradient(45deg, #FFD700, #FFA500);
+                color: #000;
+                padding: 4px 10px;
+                border-radius: 20px;
+                font-size: 0.75rem;
+                font-weight: 600;
+                display: flex;
+                align-items: center;
+                gap: 5px;
+            `;
+            profileHeader.style.position = 'relative';
+            profileHeader.appendChild(premiumBadge);
+        }
+    }
 }
 
 function updateUserInterface(userData) {
-    // Обновляем аватар
-    const avatar = document.querySelector('.user-avatar img');
-    if (avatar && userData.avatar) {
-        avatar.src = userData.avatar;
+    // Обновляем аватар в хедере
+    const headerAvatar = document.querySelector('.user-avatar img');
+    if (headerAvatar && userData.avatar) {
+        headerAvatar.src = userData.avatar;
+        headerAvatar.alt = userData.nickname;
     }
     
-    // Обновляем активный план
-    if (userData.activePlan) {
-        const plan = plans[userData.activePlan];
-        if (plan) {
-            // Можно обновить UI, показать активный план
+    // Если есть Telegram Web App, можно использовать их тему
+    if (tg) {
+        applyTelegramTheme();
+    }
+}
+
+function applyTelegramTheme() {
+    const themeParams = tg.themeParams;
+    
+    if (themeParams) {
+        document.documentElement.style.setProperty('--primary-color', themeParams.button_color || '#2481cc');
+        document.documentElement.style.setProperty('--bg-color', themeParams.bg_color || '#1a1a1a');
+        document.documentElement.style.setProperty('--text-color', themeParams.text_color || '#ffffff');
+        
+        // Обновляем градиенты на основе темы
+        updateGradients(themeParams.button_color);
+    }
+}
+
+function updateGradients(buttonColor) {
+    if (!buttonColor) return;
+    
+    const style = document.createElement('style');
+    style.textContent = `
+        .glass-btn.btn-primary {
+            background: linear-gradient(135deg, ${buttonColor}, ${adjustColor(buttonColor, -20)}) !important;
         }
+        
+        .tariff-card.featured {
+            --card-color: ${buttonColor} !important;
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+function adjustColor(color, amount) {
+    const hex = color.replace('#', '');
+    let r = parseInt(hex.substring(0, 2), 16);
+    let g = parseInt(hex.substring(2, 4), 16);
+    let b = parseInt(hex.substring(4, 6), 16);
+    
+    r = Math.max(0, Math.min(255, r + amount));
+    g = Math.max(0, Math.min(255, g + amount));
+    b = Math.max(0, Math.min(255, b + amount));
+    
+    return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+}
+
+// Генерация аватара на основе ID пользователя
+function generateAvatar(userId) {
+    const colors = ['00ff88', '00ccff', '9d4edd', 'ff6b6b', 'ffa500'];
+    const color = colors[userId % colors.length];
+    return `https://api.dicebear.com/7.x/thumbs/svg?seed=${userId}&backgroundColor=${color}&backgroundType=gradientLinear`;
+}
+
+
+// Добавляем обработку закрытия приложения
+if (tg) {
+    // Обработка события закрытия
+    tg.onEvent('viewportChanged', (isStateStable) => {
+        if (!isStateStable) {
+            // Сохраняем состояние при сворачивании
+            saveAppState();
+        }
+    });
+    
+    // Обработка нажатия кнопки закрытия
+    tg.onEvent('mainButtonClicked', () => {
+        tg.close();
+    });
+}
+
+function restoreAppState() {
+    const savedState = localStorage.getItem('flowi_vpn_state');
+    if (savedState) {
+        const state = JSON.parse(savedState);
+        // Можно восстановить состояние если нужно
     }
 }
 

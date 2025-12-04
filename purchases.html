@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Покупки - ФЛОУИ VPN</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Шапка -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <div class="logo-icon">🛒</div>
+                <h1>Мои <span class="highlight">Покупки</span></h1>
+            </div>
+            <a href="index.html" class="btn btn-outline" style="padding: 8px 15px;">
+                <i class="fas fa-arrow-left"></i> Назад
+            </a>
+        </div>
+    </header>
+
+    <!-- Контент -->
+    <main class="main-content">
+        <div class="container">
+            <!-- История покупок -->
+            <section class="card">
+                <h2><i class="fas fa-history"></i> История покупок</h2>
+                
+                <div class="purchases-list">
+                    <div class="purchase-item active">
+                        <div class="purchase-icon" style="background: rgba(156, 39, 176, 0.1);">
+                            <i class="fas fa-gem" style="color: #9C27B0;"></i>
+                        </div>
+                        <div class="purchase-info">
+                            <h4>Флоуи VPN</h4>
+                            <p>15.11.2024 - 15.12.2024</p>
+                            <span class="status-badge active">Активна</span>
+                        </div>
+                        <div class="purchase-price">
+                            999 ₽
+                        </div>
+                    </div>
+                    
+                    <div class="purchase-item">
+                        <div class="purchase-icon" style="background: rgba(33, 150, 243, 0.1);">
+                            <i class="fas fa-rocket" style="color: #2196F3;"></i>
+                        </div>
+                        <div class="purchase-info">
+                            <h4>Про VPN</h4>
+                            <p>15.10.2024 - 15.11.2024</p>
+                            <span class="status-badge expired">Истекла</span>
+                        </div>
+                        <div class="purchase-price">
+                            599 ₽
+                        </div>
+                    </div>
+                    
+                    <div class="purchase-item">
+                        <div class="purchase-icon" style="background: rgba(76, 175, 80, 0.1);">
+                            <i class="fas fa-bolt" style="color: #4CAF50;"></i>
+                        </div>
+                        <div class="purchase-info">
+                            <h4>Лайт VPN</h4>
+                            <p>15.09.2024 - 15.10.2024</p>
+                            <span class="status-badge expired">Истекла</span>
+                        </div>
+                        <div class="purchase-price">
+                            299 ₽
+                        </div>
+                    </div>
+                    
+                    <div class="purchase-item">
+                        <div class="purchase-icon" style="background: rgba(76, 175, 80, 0.1);">
+                            <i class="fas fa-bolt" style="color: #4CAF50;"></i>
+                        </div>
+                        <div class="purchase-info">
+                            <h4>Лайт VPN</h4>
+                            <p>15.08.2024 - 15.09.2024</p>
+                            <span class="status-badge expired">Истекла</span>
+                        </div>
+                        <div class="purchase-price">
+                            299 ₽
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="purchases-summary">
+                    <div class="summary-item">
+                        <span>Всего потрачено:</span>
+                        <span class="summary-value">2,196 ₽</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Сохранено времени:</span>
+                        <span class="summary-value">~47 часов</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Средний пинг до VPN:</span>
+                        <span class="summary-value">85 мс</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Средний пинг с VPN:</span>
+                        <span class="summary-value">18 мс</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Кнопка новой покупки -->
+            <section class="card">
+                <h2><i class="fas fa-plus-circle"></i> Новая покупка</h2>
+                <p style="margin-bottom: 20px; color: var(--text-secondary);">
+                    Выберите подходящий тариф VPN для максимальной производительности в PUBG Mobile
+                </p>
+                <a href="index.html" class="btn btn-primary btn-block">
+                    <i class="fas fa-shopping-cart"></i> Перейти к выбору тарифа
+                </a>
+            </section>
+
+            <!-- Инструкция -->
+            <section class="card">
+                <h2><i class="fas fa-question-circle"></i> Как активировать VPN?</h2>
+                <div class="instructions">
+                    <div class="instruction-step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h4>Оплатите выбранный тариф</h4>
+                            <p>После оплаты вы получите данные для подключения в Telegram</p>
+                        </div>
+                    </div>
+                    <div class="instruction-step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h4>Настройте VPN на устройстве</h4>
+                            <p>Используйте полученные данные в настройках VPN вашего устройства</p>
+                        </div>
+                    </div>
+                    <div class="instruction-step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h4>Запустите PUBG Mobile</h4>
+                            <p>Наслаждайтесь низким пингом и лучшей игрой!</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Навигация -->
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-item">
+            <i class="fas fa-vpnlock"></i>
+            <span>VPN</span>
+        </a>
+        <a href="purchases.html" class="nav-item active">
+            <i class="fas fa-shopping-bag"></i>
+            <span>Покупки</span>
+        </a>
+        <a href="profile.html" class="nav-item">
+            <i class="fas fa-user"></i>
+            <span>Профиль</span>
+        </a>
+        <a href="settings.html" class="nav-item">
+            <i class="fas fa-cog"></i>
+            <span>Настройки</span>
+        </a>
+    </nav>
+
+    <script src="script.js"></script>
+</body>
+</html>
