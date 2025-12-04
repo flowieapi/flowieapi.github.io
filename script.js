@@ -952,15 +952,27 @@ function fileToBase64(file) {
     });
 }
 
+function getVpnTariff(name) {
+    if (!name) return 'Не указан';
+    if (name.includes('Лайт') || name.includes('Дешевый')) return 'VPN Лайт';
+    if (name.includes('Про') || name.includes('Средний')) return 'VPN Про';
+    if (name.includes('Vip') || name.includes('ВИП') || name.includes('VIP')) return 'VPN ВИП';
+    return name;
+}
+
 // Отправить чек на проверку
 // Обновить функцию submitReceipt в script.js:
 async function submitReceipt() {
+    console.log('=== НАЧАЛО submitReceipt ===');
+    
     if (!currentPaymentData) {
+        console.error('❌ currentPaymentData отсутствует');
         showNotification('❌ Ошибка: данные покупки не найдены');
         return;
     }
 
     try {
+        console.log('1. Подготовка данных покупки...');
         showNotification('📤 Сохраняем данные покупки...');
 
         // Создаем запись о покупке
@@ -976,84 +988,228 @@ async function submitReceipt() {
             timestamp: new Date().toISOString(),
             vpn_tariff: getVpnTariff(currentPaymentData.name),
             has_receipt: !!receiptFile,
-            created_at: firebase.firestore.FieldValue.serverTimestamp()
+            created_at: firebase.firestore.FieldValue.serverTimestamp ? 
+                firebase.firestore.FieldValue.serverTimestamp() : 
+                new Date().toISOString()
         };
 
-        // Если есть файл, конвертируем в base64 (но не отправляем на ImgBB)
+        console.log('2. Данные покупки:', purchaseData);
+
+        // Если есть файл, конвертируем в base64
         if (receiptFile) {
+            console.log('3. Конвертируем файл в base64...');
             try {
                 const base64 = await fileToBase64(receiptFile);
-                purchaseData.receipt_base64 = base64;
+                purchaseData.receipt_base64 = base64.substring(0, 100) + '...'; // Сохраняем только начало для логов
                 purchaseData.file_name = receiptFile.name;
                 purchaseData.file_size = receiptFile.size;
                 purchaseData.file_type = receiptFile.type;
+                console.log('4. Файл конвертирован, размер:', receiptFile.size, 'тип:', receiptFile.type);
             } catch (fileError) {
                 console.error('Ошибка конвертации файла:', fileError);
                 purchaseData.has_receipt = false;
             }
+        } else {
+            console.log('3. Файл не прикреплен');
         }
 
         // Сохраняем локально
+        console.log('5. Сохраняем локально...');
         const savedLocally = savePurchaseOnce(purchaseData);
-
+        
         if (!savedLocally) {
+            console.warn('6. Заказ уже существует локально');
             showNotification('⚠️ Этот заказ уже был отправлен ранее');
             closeReceiptModal();
             return;
         }
+        
+        console.log('6. Локальное сохранение успешно');
 
         // Сохраняем в Firebase
+        console.log('7. Пытаемся сохранить в Firebase...');
+        console.log('db доступен?', !!db);
+        console.log('firebase доступен?', typeof firebase !== 'undefined');
+        
         let firebaseResult = null;
+        let firebaseError = null;
+        
         if (db) {
             try {
+                console.log('8. Добавляем документ в коллекцию purchases...');
+                
+                // Тест соединения
+                console.log('8.1. Тест соединения...');
+                try {
+                    const testDoc = db.collection('test_connection').doc('test_' + Date.now());
+                    await testDoc.set({ test: true, timestamp: new Date().toISOString() });
+                    await testDoc.delete();
+                    console.log('8.2. Тест соединения пройден');
+                } catch (testError) {
+                    console.error('8.2. Тест соединения не пройден:', testError);
+                }
+                
+                // Сохраняем покупку
+                console.log('9. Сохраняем purchaseData в Firestore...');
                 const docRef = await db.collection('purchases').add(purchaseData);
+                console.log('10. Документ создан с ID:', docRef.id);
+                
                 purchaseData.firebase_id = docRef.id;
-
+                
                 // Обновляем документ с ID
+                console.log('11. Обновляем документ с firebase_id...');
                 await docRef.update({
-                    firebase_id: docRef.id
+                    firebase_id: docRef.id,
+                    updated_at: new Date().toISOString()
                 });
-
+                
                 firebaseResult = {
                     success: true,
                     docId: docRef.id
                 };
-
+                
+                console.log('12. Firebase сохранение успешно!');
+                
             } catch (firebaseError) {
-                console.error('Ошибка Firebase:', firebaseError);
-                showNotification('⚠️ Данные сохранены локально. Ошибка Firebase.');
+                console.error('13. Ошибка Firebase сохранения:', firebaseError);
+                console.error('Код ошибки:', firebaseError.code);
+                console.error('Сообщение:', firebaseError.message);
+                console.error('Подробности:', firebaseError);
+                
+                firebaseError = firebaseError;
             }
+        } else {
+            console.error('14. db недоступен!');
+            showNotification('⚠️ База данных не подключена. Работаем в оффлайн режиме.');
         }
 
         if (firebaseResult && firebaseResult.success) {
+            console.log('15. Отправляем уведомление в Telegram...');
             // Отправляем уведомление в Telegram
             await sendReceiptToTelegramSimple(purchaseData, firebaseResult.docId);
-
+            
             showNotification('✅ Данные отправлены! Админ проверит в течение 15 минут');
 
             // Обновляем локальную копию
             purchaseData.firebase_id = firebaseResult.docId;
             updatePurchaseInStorage(purchaseData);
         } else {
+            console.log('15. Firebase не сохранил, сохраняем только локально');
             showNotification('⚠️ Данные сохранены локально. Ошибка подключения к Firebase');
         }
 
         // Обновляем интерфейс
+        console.log('16. Обновляем интерфейс...');
         setTimeout(() => {
             closeReceiptModal();
             loadPurchases();
             loadUserData();
-
+            
             // Очищаем данные
             currentPaymentData = null;
             currentPurchaseId = null;
             receiptFile = null;
             removeFile();
+            
+            console.log('17. Операция завершена');
         }, 1500);
 
     } catch (error) {
-        console.error('Error submitting receipt:', error);
+        console.error('=== КРИТИЧЕСКАЯ ОШИБКА ===');
+        console.error('Error in submitReceipt:', error);
+        console.error('Stack:', error.stack);
         showNotification('❌ Ошибка сохранения данных. Проверьте подключение.');
+    }
+    
+    console.log('=== КОНЕЦ submitReceipt ===');
+}
+
+// Добавьте эту функцию в script.js
+async function checkFirebaseStatus() {
+    console.log('=== ПРОВЕРКА FIREBASE ===');
+    
+    try {
+        // Проверяем загружена ли библиотека
+        console.log('1. Firebase загружен?', typeof firebase !== 'undefined');
+        if (typeof firebase === 'undefined') {
+            throw new Error('Firebase библиотека не загружена');
+        }
+        
+        // Проверяем инициализацию
+        console.log('2. Firebase инициализирован?', firebase.apps.length > 0);
+        console.log('3. Имя приложения:', firebase.apps[0]?.name);
+        
+        // Проверяем Firestore
+        console.log('4. Firestore доступен?', typeof firebase.firestore !== 'undefined');
+        
+        // Проверяем подключение
+        if (db) {
+            console.log('5. db существует');
+            
+            // Тест записи
+            console.log('6. Тест записи...');
+            const testDocRef = db.collection('test_connection').doc('test_' + Date.now());
+            await testDocRef.set({
+                test: true,
+                timestamp: new Date().toISOString(),
+                test_field: 'test_value'
+            });
+            console.log('7. Запись создана');
+            
+            // Чтение
+            console.log('8. Чтение записи...');
+            const testDoc = await testDocRef.get();
+            console.log('9. Документ существует?', testDoc.exists);
+            
+            // Удаление
+            console.log('10. Удаление тестовой записи...');
+            await testDocRef.delete();
+            console.log('11. Запись удалена');
+            
+            // Проверяем коллекцию purchases
+            console.log('12. Проверяем коллекцию purchases...');
+            try {
+                const purchasesSnapshot = await db.collection('purchases').limit(1).get();
+                console.log('13. Коллекция purchases доступна, записей:', purchasesSnapshot.size);
+            } catch (purchasesError) {
+                console.error('13. Ошибка доступа к purchases:', purchasesError);
+            }
+            
+            return {
+                success: true,
+                message: '✅ Firebase работает корректно',
+                details: {
+                    libraryLoaded: true,
+                    appInitialized: true,
+                    firestoreAvailable: true,
+                    writeTest: true,
+                    readTest: true,
+                    deleteTest: true
+                }
+            };
+        } else {
+            return {
+                success: false,
+                message: '❌ db не инициализирован',
+                details: {
+                    libraryLoaded: typeof firebase !== 'undefined',
+                    appInitialized: firebase.apps.length > 0,
+                    firestoreAvailable: typeof firebase.firestore !== 'undefined',
+                    dbInstance: !!db
+                }
+            };
+        }
+        
+    } catch (error) {
+        console.error('❌ Ошибка проверки Firebase:', error);
+        console.error('Код ошибки:', error.code);
+        console.error('Сообщение:', error.message);
+        
+        return {
+            success: false,
+            message: '❌ Firebase ошибка: ' + error.message,
+            error: error
+        };
     }
 }
 
