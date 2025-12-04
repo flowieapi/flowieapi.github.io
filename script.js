@@ -101,105 +101,95 @@ function scrollToElement(selector) {
     }
 }
 
-
-// ============ УПРОЩЕННАЯ ИНИЦИАЛИЗАЦИЯ FIREBASE ============
-
-async function initFirebase() {
-    console.log('Попытка инициализации Firebase...');
-    
-    // Проверяем если Firebase уже инициализирован
-    if (typeof firebase !== 'undefined' && firebase.apps && firebase.apps.length > 0) {
-        console.log('Firebase уже инициализирован');
-        try {
-            db = firebase.firestore();
-            isFirebaseAvailable = true;
-            console.log('✅ Firebase Firestore доступен');
-            return true;
-        } catch (error) {
-            console.error('Ошибка получения Firestore:', error);
+async function loadFirebase() {
+    try {
+        // Загружаем Firebase только если еще не загружен
+        if (typeof firebase === 'undefined') {
+            await loadScript('https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js');
+            await loadScript('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js');
+            await loadScript('https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js');
+            console.log('✅ Firebase SDK загружен динамически');
         }
-    }
-    
-    // Пробуем разные способы инициализации
-    const firebaseScripts = [
-        'https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js',
-        'https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js',
-        'https://cdn.jsdelivr.net/npm/firebase@9.22.0/firebase-app-compat.min.js',
-        'https://cdn.jsdelivr.net/npm/firebase@9.22.0/firebase-firestore-compat.min.js'
-    ];
-    
-    for (const script of firebaseScripts) {
-        try {
-            console.log(`Пробуем загрузить: ${script}`);
-            await loadScript(script);
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            
-            if (typeof firebase !== 'undefined') {
-                console.log('Firebase SDK загружен');
-                break;
-            }
-        } catch (error) {
-            console.log(`Не удалось загрузить ${script}:`, error.message);
-        }
-    }
-    
-    if (typeof firebase === 'undefined') {
-        console.error('Firebase SDK не удалось загрузить');
-        showNotification('⚠️ База данных недоступна. Работаем в оффлайн режиме.');
-        isFirebaseAvailable = false;
+        return true;
+    } catch (error) {
+        console.error('❌ Ошибка загрузки Firebase:', error);
         return false;
     }
-    
+}
+
+
+async function initFirebase() {
     try {
-        // Инициализируем Firebase
-        if (!firebase.apps || firebase.apps.length === 0) {
-            console.log('Инициализируем Firebase приложение...');
-            firebase.initializeApp(firebaseConfig);
-        }
-        
-        // Получаем Firestore
-        if (typeof firebase.firestore === 'function') {
-            db = firebase.firestore();
-            isFirebaseAvailable = true;
-            console.log('✅ Firebase успешно инициализирован');
-            
-            // Тестовый запрос
-            try {
-                const testRef = db.collection('test_connection').doc('test');
-                await testRef.set({ test: true, timestamp: new Date().toISOString() });
-                await testRef.delete();
-                console.log('✅ Тест соединения пройден');
-            } catch (testError) {
-                console.log('⚠️ Тест соединения не пройден, но Firestore доступен:', testError.message);
-            }
-            
-            return true;
-        } else {
-            console.error('Firestore не доступен в Firebase SDK');
-            isFirebaseAvailable = false;
+        console.log('Попытка инициализации Firebase...');
+
+        // Проверяем, что Firebase загружен через CDN
+        if (typeof firebase === 'undefined') {
+            console.error('Firebase не загружен через CDN');
             return false;
         }
-        
+
+        console.log('Firebase загружен через CDN, версия:', firebase.SDK_VERSION);
+
+        // Конфигурация Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyB03T53pNwMOrQUtRR1gn5XOWP1V6Qg6do",
+            authDomain: "vpndatabase-7b0ab.firebaseapp.com",
+            projectId: "vpndatabase-7b0ab",
+            storageBucket: "vpndatabase-7b0ab.appspot.com",
+            messagingSenderId: "577858295889",
+            appId: "1:577858295889:web:5b2e2b0884984d17c7a6d0"
+        };
+
+        // Инициализируем только если еще не инициализировано
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+            console.log('Firebase приложение инициализировано');
+        } else {
+            console.log('Firebase уже инициализирован');
+        }
+
+        // Инициализируем Firestore
+        if (typeof firebase.firestore !== 'undefined') {
+            window.db = firebase.firestore();
+            console.log('Firestore инициализирован');
+
+            // Проверяем подключение
+            db.collection('test').doc('test').get()
+                .then(() => console.log('✅ Подключение к Firestore успешно'))
+                .catch(error => console.error('❌ Ошибка Firestore:', error));
+
+            return true;
+        } else {
+            console.error('Firestore не доступен');
+            return false;
+        }
     } catch (error) {
         console.error('Ошибка инициализации Firebase:', error);
-        isFirebaseAvailable = false;
-        showNotification('⚠️ База данных недоступна. Работаем в оффлайн режиме.');
         return false;
     }
 }
 
 // Функция динамической загрузки скрипта
+// Эта функция должна быть ТОЛЬКО для не-Firebase скриптов
 function loadScript(src) {
     return new Promise((resolve, reject) => {
-        if (document.querySelector(`script[src="${src}"]`)) {
+        // НЕ загружать Firebase скрипты через эту функцию
+        if (src.includes('firebase')) {
+            console.log('Firebase уже загружен через CDN');
             resolve();
             return;
         }
-        
+
         const script = document.createElement('script');
         script.src = src;
-        script.onload = () => resolve();
-        script.onerror = () => reject(new Error(`Не удалось загрузить скрипт: ${src}`));
+        script.onload = () => {
+            console.log('✅ Скрипт загружен:', src);
+            resolve();
+        };
+        script.onerror = () => {
+            console.error('❌ Ошибка загрузки скрипта:', src);
+            reject(new Error(`Failed to load script: ${src}`));
+        };
         document.head.appendChild(script);
     });
 }
@@ -295,9 +285,9 @@ ${purchaseData.has_receipt ? '📎 Чек приложен' : '⚠️ Чек н�
 
 function savePurchaseOnce(purchase) {
     let purchases = JSON.parse(localStorage.getItem('flowie_purchases') || '[]');
-    
+
     const exists = purchases.some(p => p.order_id === purchase.order_id);
-    
+
     if (!exists) {
         purchases.push(purchase);
         localStorage.setItem('flowie_purchases', JSON.stringify(purchases));
@@ -310,13 +300,13 @@ function savePurchaseOnce(purchase) {
 function updatePurchaseInStorage(updatedPurchase) {
     let purchases = JSON.parse(localStorage.getItem('flowie_purchases') || '[]');
     const index = purchases.findIndex(p => p.order_id === updatedPurchase.order_id);
-    
+
     if (index !== -1) {
         purchases[index] = { ...purchases[index], ...updatedPurchase };
     } else {
         purchases.push(updatedPurchase);
     }
-    
+
     localStorage.setItem('flowie_purchases', JSON.stringify(purchases));
 }
 
@@ -329,7 +319,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     if (window.Telegram && window.Telegram.WebApp) {
         tg = window.Telegram.WebApp;
         console.log('Telegram WebApp обнаружен');
-        
+
         // Упрощенные настройки Telegram
         try {
             if (tg.expand) tg.expand();
@@ -356,6 +346,12 @@ document.addEventListener('DOMContentLoaded', async function () {
     loadUserData();
     setupEvents();
 
+    await loadFirebase();
+
+    // Инициализируем
+    const firebaseReady = await initFirebase();
+
+
     // Инициализируем Firebase в фоне (не блокируем интерфейс)
     setTimeout(async () => {
         await initFirebase();
@@ -375,7 +371,7 @@ function testFirebase() {
     console.log('Firestore доступен?', typeof firebase?.firestore !== 'undefined');
     console.log('db доступен?', !!db);
     console.log('isFirebaseAvailable:', isFirebaseAvailable);
-    
+
     if (db) {
         console.log('Пробуем создать тестовый документ...');
         try {
@@ -393,7 +389,7 @@ function testFirebase() {
             console.error('❌ Ошибка:', error);
         }
     }
-    
+
     showNotification('Тест Firebase завершен');
 }
 
@@ -682,7 +678,7 @@ function removeFile() {
     if (uploadArea) uploadArea.style.display = 'block';
     if (selectedFile) selectedFile.style.display = 'none';
     if (fileInput) fileInput.value = '';
-    
+
     receiptFile = null;
 }
 
@@ -741,7 +737,7 @@ async function submitReceipt() {
         if (isFirebaseAvailable && db) {
             try {
                 console.log('Пробуем сохранить в Firebase...');
-                
+
                 // Создаем упрощенный объект для Firebase
                 const firebaseData = {
                     name: purchaseData.name,
@@ -756,20 +752,20 @@ async function submitReceipt() {
                     vpn_tariff: purchaseData.vpn_tariff,
                     order_amount: purchaseData.order_amount,
                     has_receipt: purchaseData.has_receipt,
-                    created_at: firebase.firestore.FieldValue ? 
-                        firebase.firestore.FieldValue.serverTimestamp() : 
+                    created_at: firebase.firestore.FieldValue ?
+                        firebase.firestore.FieldValue.serverTimestamp() :
                         new Date().toISOString()
                 };
 
                 // Добавляем в Firestore
                 const docRef = await db.collection('purchases').add(firebaseData);
                 purchaseData.firebase_id = docRef.id;
-                
+
                 console.log('✅ Сохранено в Firebase, ID:', docRef.id);
 
                 // Отправляем уведомление в Telegram
                 await sendReceiptToTelegramSimple(purchaseData, docRef.id);
-                
+
                 showNotification('✅ Данные отправлены! Админ проверит в течение 15 минут');
 
             } catch (firebaseError) {
@@ -787,7 +783,7 @@ async function submitReceipt() {
             closeReceiptModal();
             loadPurchases();
             loadUserData();
-            
+
             // Очищаем
             currentPaymentData = null;
             currentPurchaseId = null;
@@ -1088,7 +1084,7 @@ function showProfileModal() {
             `<div style="width: 100%; height: 100%; background: rgba(255, 255, 255, 0.1); display: flex; align-items: center; justify-content: center; font-size: 36px; color: white; font-weight: bold;">${(user?.first_name?.[0] || 'U').toUpperCase()}</div>`
         }
                 </div>
-                <h3 style="font-size: 24px; font-weight: 700; margin-bottom: 8px;">${user?.first_name || 'Тест'}</h3>
+                <h3 style="font-size: 24px; font-weight: 700; margin-bottom: 8px;">${user?.first_name || 'Писько'}</h3>
                 <p style="color: #30D158; font-size: 16px; margin-bottom: 4px;">@${user?.username || 'username'}</p>
                 <div style="display: inline-block; background: rgba(48, 209, 88, 0.2); color: #30D158; padding: 4px 12px; border-radius: 20px; font-size: 14px; font-weight: 600;">Уровень ${getPlayerLevel()}</div>
             </div>
@@ -1146,7 +1142,7 @@ function updatePing() {
     const pingValue = document.getElementById('ping-value');
     const currentPing = document.getElementById('current-ping');
     const newPing = getRandomInt(12, 35);
-    
+
     if (pingValue) pingValue.textContent = newPing + 'ms';
     if (currentPing) {
         currentPing.textContent = newPing + 'ms';
@@ -1159,18 +1155,18 @@ function checkPing() {
     const currentPing = document.getElementById('current-ping');
     const connectBtn = document.getElementById('connect-btn');
     const vpnStatus = document.getElementById('vpn-status');
-    
+
     connectBtn.disabled = true;
     vpnStatus.textContent = 'Проверяем...';
     pingValue.textContent = '...';
-    
+
     setTimeout(() => {
         const newPing = Math.floor(Math.random() * 30) + 10;
         pingValue.textContent = newPing + 'ms';
         currentPing.textContent = newPing + 'ms';
         vpnStatus.textContent = 'Готов';
         showNotification('Пинг проверен: ' + newPing + 'ms');
-        
+
         setTimeout(() => {
             connectBtn.disabled = false;
         }, 2000);
@@ -1273,7 +1269,7 @@ const requiredFunctions = [
     'getVpnTariff', 'getStatusText', 'getStatusColor', 'getVPNTypeByName',
     'getVPNFeatures', 'getRandomInt', 'fileToBase64', 'showNotification',
     'scrollToElement', 'savePurchaseOnce', 'updatePurchaseInStorage',
-    'setupUserProfile', 'getPlayerLevel', 'loadVPNCategories', 
+    'setupUserProfile', 'getPlayerLevel', 'loadVPNCategories',
     'displayVPNCategories', 'buyVPN', 'generateOrderId', 'showPayment',
     'handleReceiptUpload', 'removeFile', 'submitReceipt', 'loadUserData',
     'loadPurchases', 'showBase64Image', 'closeModal', 'openPaymentModal',
