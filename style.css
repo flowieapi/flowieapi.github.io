@@ -384,47 +384,135 @@ body {
     z-index: 1;
 }
 
-/* Обновленные стили для статистики с горизонтальной прокруткой */
 .stats-grid-container {
     overflow-x: auto;
     margin: 0 -16px;
-    padding: 0 16px 20px 16px;
+    padding: 0 16px 40px 16px;
+    /* Увеличиваем паддинг снизу */
     scrollbar-width: none;
-    /* Firefox */
     -ms-overflow-style: none;
-    /* IE and Edge */
+    position: relative;
+    min-height: 200px;
 }
 
 .stats-grid-container::-webkit-scrollbar {
     display: none;
-    /* Chrome, Safari, Opera */
 }
 
 .stats-grid-scroll {
     display: flex;
-    gap: 12px;
-    padding-bottom: 10px;
+    gap: 15px;
+    padding-bottom: 40px;
+    /* Отступ для индикатора */
     width: max-content;
     min-width: 100%;
+    padding: 15px 5px 40px 5px;
+}
+
+.stats-grid-container {
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Добавляем индикатор при скролле */
+.stats-grid-container.scrolling::after {
+    content: '';
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 4px;
+    background: rgba(34, 197, 94, 0.3);
+    border-radius: 2px;
+    animation: scrollIndicator 2s ease-in-out infinite;
+}
+
+@keyframes scrollIndicator {
+    0%, 100% {
+        width: 40px;
+        opacity: 0.5;
+    }
+    50% {
+        width: 60px;
+        opacity: 1;
+    }
+}
+
+/* Скрываем индикатор при достижении конца */
+.stats-grid-container.scrolled-to-end::after {
+    opacity: 0;
+    animation: none;
+}
+
+.smooth-scroll {
+    scroll-behavior: smooth;
+}
+
+/* Анимация при появлении индикатора */
+@keyframes indicatorFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.scroll-indicator {
+    animation: indicatorFadeIn 0.5s ease-out;
+}
+
+
+/* Интерактивные эффекты для карточек при скролле */
+.stats-grid-container.scrolling .stat-card {
+    transition: transform 0.1s ease-out;
+}
+
+/* Подсветка активной точки */
+.scroll-dot.active::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(34, 197, 94, 0.4) 0%, transparent 70%);
+    animation: activeGlow 2s ease-in-out infinite;
+}
+
+@keyframes activeGlow {
+    0%, 100% {
+        opacity: 0.5;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    50% {
+        opacity: 0.8;
+        transform: translate(-50%, -50%) scale(1.2);
+    }
 }
 
 .stats-grid-scroll .stat-card {
     flex: 0 0 auto;
-    width: 160px;
-    min-width: 160px;
-    padding: 20px 16px;
-    background: rgba(34, 197, 94, 0.08);
-    border: 1px solid rgba(34, 197, 94, 0.15);
-    backdrop-filter: blur(10px);
-    border-radius: 16px;
+    width: 170px;
+    min-width: 170px;
+    padding: 25px 20px;
+    background: rgba(34, 197, 94, 0.07);
+    border: 1.5px solid rgba(34, 197, 94, 0.15);
+    backdrop-filter: blur(15px);
+    border-radius: 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
-    animation: slideIn 0.3s ease-out;
-    transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: cardFloatIn 0.6s ease-out backwards;
 }
 
 .stats-grid-scroll .stat-card::before {
@@ -433,143 +521,462 @@ body {
     top: 0;
     left: 0;
     right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, var(--pubg-accent), var(--pubg-accent-light));
-    border-radius: 16px 16px 0 0;
+    height: 5px;
+    background: linear-gradient(90deg, transparent, var(--card-color, var(--pubg-accent)), transparent);
+    border-radius: 20px 20px 0 0;
+    opacity: 0.7;
 }
 
 .stats-grid-scroll .stat-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(34, 197, 94, 0.15);
-    border-color: rgba(34, 197, 94, 0.3);
+    transform: translateY(-10px) scale(1.03);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3),
+        0 0 0 1px rgba(34, 197, 94, 0.3),
+        0 0 30px rgba(34, 197, 94, 0.2);
+    border-color: rgba(34, 197, 94, 0.4);
+    background: rgba(34, 197, 94, 0.12);
 }
 
+.stat-glow {
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, var(--glow-color, rgba(34, 197, 94, 0.1)) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.stats-grid-scroll .stat-card:hover .stat-glow {
+    opacity: 1;
+}
+
+/* Пульсирующая анимация */
+.pulse-animation {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 20px;
+    border: 2px solid transparent;
+    animation: pulseBorder 3s ease-in-out infinite;
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+@keyframes pulseBorder {
+
+    0%,
+    100% {
+        border-color: rgba(34, 197, 94, 0.1);
+        transform: scale(1);
+    }
+
+    50% {
+        border-color: rgba(34, 197, 94, 0.4);
+        transform: scale(1.02);
+    }
+}
+
+/* Обновленные иконки */
 .stats-grid-scroll .stat-card i {
-    font-size: 32px;
-    color: var(--pubg-accent);
-    margin-bottom: 12px;
-    background: rgba(34, 197, 94, 0.1);
-    width: 60px;
-    height: 60px;
+    font-size: 42px;
+    margin-bottom: 20px;
+    background: linear-gradient(135deg, var(--icon-gradient-start, rgba(34, 197, 94, 0.1)), var(--icon-gradient-end, rgba(34, 197, 94, 0.3)));
+    width: 80px;
+    height: 80px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    transition: all 0.3s ease;
+    position: relative;
+    z-index: 2;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .stats-grid-scroll .stat-card:hover i {
-    transform: scale(1.1);
-    background: rgba(34, 197, 94, 0.2);
+    transform: rotate(5deg) scale(1.15);
+    background: linear-gradient(135deg, var(--icon-gradient-hover-start, rgba(34, 197, 94, 0.2)), var(--icon-gradient-hover-end, rgba(34, 197, 94, 0.4)));
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3),
+        inset 0 2px 10px rgba(255, 255, 255, 0.1);
+}
+
+.stats-grid-scroll .stat-card i::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.stats-grid-scroll .stat-card:hover i::after {
+    opacity: 1;
 }
 
 .stat-info {
     display: flex;
     flex-direction: column;
     width: 100%;
+    position: relative;
+    z-index: 2;
 }
 
 .stat-value {
-    font-size: 28px;
-    font-weight: 800;
+    font-size: 36px;
+    font-weight: 900;
     color: var(--text-primary);
     line-height: 1;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
     font-family: 'Rajdhani', sans-serif;
-    letter-spacing: -0.5px;
+    letter-spacing: -1px;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    background: linear-gradient(45deg, var(--card-color, var(--pubg-accent)), var(--text-primary));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.stats-grid-scroll .stat-card:hover .stat-value {
+    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    transform: scale(1.05);
 }
 
 .stat-name {
-    font-size: 11px;
+    font-size: 12px;
     color: var(--text-secondary);
     text-transform: uppercase;
-    letter-spacing: 1px;
-    font-weight: 600;
+    letter-spacing: 1.5px;
+    font-weight: 700;
     opacity: 0.9;
+    transition: all 0.3s ease;
+}
+
+.stats-grid-scroll .stat-card:hover .stat-name {
+    color: var(--card-color, var(--pubg-accent));
+    opacity: 1;
+    letter-spacing: 2px;
 }
 
 /* Специфичные стили для разных типов статистики */
+.stats-grid-scroll .stat-card:nth-child(1) {
+    --card-color: #3b82f6;
+}
+
+.stats-grid-scroll .stat-card:nth-child(2) {
+    --card-color: #22c55e;
+}
+
+.stats-grid-scroll .stat-card:nth-child(3) {
+    --card-color: #8b5cf6;
+}
+
+.stats-grid-scroll .stat-card:nth-child(4) {
+    --card-color: #f59e0b;
+}
+
+.stats-grid-scroll .stat-card:nth-child(5) {
+    --card-color: #ef4444;
+}
+
 .stats-grid-scroll .stat-card:nth-child(1) i {
     color: #3b82f6;
-    /* Синий для снижения пинга */
+    --icon-gradient-start: rgba(59, 130, 246, 0.1);
+    --icon-gradient-end: rgba(59, 130, 246, 0.3);
+    --icon-gradient-hover-start: rgba(59, 130, 246, 0.2);
+    --icon-gradient-hover-end: rgba(59, 130, 246, 0.4);
+    --glow-color: rgba(59, 130, 246, 0.1);
 }
 
 .stats-grid-scroll .stat-card:nth-child(2) i {
-    color: var(--pubg-accent);
-    /* Зеленый для стабильности */
+    color: #22c55e;
+    --icon-gradient-start: rgba(34, 197, 94, 0.1);
+    --icon-gradient-end: rgba(34, 197, 94, 0.3);
+    --icon-gradient-hover-start: rgba(34, 197, 94, 0.2);
+    --icon-gradient-hover-end: rgba(34, 197, 94, 0.4);
+    --glow-color: rgba(34, 197, 94, 0.1);
 }
 
 .stats-grid-scroll .stat-card:nth-child(3) i {
     color: #8b5cf6;
-    /* Фиолетовый для поддержки */
+    --icon-gradient-start: rgba(139, 92, 246, 0.1);
+    --icon-gradient-end: rgba(139, 92, 246, 0.3);
+    --icon-gradient-hover-start: rgba(139, 92, 246, 0.2);
+    --icon-gradient-hover-end: rgba(139, 92, 246, 0.4);
+    --glow-color: rgba(139, 92, 246, 0.1);
 }
 
-.stats-grid-scroll .stat-card:nth-child(1)::before {
-    background: linear-gradient(90deg, #3b82f6, #60a5fa);
+.stats-grid-scroll .stat-card:nth-child(4) i {
+    color: #f59e0b;
+    --icon-gradient-start: rgba(245, 158, 11, 0.1);
+    --icon-gradient-end: rgba(245, 158, 11, 0.3);
+    --icon-gradient-hover-start: rgba(245, 158, 11, 0.2);
+    --icon-gradient-hover-end: rgba(245, 158, 11, 0.4);
+    --glow-color: rgba(245, 158, 11, 0.1);
 }
 
-.stats-grid-scroll .stat-card:nth-child(2)::before {
-    background: linear-gradient(90deg, var(--pubg-accent), var(--pubg-accent-light));
-}
-
-.stats-grid-scroll .stat-card:nth-child(3)::before {
-    background: linear-gradient(90deg, #8b5cf6, #a78bfa);
+.stats-grid-scroll .stat-card:nth-child(5) i {
+    color: #ef4444;
+    --icon-gradient-start: rgba(239, 68, 68, 0.1);
+    --icon-gradient-end: rgba(239, 68, 68, 0.3);
+    --icon-gradient-hover-start: rgba(239, 68, 68, 0.2);
+    --icon-gradient-hover-end: rgba(239, 68, 68, 0.4);
+    --glow-color: rgba(239, 68, 68, 0.1);
 }
 
 .scroll-indicator {
-    display: none;
+    position: absolute;
+    bottom: 15px;
+    left: 0;
+    right: 0;
+    display: flex;
     justify-content: center;
-    gap: 4px;
-    margin-top: 12px;
+    gap: 8px;
+    z-index: 10;
+    pointer-events: none;
+    /* Чтобы не мешал скроллу */
 }
 
+
+/* Делаем точки интерактивными */
 .scroll-dot {
-    width: 6px;
-    height: 6px;
-    background: rgba(34, 197, 94, 0.3);
+    width: 10px;
+    height: 10px;
+    background: rgba(34, 197, 94, 0.2);
     border-radius: 50%;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    position: relative;
+    pointer-events: auto;
+    /* Включаем события для точек */
+}
+
+.scroll-indicator::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: rgba(34, 197, 94, 0.1);
+    transform: translateY(-50%);
+    z-index: -1;
+    border-radius: 1px;
+}
+
+
+.scroll-dot::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(34, 197, 94, 0.1);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.scroll-dot:hover::after {
+    opacity: 1;
 }
 
 .scroll-dot.active {
     background: var(--pubg-accent);
+    transform: scale(1.4);
+    box-shadow:
+        0 0 0 2px rgba(34, 197, 94, 0.3),
+        0 0 15px rgba(34, 197, 94, 0.5);
+}
+
+.scroll-dot:hover:not(.active) {
+    background: rgba(34, 197, 94, 0.4);
     transform: scale(1.2);
+}
+
+@keyframes cardFloatIn {
+    0% {
+        opacity: 0;
+        transform: translateY(30px) scale(0.9);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes iconFloat {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
 }
 
 @media (max-width: 768px) {
     .scroll-indicator {
         display: flex;
     }
+
+    .stats-grid-container {
+        padding-bottom: 50px;
+        /* Больше места для индикатора и подсказки */
+    }
 }
 
-.scroll-hint {
+/* Адаптация для очень маленьких экранов */
+@media (max-width: 350px) {
+    .scroll-hint {
+        font-size: 11px;
+        padding: 6px 12px;
+    }
+
+    .stats-grid-container {
+        padding-bottom: 45px;
+    }
+}
+
+.scroll-hint-wrapper {
+    position: absolute;
+    bottom: 15px;
+    left: 0;
+    right: 0;
     text-align: center;
-    color: var(--text-secondary);
-    font-size: 11px;
-    margin-top: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    opacity: 0.7;
-    animation: fadeInOut 3s ease-in-out infinite;
+    pointer-events: none;
+    /* Чтобы не мешала скроллу */
+    z-index: 10;
 }
 
-@keyframes fadeInOut {
+.scroll-hint:hover {
+    background: rgba(15, 20, 25, 0.95);
+    border-color: rgba(34, 197, 94, 0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+}
+
+/* Анимация точек при скролле */
+@keyframes dotPulse {
 
     0%,
     100% {
-        opacity: 0.5;
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
     }
 
     50% {
-        opacity: 1;
+        transform: scale(1.1);
+        box-shadow: 0 0 0 4px rgba(34, 197, 94, 0);
+    }
+}
+
+.scroll-dot.active {
+    animation: dotPulse 2s ease-in-out infinite;
+}
+
+@media (max-width: 768px) {
+    .scroll-indicator {
+        display: flex;
+    }
+
+    .stats-grid-container {
+        padding-bottom: 50px;
+        /* Больше места для индикатора */
     }
 }
 
 .scroll-hint i {
     color: var(--pubg-accent);
+    font-size: 10px;
+    transition: transform 0.3s ease;
+}
+
+.scroll-hint:hover i:first-child {
+    transform: translateX(-2px);
+}
+
+.scroll-hint:hover i:last-child {
+    transform: translateX(2px);
+}
+
+.scroll-hint {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: rgba(15, 20, 25, 0.85);
+    backdrop-filter: blur(10px);
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    color: var(--text-secondary);
     font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    pointer-events: auto;
+    /* Включаем события для hover */
+    transition: all 0.3s ease;
+    animation: bounceIn 0.6s ease-out, fadeInOut 3s ease-in-out infinite 0.6s;
+}
+
+/* Анимации */
+@keyframes fadeInOut {
+
+    0%,
+    100% {
+        opacity: 0.7;
+        transform: scale(0.98);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes bounceIn {
+    0% {
+        opacity: 0;
+        transform: translateY(20px) scale(0.8);
+    }
+
+    50% {
+        transform: translateY(-5px) scale(1.05);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Эффект исчезновения при скролле до конца */
+.scroll-hint.fade-out {
+    opacity: 0;
+    transform: scale(0.9);
+    pointer-events: none;
+}
+
+.scroll-hint i {
+    color: var(--pubg-accent);
+    font-size: 10px;
 }
 
 /* Улучшаем отображение на мобильных */
@@ -604,10 +1011,10 @@ body {
     }
 }
 
-
 .stats-grid-scroll .stat-card {
-    animation: slideIn 0.4s ease-out backwards;
+    animation: cardFloatIn 0.6s ease-out backwards;
 }
+
 
 .stats-grid-scroll .stat-card:nth-child(1) {
     animation-delay: 0.1s;
@@ -620,6 +1027,81 @@ body {
 .stats-grid-scroll .stat-card:nth-child(3) {
     animation-delay: 0.3s;
 }
+
+.stats-grid-scroll .stat-card:nth-child(4) {
+    animation-delay: 0.4s;
+}
+
+.stats-grid-scroll .stat-card:nth-child(5) {
+    animation-delay: 0.5s;
+}
+
+.stats-grid-scroll .stat-card i {
+    animation: iconFloat 4s ease-in-out infinite;
+}
+
+.stats-grid-scroll .stat-card:nth-child(1) i {
+    animation-delay: 0s;
+}
+
+.stats-grid-scroll .stat-card:nth-child(2) i {
+    animation-delay: 0.8s;
+}
+
+.stats-grid-scroll .stat-card:nth-child(3) i {
+    animation-delay: 1.6s;
+}
+
+.stats-grid-scroll .stat-card:nth-child(4) i {
+    animation-delay: 2.4s;
+}
+
+.stats-grid-scroll .stat-card:nth-child(5) i {
+    animation-delay: 3.2s;
+}
+
+/* Адаптивность */
+@media (max-width: 380px) {
+    .stats-grid-scroll .stat-card {
+        width: 155px;
+        min-width: 155px;
+        padding: 20px 15px;
+    }
+
+    .stats-grid-scroll .stat-card i {
+        font-size: 36px;
+        width: 70px;
+        height: 70px;
+    }
+
+    .stat-value {
+        font-size: 32px;
+    }
+
+    .scroll-dot {
+        width: 8px;
+        height: 8px;
+    }
+}
+
+@media (max-width: 350px) {
+    .stats-grid-scroll .stat-card {
+        width: 145px;
+        min-width: 145px;
+        padding: 18px 12px;
+    }
+
+    .stats-grid-scroll .stat-card i {
+        font-size: 32px;
+        width: 65px;
+        height: 65px;
+    }
+
+    .stat-value {
+        font-size: 28px;
+    }
+}
+
 
 /* Эффект блеска на карточках */
 .stats-grid-scroll .stat-card::after {

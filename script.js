@@ -42,30 +42,212 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 // Обновляем индикатор прокрутки статистики
-function updateStatsScrollIndicator() {
+function setupFixedScrollIndicator() {
     const container = document.querySelector('.stats-grid-container');
     const dots = document.querySelectorAll('.scroll-dot');
-    const cards = document.querySelectorAll('.stats-grid-scroll .stat-card');
 
-    if (!container || !dots.length || !cards.length) return;
+    if (!container || !dots.length) return;
 
-    container.addEventListener('scroll', () => {
+    // Проверяем, нужен ли индикатор
+    function checkIfScrollNeeded() {
+        const hasScroll = container.scrollWidth > container.clientWidth;
+
+        // Показываем/скрываем индикатор в зависимости от устройства
+        if (window.innerWidth <= 768 && hasScroll) {
+            container.style.paddingBottom = '50px';
+        } else {
+            container.style.paddingBottom = '25px';
+        }
+
+        return hasScroll;
+    }
+
+    // Обновление точек индикатора
+    function updateScrollDots() {
+        if (container.scrollWidth <= container.clientWidth) return;
+
         const scrollPercentage = container.scrollLeft / (container.scrollWidth - container.clientWidth);
-        const activeIndex = Math.floor(scrollPercentage * (dots.length - 1));
+        const activeIndex = Math.min(
+            Math.floor(scrollPercentage * (dots.length - 1)),
+            dots.length - 1
+        );
 
-        dots.forEach((dot, index) => {
-            dot.classList.toggle('active', index === activeIndex);
+        // Снимаем класс active со всех точек
+        dots.forEach(dot => {
+            dot.classList.remove('active');
+        });
+
+        // Добавляем класс active к активной точке
+        if (dots[activeIndex]) {
+            dots[activeIndex].classList.add('active');
+        }
+
+        // Проверяем, достигнут ли конец
+        const isAtEnd = container.scrollLeft + container.clientWidth >= container.scrollWidth - 10;
+        const isAtStart = container.scrollLeft <= 10;
+
+        // Добавляем/убираем классы для стилей
+        if (isAtEnd) {
+            container.classList.add('scrolled-to-end');
+            container.classList.remove('scrolling');
+        } else if (isAtStart) {
+            container.classList.remove('scrolling', 'scrolled-to-end');
+        } else {
+            container.classList.add('scrolling');
+            container.classList.remove('scrolled-to-end');
+        }
+    }
+
+    // Клик по точкам для навигации
+    dots.forEach((dot, index) => {
+        dot.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const cardWidth = document.querySelector('.stat-card')?.offsetWidth || 170;
+            const gap = 15;
+            const scrollPosition = index * (cardWidth + gap);
+
+            container.scrollTo({
+                left: scrollPosition,
+                behavior: 'smooth'
+            });
         });
     });
 
-    // Инициализируем первую точку как активную
-    dots[0].classList.add('active');
+    // Инициализация
+    checkIfScrollNeeded();
+    updateScrollDots();
+
+    // Обработчики событий
+    container.addEventListener('scroll', updateScrollDots);
+    window.addEventListener('resize', () => {
+        checkIfScrollNeeded();
+        updateScrollDots();
+    });
+
+    // Автоматическое обновление при изменении размера окна
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+            checkIfScrollNeeded();
+            updateScrollDots();
+        }, 150);
+    });
+
+    // Добавляем класс для плавного скролла
+    container.classList.add('smooth-scroll');
 }
 
-// Добавляем вызов в DOMContentLoaded
+// Функция для улучшенного управления индикатором с тач-событиями
+function setupTouchScrollIndicator() {
+    const container = document.querySelector('.stats-grid-container');
+    const dots = document.querySelectorAll('.scroll-dot');
+
+    if (!container || !dots.length) return;
+
+    let isScrolling = false;
+    let scrollTimeout;
+
+    container.addEventListener('touchstart', () => {
+        container.classList.add('scrolling');
+    });
+
+    container.addEventListener('touchmove', () => {
+        if (!isScrolling) {
+            isScrolling = true;
+            container.classList.add('scrolling');
+        }
+
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(() => {
+            isScrolling = false;
+            container.classList.remove('scrolling');
+        }, 100);
+    });
+
+    container.addEventListener('touchend', () => {
+        setTimeout(() => {
+            isScrolling = false;
+            container.classList.remove('scrolling');
+        }, 150);
+    });
+
+    // Для мыши тоже
+    container.addEventListener('mousedown', () => {
+        container.classList.add('scrolling');
+    });
+
+    container.addEventListener('mousemove', (e) => {
+        if (e.buttons === 1) { // Левая кнопка мыши нажата
+            if (!isScrolling) {
+                isScrolling = true;
+                container.classList.add('scrolling');
+            }
+
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                isScrolling = false;
+                container.classList.remove('scrolling');
+            }, 100);
+        }
+    });
+
+    container.addEventListener('mouseup', () => {
+        setTimeout(() => {
+            isScrolling = false;
+            container.classList.remove('scrolling');
+        }, 150);
+    });
+
+    container.addEventListener('mouseleave', () => {
+        isScrolling = false;
+        container.classList.remove('scrolling');
+    });
+}
+
+function setupScrollHint() {
+    const container = document.querySelector('.stats-grid-container');
+    const hint = document.querySelector('.scroll-hint');
+
+    if (!container || !hint) return;
+
+    container.addEventListener('scroll', () => {
+        const isAtEnd = container.scrollLeft + container.clientWidth >= container.scrollWidth - 50;
+        const isAtStart = container.scrollLeft <= 50;
+
+        // Показываем подсказку только если есть куда скроллить
+        if (isAtEnd || isAtStart) {
+            hint.style.opacity = '0.3';
+        } else {
+            hint.style.opacity = '0.8';
+        }
+    });
+
+    // Скроем подсказку через 10 секунд просмотра
+    setTimeout(() => {
+        hint.style.transition = 'opacity 1s ease';
+        hint.style.opacity = '0';
+
+        // Показать снова при скролле
+        container.addEventListener('scroll', () => {
+            hint.style.opacity = '0.8';
+
+            // Снова скрыть через 5 секунд бездействия
+            clearTimeout(hint.hideTimeout);
+            hint.hideTimeout = setTimeout(() => {
+                hint.style.opacity = '0';
+            }, 5000);
+        });
+    }, 10000);
+}
+
+// Обновляем DOMContentLoaded
 document.addEventListener('DOMContentLoaded', function () {
     // ... существующий код ...
-    updateStatsScrollIndicator();
+    setupFixedScrollIndicator();
+    setupTouchScrollIndicator();
 });
 
 // Настройка профиля игрока в хедере
