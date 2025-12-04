@@ -1,6 +1,7 @@
 // Конфигурация Telegram бота
-const BOT_TOKEN = '8164840278:AAFHOBOBc564w5VsVYbQEbdwB9srGbtZq_g'; // Получите у @BotFather
-const ADMIN_CHAT_ID = '7620973293'; // Получите у @userinfobot
+const BOT_TOKEN = '8164840278:AAFHOBOBc564w5VsVYbQEbdwB9srGbtZq_g';
+const ADMIN_CHAT_ID = '7620973293';
+const IMGBB_API_KEY = '6f7fdf63779e3281a8b03ea66b09cdc0';
 
 // Инициализация Telegram Web App
 let tg = window.Telegram.WebApp;
@@ -11,11 +12,17 @@ let selectedVPN = null;
 let currentPaymentData = null;
 let receiptFile = null;
 let currentPurchaseId = null;
+let db = null;
+
+// ============ ОСНОВНЫЕ ФУНКЦИИ ============
 
 // Инициализация приложения
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', async function () {
+    console.log('Документ загружен, инициализация...');
+    
     // Настройки для iOS стеклянного стиля
     if (tg && tg.expand) {
+        console.log('Telegram WebApp обнаружен');
         tg.expand();
         tg.enableClosingConfirmation();
         tg.setHeaderColor('#000000');
@@ -23,13 +30,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Получаем данные пользователя
         user = tg.initDataUnsafe?.user || tg.initDataUnsafe?.sender;
+        console.log('Пользователь Telegram:', user);
     } else {
-        console.log('Telegram WebApp not detected, running in browser mode');
+        console.log('Telegram WebApp не обнаружен, запуск в режиме браузера');
         // Тестовые данные для браузера
         user = {
             id: 123456789,
-            first_name: 'Пользователь',
-            username: 'test_player',
+            first_name: 'Тестовый Пользователь',
+            username: 'test_user',
             photo_url: ''
         };
     }
@@ -39,216 +47,147 @@ document.addEventListener('DOMContentLoaded', function () {
     updatePing();
     loadUserData();
     setupEvents();
-});
-
-// Обновляем индикатор прокрутки статистики
-function setupFixedScrollIndicator() {
-    const container = document.querySelector('.stats-grid-container');
-    const dots = document.querySelectorAll('.scroll-dot');
-
-    if (!container || !dots.length) return;
-
-    // Проверяем, нужен ли индикатор
-    function checkIfScrollNeeded() {
-        const hasScroll = container.scrollWidth > container.clientWidth;
-
-        // Показываем/скрываем индикатор в зависимости от устройства
-        if (window.innerWidth <= 768 && hasScroll) {
-            container.style.paddingBottom = '50px';
-        } else {
-            container.style.paddingBottom = '25px';
-        }
-
-        return hasScroll;
-    }
-
-    // Обновление точек индикатора
-    function updateScrollDots() {
-        if (container.scrollWidth <= container.clientWidth) return;
-
-        const scrollPercentage = container.scrollLeft / (container.scrollWidth - container.clientWidth);
-        const activeIndex = Math.min(
-            Math.floor(scrollPercentage * (dots.length - 1)),
-            dots.length - 1
-        );
-
-        // Снимаем класс active со всех точек
-        dots.forEach(dot => {
-            dot.classList.remove('active');
-        });
-
-        // Добавляем класс active к активной точке
-        if (dots[activeIndex]) {
-            dots[activeIndex].classList.add('active');
-        }
-
-        // Проверяем, достигнут ли конец
-        const isAtEnd = container.scrollLeft + container.clientWidth >= container.scrollWidth - 10;
-        const isAtStart = container.scrollLeft <= 10;
-
-        // Добавляем/убираем классы для стилей
-        if (isAtEnd) {
-            container.classList.add('scrolled-to-end');
-            container.classList.remove('scrolling');
-        } else if (isAtStart) {
-            container.classList.remove('scrolling', 'scrolled-to-end');
-        } else {
-            container.classList.add('scrolling');
-            container.classList.remove('scrolled-to-end');
-        }
-    }
-
-    // Клик по точкам для навигации
-    dots.forEach((dot, index) => {
-        dot.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-
-            const cardWidth = document.querySelector('.stat-card')?.offsetWidth || 170;
-            const gap = 15;
-            const scrollPosition = index * (cardWidth + gap);
-
-            container.scrollTo({
-                left: scrollPosition,
-                behavior: 'smooth'
-            });
-        });
-    });
-
-    // Инициализация
-    checkIfScrollNeeded();
-    updateScrollDots();
-
-    // Обработчики событий
-    container.addEventListener('scroll', updateScrollDots);
-    window.addEventListener('resize', () => {
-        checkIfScrollNeeded();
-        updateScrollDots();
-    });
-
-    // Автоматическое обновление при изменении размера окна
-    let resizeTimeout;
-    window.addEventListener('resize', () => {
-        clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(() => {
-            checkIfScrollNeeded();
-            updateScrollDots();
-        }, 150);
-    });
-
-    // Добавляем класс для плавного скролла
-    container.classList.add('smooth-scroll');
-}
-
-// Функция для улучшенного управления индикатором с тач-событиями
-function setupTouchScrollIndicator() {
-    const container = document.querySelector('.stats-grid-container');
-    const dots = document.querySelectorAll('.scroll-dot');
-
-    if (!container || !dots.length) return;
-
-    let isScrolling = false;
-    let scrollTimeout;
-
-    container.addEventListener('touchstart', () => {
-        container.classList.add('scrolling');
-    });
-
-    container.addEventListener('touchmove', () => {
-        if (!isScrolling) {
-            isScrolling = true;
-            container.classList.add('scrolling');
-        }
-
-        clearTimeout(scrollTimeout);
-        scrollTimeout = setTimeout(() => {
-            isScrolling = false;
-            container.classList.remove('scrolling');
-        }, 100);
-    });
-
-    container.addEventListener('touchend', () => {
-        setTimeout(() => {
-            isScrolling = false;
-            container.classList.remove('scrolling');
-        }, 150);
-    });
-
-    // Для мыши тоже
-    container.addEventListener('mousedown', () => {
-        container.classList.add('scrolling');
-    });
-
-    container.addEventListener('mousemove', (e) => {
-        if (e.buttons === 1) { // Левая кнопка мыши нажата
-            if (!isScrolling) {
-                isScrolling = true;
-                container.classList.add('scrolling');
-            }
-
-            clearTimeout(scrollTimeout);
-            scrollTimeout = setTimeout(() => {
-                isScrolling = false;
-                container.classList.remove('scrolling');
-            }, 100);
-        }
-    });
-
-    container.addEventListener('mouseup', () => {
-        setTimeout(() => {
-            isScrolling = false;
-            container.classList.remove('scrolling');
-        }, 150);
-    });
-
-    container.addEventListener('mouseleave', () => {
-        isScrolling = false;
-        container.classList.remove('scrolling');
-    });
-}
-
-function setupScrollHint() {
-    const container = document.querySelector('.stats-grid-container');
-    const hint = document.querySelector('.scroll-hint');
-
-    if (!container || !hint) return;
-
-    container.addEventListener('scroll', () => {
-        const isAtEnd = container.scrollLeft + container.clientWidth >= container.scrollWidth - 50;
-        const isAtStart = container.scrollLeft <= 50;
-
-        // Показываем подсказку только если есть куда скроллить
-        if (isAtEnd || isAtStart) {
-            hint.style.opacity = '0.3';
-        } else {
-            hint.style.opacity = '0.8';
-        }
-    });
-
-    // Скроем подсказку через 10 секунд просмотра
-    setTimeout(() => {
-        hint.style.transition = 'opacity 1s ease';
-        hint.style.opacity = '0';
-
-        // Показать снова при скролле
-        container.addEventListener('scroll', () => {
-            hint.style.opacity = '0.8';
-
-            // Снова скрыть через 5 секунд бездействия
-            clearTimeout(hint.hideTimeout);
-            hint.hideTimeout = setTimeout(() => {
-                hint.style.opacity = '0';
-            }, 5000);
-        });
-    }, 10000);
-}
-
-// Обновляем DOMContentLoaded
-document.addEventListener('DOMContentLoaded', function () {
-    // ... существующий код ...
     setupFixedScrollIndicator();
     setupTouchScrollIndicator();
+    
+    // Инициализируем Firebase
+    await initFirebase();
 });
+
+// Инициализация Firebase
+async function initFirebase() {
+    try {
+        console.log('Инициализация Firebase...');
+        
+        // Проверяем, загружена ли библиотека Firebase
+        if (typeof firebase === 'undefined') {
+            console.error('Firebase не загружен');
+            return false;
+        }
+        
+        // Проверяем, инициализировано ли уже приложение
+        if (firebase.apps.length === 0) {
+            console.error('Firebase не инициализирован');
+            return false;
+        }
+        
+        // Получаем Firestore
+        if (firebase.firestore) {
+            db = firebase.firestore();
+            console.log('Firestore успешно инициализирован');
+            return true;
+        } else {
+            console.error('Firestore недоступен');
+            return false;
+        }
+    } catch (error) {
+        console.error('Ошибка инициализации Firebase:', error);
+        return false;
+    }
+}
+
+// Добавить эту функцию в script.js после инициализации
+function setupRealTimePurchaseUpdates() {
+    if (!db) return;
+    
+    if (user && user.id) {
+        // Подписываемся на обновления покупок пользователя
+        db.collection('purchases')
+            .where('user_id', '==', user.id.toString())
+            .orderBy('timestamp', 'desc')
+            .onSnapshot((snapshot) => {
+                const updates = [];
+                snapshot.docChanges().forEach((change) => {
+                    if (change.type === 'modified' || change.type === 'added') {
+                        const data = change.doc.data();
+                        updates.push({
+                            ...data,
+                            firebase_id: change.doc.id
+                        });
+                    }
+                });
+                
+                // Обновляем локальные данные
+                if (updates.length > 0) {
+                    updates.forEach(update => {
+                        updateLocalPurchaseStatus(update.order_id, update.status, update);
+                    });
+                    
+                    // Обновляем UI
+                    loadPurchases();
+                    loadUserData();
+                    
+                    // Показываем уведомления о подтверждении
+                    updates.forEach(update => {
+                        if (update.status === 'confirmed') {
+                            showNotification(`✅ Ваш заказ ${update.order_id} подтвержден!`);
+                            activateVPNSubscription(update);
+                        }
+                    });
+                }
+            }, (error) => {
+                console.error('Ошибка real-time обновлений:', error);
+            });
+    }
+}
+
+// Добавить вызов в конец инициализации:
+async function initializeFirebase() {
+    try {
+        await auth.signInAnonymously();
+        console.log('Firebase аутентифицирован анонимно');
+        
+        // Загружаем покупки пользователя
+        await loadUserPurchases();
+        
+        // Настраиваем real-time обновления
+        setupRealTimePurchaseUpdates();
+        
+        return true;
+    } catch (error) {
+        console.error('Firebase auth error:', error);
+        return false;
+    }
+}
+
+async function loadUserPurchases() {
+    if (!db) {
+        console.log('Firestore не доступен');
+        return;
+    }
+    
+    try {
+        if (user && user.id) {
+            // Загружаем покупки пользователя из Firestore
+            const snapshot = await db.collection('purchases')
+                .where('user_id', '==', user.id.toString())
+                .orderBy('timestamp', 'desc')
+                .get();
+            
+            if (!snapshot.empty) {
+                const purchases = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    purchases.push({
+                        ...data,
+                        firebase_id: doc.id
+                    });
+                });
+                
+                // Сохраняем локально
+                localStorage.setItem('flowie_purchases', JSON.stringify(purchases));
+                
+                // Обновляем UI
+                loadPurchases();
+                loadUserData();
+            }
+        }
+    } catch (error) {
+        console.error('Ошибка загрузки покупок:', error);
+    }
+}
+
+
 
 // Настройка профиля игрока в хедере
 function setupUserProfile() {
@@ -293,7 +232,6 @@ function getPlayerLevel() {
 
 // Загрузка VPN категорий
 function loadVPNCategories() {
-    // В функции loadVPNCategories обновляем описания
     const vpnCategories = [
         {
             id: 'cheap',
@@ -516,16 +454,12 @@ function showPayment(category) {
 
 // Настройка событий
 function setupEvents() {
+    console.log('Настройка событий...');
+    
     // Подключение VPN
     const connectBtn = document.getElementById('connect-btn');
     if (connectBtn) {
         connectBtn.addEventListener('click', toggleVPN);
-    }
-
-    // Кнопка смены сервера
-    const changeServerBtn = document.querySelector('.btn-change-server');
-    if (changeServerBtn) {
-        changeServerBtn.addEventListener('click', changeServer);
     }
 
     // Навигация
@@ -606,6 +540,8 @@ function setupEvents() {
     if (buyBtn) {
         buyBtn.addEventListener('click', showVPNModal);
     }
+    
+    console.log('События настроены');
 }
 
 // Показать модальное окно профиля
@@ -756,14 +692,13 @@ function showProfileModal() {
                     Купить VPN
                 </button>
                 
-                <button onclick="closeModal(); showSection('purchases');" style="
+                <button onclick="checkAllPendingOrders()" style="
                     width: 100%;
                     padding: 16px;
-                    background: rgba(255, 255, 255, 0.1);
-                    backdrop-filter: blur(20px);
-                    border: 1px solid rgba(255, 255, 255, 0.2);
+                    background: rgba(59, 130, 246, 0.2);
+                    border: 1px solid rgba(59, 130, 246, 0.4);
                     border-radius: 12px;
-                    color: white;
+                    color: #3b82f6;
                     font-weight: 600;
                     cursor: pointer;
                     display: flex;
@@ -771,8 +706,8 @@ function showProfileModal() {
                     justify-content: center;
                     gap: 10px;
                 ">
-                    <i class="fas fa-history"></i>
-                    Полная история
+                    <i class="fas fa-sync-alt"></i>
+                    Проверить статусы заказов
                 </button>
                 
                 <button onclick="window.open('https://t.me/flowie_support', '_blank');" style="
@@ -947,53 +882,324 @@ function removeFile() {
     receiptFile = null;
 }
 
+// ============ СИСТЕМА ОПЛАТЫ С IMGBB ============
+
+// Конвертация файла в Base64
+function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+        reader.readAsDataURL(file);
+    });
+}
+
+// Загрузка на ImgBB
+async function uploadToImgBB(file) {
+    try {
+        console.log('Начинаем загрузку на ImgBB...');
+        
+        // Конвертируем файл в base64
+        const base64 = await fileToBase64(file);
+        
+        // Отправляем на ImgBB
+        const formData = new FormData();
+        formData.append('key', IMGBB_API_KEY);
+        formData.append('image', base64.split(',')[1]);
+        formData.append('name', `receipt_${currentPurchaseId}_${Date.now()}`);
+        
+        const response = await fetch('https://api.imgbb.com/1/upload', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            console.log('Файл успешно загружен на ImgBB:', data.data.url);
+            return {
+                url: data.data.url,
+                delete_url: data.data.delete_url,
+                thumb_url: data.data.thumb.url,
+                id: data.data.id
+            };
+        } else {
+            throw new Error('ImgBB upload failed: ' + (data.error?.message || 'Unknown error'));
+        }
+    } catch (error) {
+        console.error('Ошибка загрузки на ImgBB:', error);
+        throw error;
+    }
+}
+
+// Сохранение покупки с ImgBB
+async function savePurchaseWithImgBB(purchaseData, file = null) {
+    try {
+        console.log('Сохранение покупки...');
+        
+        let imgbbData = null;
+        
+        // Если есть файл, загружаем на ImgBB
+        if (file) {
+            try {
+                imgbbData = await uploadToImgBB(file);
+                console.log('Файл загружен на ImgBB:', imgbbData.url);
+            } catch (imgbbError) {
+                console.error('Ошибка ImgBB, продолжаем без файла:', imgbbError);
+            }
+        }
+        
+        // Данные для сохранения
+        const purchaseDoc = {
+            ...purchaseData,
+            receipt_url: imgbbData?.url || null,
+            receipt_thumb: imgbbData?.thumb_url || null,
+            receipt_id: imgbbData?.id || null,
+            created_at: new Date().toISOString(),
+            status: 'pending',
+            has_receipt: !!file,
+            file_size: file?.size || 0,
+            file_type: file?.type || null,
+            firebase_updated: false
+        };
+        
+        let docId = null;
+        
+        // Сохраняем в Firestore если доступен
+        if (db) {
+            try {
+                const docRef = await db.collection('purchases').add(purchaseDoc);
+                docId = docRef.id;
+                console.log('Документ сохранен в Firestore с ID:', docId);
+                
+                // Обновляем документ с ID
+                await docRef.update({
+                    firebase_id: docId,
+                    firebase_updated: true
+                });
+                
+                purchaseDoc.firebase_id = docId;
+            } catch (firebaseError) {
+                console.error('Ошибка сохранения в Firestore:', firebaseError);
+                docId = 'local_' + Date.now();
+                purchaseDoc.firebase_id = docId;
+            }
+        } else {
+            docId = 'local_' + Date.now();
+            purchaseDoc.firebase_id = docId;
+        }
+        
+        // Отправляем уведомление в Telegram
+        try {
+            await sendReceiptToTelegram(imgbbData?.url, purchaseDoc, docId);
+        } catch (telegramError) {
+            console.error('Ошибка отправки в Telegram:', telegramError);
+        }
+        
+        return {
+            success: true,
+            docId: docId,
+            imgbbUrl: imgbbData?.url,
+            purchase: purchaseDoc
+        };
+        
+    } catch (error) {
+        console.error('Ошибка сохранения покупки:', error);
+        throw error;
+    }
+}
+
+// Отправка чека в Telegram
+async function sendReceiptToTelegram(imgbbUrl, purchaseData, firebaseId) {
+    try {
+        console.log('Отправка уведомления в Telegram...');
+        
+        // Формируем сообщение для админа
+        const caption = `
+📋 *НОВАЯ ПОКУПКА VPN*
+
+👤 *Пользователь:*
+• ID: ${purchaseData.user_id}
+• Имя: ${purchaseData.user_name}
+• Username: @${purchaseData.username || 'отсутствует'}
+
+💰 *Детали покупки:*
+• Товар: ${purchaseData.name}
+• Сумма: ${purchaseData.amount}₽
+• Заказ: ${purchaseData.order_id}
+• Дата: ${purchaseData.date}
+
+📊 *ID в системе:* ${firebaseId}
+${imgbbUrl ? '📎 Чек приложен' : '⚠️ Чек не приложен'}
+
+👇 *Действия администратора:*`;
+
+        // Создаем клавиатуру
+        const keyboard = {
+            inline_keyboard: [
+                [
+                    {
+                        text: '✅ Принять',
+                        callback_data: `approve_${firebaseId}`
+                    },
+                    {
+                        text: '❌ Отклонить', 
+                        callback_data: `reject_${firebaseId}`
+                    }
+                ]
+            ]
+        };
+
+        // Если есть username, добавляем кнопку для связи
+        if (purchaseData.username && purchaseData.username !== 'no_username') {
+            keyboard.inline_keyboard.push([
+                {
+                    text: '💬 Написать пользователю',
+                    url: `https://t.me/${purchaseData.username}`
+                }
+            ]);
+        }
+
+        let result;
+        
+        // Если есть URL изображения, отправляем фото
+        if (imgbbUrl) {
+            const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    chat_id: ADMIN_CHAT_ID,
+                    photo: imgbbUrl,
+                    caption: caption,
+                    parse_mode: 'Markdown',
+                    reply_markup: keyboard
+                })
+            });
+            
+            result = await response.json();
+        } 
+        // Если нет изображения, отправляем текстовое сообщение
+        else {
+            const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    chat_id: ADMIN_CHAT_ID,
+                    text: caption,
+                    parse_mode: 'Markdown',
+                    reply_markup: keyboard
+                })
+            });
+            
+            result = await response.json();
+        }
+        
+        console.log('Ответ Telegram:', result);
+        
+        // Сохраняем message_id в Firestore
+        if (result.ok && result.result && db) {
+            try {
+                const docRef = db.collection('purchases').doc(firebaseId);
+                await docRef.update({
+                    telegram_message_id: result.result.message_id,
+                    admin_notified: true,
+                    notified_at: new Date().toISOString()
+                });
+                console.log('Message ID сохранен в Firestore');
+            } catch (updateError) {
+                console.error('Ошибка обновления Telegram message ID:', updateError);
+            }
+        }
+        
+        return result;
+        
+    } catch (error) {
+        console.error('Ошибка отправки в Telegram:', error);
+        throw error;
+    }
+}
+
 // Отправить чек на проверку
+// Обновить функцию submitReceipt в script.js:
 async function submitReceipt() {
-    if (!receiptFile || !currentPaymentData) {
-        showNotification('❌ Сначала загрузите чек');
+    if (!currentPaymentData) {
+        showNotification('❌ Ошибка: данные покупки не найдены');
         return;
     }
 
     try {
-        showNotification('📤 Отправляем чек на проверку...');
+        showNotification('📤 Сохраняем данные и отправляем чек...');
 
         // Создаем запись о покупке
         const purchaseData = {
-            id: Date.now().toString(),
             name: currentPaymentData.name,
             amount: currentPaymentData.price,
             status: 'pending',
             date: new Date().toLocaleString('ru-RU'),
             order_id: currentPurchaseId,
-            user_id: user?.id || 'unknown',
+            user_id: user?.id?.toString() || 'unknown',
             user_name: user?.first_name || 'Unknown',
             username: user?.username || 'no_username',
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
+            telegram_user: user ? {
+                id: user.id,
+                first_name: user.first_name,
+                username: user.username
+            } : null,
+            vpn_tariff: getVpnTariff(currentPaymentData.name)
         };
 
-        // Сохраняем покупку (только один раз)
-        savePurchaseOnce(purchaseData);
+        // Сохраняем локально
+        const savedLocally = savePurchaseOnce(purchaseData);
+        
+        if (!savedLocally) {
+            showNotification('⚠️ Этот заказ уже был отправлен ранее');
+            closeReceiptModal();
+            return;
+        }
 
-        // Отправляем в Telegram бота
-        const success = await sendToTelegramBot(receiptFile, purchaseData);
+        // Сохраняем в Firebase и отправляем в Telegram
+        const result = await savePurchaseWithImgBB(purchaseData, receiptFile);
 
-        if (success) {
+        if (result.success) {
             showNotification('✅ Чек отправлен! Админ проверит в течение 15 минут');
+
+            // Обновляем локальную копию
+            purchaseData.firebase_id = result.docId;
+            purchaseData.has_receipt = !!receiptFile;
+            if (result.imgbbUrl) {
+                purchaseData.receipt_url = result.imgbbUrl;
+            }
+            updatePurchaseInStorage(purchaseData);
 
             // Обновляем интерфейс
             setTimeout(() => {
                 closeReceiptModal();
                 loadPurchases();
                 loadUserData();
+                
+                // Очищаем данные
+                currentPaymentData = null;
+                currentPurchaseId = null;
+                receiptFile = null;
+                removeFile();
             }, 1500);
 
         } else {
-            showNotification('⚠️ Чек сохранен, но не отправлен. Свяжитесь с поддержкой');
+            showNotification('⚠️ Данные сохранены локально. Ошибка отправки');
         }
 
     } catch (error) {
         console.error('Error submitting receipt:', error);
-        showNotification('❌ Ошибка отправки. Попробуйте еще раз');
+        showNotification('❌ Ошибка соединения. Данные сохранены локально.');
     }
 }
 
@@ -1007,7 +1213,7 @@ function savePurchaseOnce(purchase) {
     if (!exists) {
         purchases.push(purchase);
         localStorage.setItem('flowie_purchases', JSON.stringify(purchases));
-        console.log('Покупка сохранена:', purchase.order_id);
+        console.log('Покупка сохранена локально:', purchase.order_id);
         return true;
     } else {
         console.log('Покупка уже существует, не сохраняем дубликат:', purchase.order_id);
@@ -1015,32 +1221,21 @@ function savePurchaseOnce(purchase) {
     }
 }
 
-// Отправка в Telegram бота через прокси
-async function sendToTelegramBot(file, purchaseData) {
-    try {
-        // Для работы в браузере нужно использовать прокси
-        // В реальном приложении это должен быть ваш сервер
-
-        // Создаем FormData
-        const formData = new FormData();
-        formData.append('photo', file);
-        formData.append('purchase_data', JSON.stringify(purchaseData));
-
-        // Для демо просто симулируем отправку
-        console.log('Чек отправлен в Telegram:', {
-            file: file.name,
-            size: file.size,
-            purchase: purchaseData
-        });
-
-        // Для демо возвращаем успех
-        return true;
-
-    } catch (error) {
-        console.error('Error sending to Telegram:', error);
-        return false;
+// Обновление покупки в localStorage
+function updatePurchaseInStorage(updatedPurchase) {
+    let purchases = JSON.parse(localStorage.getItem('flowie_purchases') || '[]');
+    const index = purchases.findIndex(p => p.order_id === updatedPurchase.order_id);
+    
+    if (index !== -1) {
+        purchases[index] = { ...purchases[index], ...updatedPurchase };
+    } else {
+        purchases.push(updatedPurchase);
     }
+    
+    localStorage.setItem('flowie_purchases', JSON.stringify(purchases));
 }
+
+// ============ ОСТАЛЬНЫЕ ФУНКЦИИ ============
 
 // Загрузка покупок в раздел "Мои покупки"
 function loadPurchases() {
@@ -1107,16 +1302,26 @@ function loadPurchases() {
                 </div>
             </div>
             
+            ${purchase.receipt_url ? `
+                <div style="margin-top: 10px; text-align: center;">
+                    <a href="${purchase.receipt_url}" target="_blank" 
+                       style="color: #30D158; text-decoration: none; font-size: 12px; display: inline-flex; align-items: center; gap: 5px;">
+                        <i class="fas fa-receipt"></i>
+                        Посмотреть чек
+                    </a>
+                </div>
+            ` : ''}
+            
             ${purchase.status === 'pending' ? `
-                <div style="font-size: 12px; color: #f59e0b; text-align: center; padding: 8px; background: rgba(245, 158, 11, 0.1); border-radius: 8px; border: 1px solid rgba(245, 158, 11, 0.2);">
+                <div style="font-size: 12px; color: #f59e0b; text-align: center; padding: 8px; background: rgba(245, 158, 11, 0.1); border-radius: 8px; border: 1px solid rgba(245, 158, 11, 0.2); margin-top: 10px;">
                     ⏳ Ожидает проверки администратором
                 </div>
             ` : purchase.status === 'confirmed' ? `
-                <div style="font-size: 12px; color: #22c55e; text-align: center; padding: 8px; background: rgba(34, 197, 94, 0.1); border-radius: 8px; border: 1px solid rgba(34, 197, 94, 0.2);">
+                <div style="font-size: 12px; color: #22c55e; text-align: center; padding: 8px; background: rgba(34, 197, 94, 0.1); border-radius: 8px; border: 1px solid rgba(34, 197, 94, 0.2); margin-top: 10px;">
                     ✅ Оплата подтверждена! VPN активирован.
                 </div>
             ` : `
-                <div style="font-size: 12px; color: #FF453A; text-align: center; padding: 8px; background: rgba(255, 69, 58, 0.1); border-radius: 8px; border: 1px solid rgba(255, 69, 58, 0.2);">
+                <div style="font-size: 12px; color: #FF453A; text-align: center; padding: 8px; background: rgba(255, 69, 58, 0.1); border-radius: 8px; border: 1px solid rgba(255, 69, 58, 0.2); margin-top: 10px;">
                     ❌ Платеж отклонен. Свяжитесь с поддержкой.
                 </div>
             `}
@@ -1126,7 +1331,6 @@ function loadPurchases() {
     purchasesSection.style.display = 'block';
 }
 
-// Загрузка данных пользователя
 function loadUserData() {
     const activeSubscription = localStorage.getItem('flowie_active_subscription');
     const subscriptionCard = document.getElementById('subscription-card');
@@ -1149,7 +1353,7 @@ function loadUserData() {
             <div class="sub-features">
                 <div class="feature">
                     <i class="fas fa-check-circle"></i>
-                    <span>Все фичи разблокированы</span>
+                    <span>${getVPNFeatures(lastConfirmed.name)}</span>
                 </div>
                 <div class="feature">
                     <i class="fas fa-infinity"></i>
@@ -1172,8 +1376,8 @@ function loadUserData() {
                 <div class="stat">
                     <div class="stat-icon">⚡</div>
                     <div class="stat-data">
-                        <div class="stat-value">${getRandomInt(25, 45)}ms</div>
-                        <div class="stat-label">Средний пинг</div>
+                        <div class="stat-value">${getRandomInt(12, 35)}ms</div>
+                        <div class="stat-label">Текущий пинг</div>
                     </div>
                 </div>
             </div>
@@ -1184,19 +1388,32 @@ function loadUserData() {
             name: lastConfirmed.name,
             type: selectedVPN,
             activated_at: new Date().toISOString(),
-            order_id: lastConfirmed.order_id
+            order_id: lastConfirmed.order_id,
+            expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
         }));
     } else {
         subscriptionCard.innerHTML = `
             <div class="no-subscription">
                 <i class="fas fa-key"></i>
                 <p>У тебя нет активной подписки</p>
-                <button class="btn-buy" onclick="showVPNModal()">Купить VPN</button>
+                <button class="btn-buy" onclick="showVPNModal()">
+                    <i class="fas fa-bolt"></i> Купить VPN
+                </button>
             </div>
         `;
     }
+}
 
-    loadPurchases();
+// Добавить эту функцию для получения фич VPN:
+function getVPNFeatures(vpnName) {
+    if (vpnName.includes('Лайт') || vpnName.includes('Дешевый')) {
+        return 'Пинг 35-25ms • Базовые сервера';
+    } else if (vpnName.includes('Про') || vpnName.includes('Средний')) {
+        return 'Пинг 25-18ms • Регистрация урона';
+    } else if (vpnName.includes('Vip') || vpnName.includes('ВИП')) {
+        return 'Пинг 18-12ms • Все фичи • VIP сервера';
+    }
+    return 'Все фичи разблокированы';
 }
 
 function getVPNTypeByName(name) {
@@ -1298,7 +1515,6 @@ function showVPNModal() {
 
 // Включить/выключить VPN
 function toggleVPN() {
-    // Если нужно сохранить функционал VPN
     showVPNModal();
 }
 
@@ -1357,12 +1573,6 @@ function checkPing() {
     }, 1500); // Время проверки 1.5 секунды
 }
 
-// Выбор сервера (упрощенно)
-function selectServer() {
-    // Функция упрощена, так как выбор сервера скрыт
-    updatePing();
-}
-
 // Показать уведомление
 function showNotification(message) {
     const notification = document.getElementById('notification');
@@ -1403,11 +1613,6 @@ function showSection(section) {
     }
 }
 
-// Показать профиль
-function showProfile() {
-    showProfileModal();
-}
-
 // Вспомогательные функции
 function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -1420,55 +1625,263 @@ function scrollToElement(selector) {
     }
 }
 
-// Обработка статусов платежей от бота
-async function handlePaymentStatus(orderId, status) {
-    let purchases = JSON.parse(localStorage.getItem('flowie_purchases') || '[]');
-    const purchaseIndex = purchases.findIndex(p => p.order_id === orderId);
+// ============ ФУНКЦИИ ДЛЯ SCROLL ИНДИКАТОРА ============
 
-    if (purchaseIndex !== -1) {
-        purchases[purchaseIndex].status = status;
-        localStorage.setItem('flowie_purchases', JSON.stringify(purchases));
+function setupFixedScrollIndicator() {
+    const container = document.querySelector('.stats-grid-container');
+    const dots = document.querySelectorAll('.scroll-dot');
 
-        if (status === 'confirmed') {
-            const purchase = purchases[purchaseIndex];
-            localStorage.setItem('flowie_active_subscription', JSON.stringify({
-                name: purchase.name,
-                type: getVPNTypeByName(purchase.name),
-                activated_at: new Date().toISOString(),
-                order_id: purchase.order_id
-            }));
+    if (!container || !dots.length) return;
 
-            showNotification(`🎉 ${purchase.name} активирован!`);
+    function checkIfScrollNeeded() {
+        const hasScroll = container.scrollWidth > container.clientWidth;
+        return hasScroll;
+    }
 
-            // Если VPN был отключен, предлагаем подключить
-            if (!isVPNConnected) {
-                setTimeout(() => {
-                    if (confirm('VPN активирован! Хотите подключиться сейчас?')) {
-                        toggleVPN();
-                    }
-                }, 1000);
-            }
+    function updateScrollDots() {
+        if (container.scrollWidth <= container.clientWidth) return;
+
+        const scrollPercentage = container.scrollLeft / (container.scrollWidth - container.clientWidth);
+        const activeIndex = Math.min(
+            Math.floor(scrollPercentage * (dots.length - 1)),
+            dots.length - 1
+        );
+
+        dots.forEach(dot => {
+            dot.classList.remove('active');
+        });
+
+        if (dots[activeIndex]) {
+            dots[activeIndex].classList.add('active');
+        }
+    }
+
+    dots.forEach((dot, index) => {
+        dot.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const cardWidth = document.querySelector('.stat-card')?.offsetWidth || 170;
+            const gap = 15;
+            const scrollPosition = index * (cardWidth + gap);
+
+            container.scrollTo({
+                left: scrollPosition,
+                behavior: 'smooth'
+            });
+        });
+    });
+
+    checkIfScrollNeeded();
+    updateScrollDots();
+
+    container.addEventListener('scroll', updateScrollDots);
+    window.addEventListener('resize', () => {
+        checkIfScrollNeeded();
+        updateScrollDots();
+    });
+}
+
+function setupTouchScrollIndicator() {
+    const container = document.querySelector('.stats-grid-container');
+    const dots = document.querySelectorAll('.scroll-dot');
+
+    if (!container || !dots.length) return;
+
+    let isScrolling = false;
+    let scrollTimeout;
+
+    container.addEventListener('touchstart', () => {
+        container.classList.add('scrolling');
+    });
+
+    container.addEventListener('touchmove', () => {
+        if (!isScrolling) {
+            isScrolling = true;
+            container.classList.add('scrolling');
         }
 
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(() => {
+            isScrolling = false;
+            container.classList.remove('scrolling');
+        }, 100);
+    });
+
+    container.addEventListener('touchend', () => {
+        setTimeout(() => {
+            isScrolling = false;
+            container.classList.remove('scrolling');
+        }, 150);
+    });
+}
+
+// ============ ФУНКЦИИ ДЛЯ ПРОВЕРКИ СТАТУСА ============
+
+// Функция для проверки статуса заказа
+async function checkOrderStatus(orderId) {
+    if (!db) {
+        showNotification('❌ Firebase не подключен');
+        return;
+    }
+    
+    try {
+        showNotification('🔍 Проверяем статус заказа...');
+        
+        const snapshot = await db.collection('purchases')
+            .where('order_id', '==', orderId)
+            .limit(1)
+            .get();
+        
+        if (snapshot.empty) {
+            showNotification('Заказ не найден в базе данных');
+            return;
+        }
+        
+        const doc = snapshot.docs[0];
+        const data = doc.data();
+        const docId = doc.id;
+        
+        // Обновляем локально
+        updateLocalPurchaseStatus(orderId, data.status, { ...data, firebase_id: docId });
+        
+        // Показываем уведомление
+        if (data.status === 'confirmed') {
+            showNotification(`✅ Заказ ${orderId} подтвержден!`);
+            activateVPNSubscription(data);
+        } else if (data.status === 'rejected') {
+            showNotification(`❌ Заказ ${orderId} отклонен.`);
+        } else {
+            showNotification(`⏳ Заказ ${orderId} еще на проверке.`);
+        }
+        
+        // Обновляем UI
         loadPurchases();
         loadUserData();
+        
+    } catch (error) {
+        console.error('Error checking order status:', error);
+        showNotification('❌ Ошибка при проверке статуса');
     }
 }
 
-// Инициализация обработки URL параметров
-document.addEventListener('DOMContentLoaded', function () {
-    const urlParams = new URLSearchParams(window.location.search);
-    const paymentStatus = urlParams.get('payment');
-    const orderId = urlParams.get('order_id');
-
-    if (paymentStatus && orderId) {
-        handlePaymentStatus(orderId, paymentStatus);
-        // Убираем параметры из URL
-        window.history.replaceState({}, document.title, window.location.pathname);
+// Функция проверки всех ожидающих заказов
+async function checkAllPendingOrders() {
+    const purchases = JSON.parse(localStorage.getItem('flowie_purchases') || '[]');
+    const pendingOrders = purchases.filter(p => p.status === 'pending');
+    
+    if (pendingOrders.length === 0) {
+        showNotification('✅ Нет заказов на проверке');
+        return;
     }
-});
+    
+    showNotification(`🔍 Проверяем ${pendingOrders.length} заказ(ов)...`);
+    
+    let updatedCount = 0;
+    
+    for (const order of pendingOrders) {
+        if (order.order_id) {
+            await checkOrderStatus(order.order_id);
+            updatedCount++;
+            
+            // Пауза между запросами
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+    }
+    
+    showNotification(`✅ Проверено ${updatedCount} заказ(ов)`);
+}
 
-// Функция для ручного обновления статуса (для админа)
-function updatePurchaseStatus(orderId, status) {
-    handlePaymentStatus(orderId, status);
+// Обновление локального статуса
+function updateLocalPurchaseStatus(orderId, status, purchaseData = null) {
+    let purchases = JSON.parse(localStorage.getItem('flowie_purchases') || '[]');
+    const index = purchases.findIndex(p => p.order_id === orderId);
+    
+    if (index !== -1) {
+        purchases[index].status = status;
+        purchases[index].updated_at = new Date().toISOString();
+        
+        if (purchaseData) {
+            purchases[index] = { ...purchases[index], ...purchaseData };
+        }
+        
+        localStorage.setItem('flowie_purchases', JSON.stringify(purchases));
+        return true;
+    }
+    
+    return false;
+}
+
+// Активация VPN подписки
+function activateVPNSubscription(purchase) {
+    const vpnType = getVPNTypeByName(purchase.name);
+    
+    const subscriptionData = {
+        name: purchase.name,
+        type: vpnType,
+        activated_at: new Date().toISOString(),
+        order_id: purchase.order_id,
+        firebase_id: purchase.firebase_id || purchase.id,
+        expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        purchase_data: purchase
+    };
+    
+    localStorage.setItem('flowie_active_subscription', JSON.stringify(subscriptionData));
+    
+    // Обновляем статус VPN
+    isVPNConnected = true;
+    
+    // Обновляем интерфейс
+    updatePing();
+    showNotification('✅ VPN успешно активирован!');
+    
+    return subscriptionData;
+}
+
+// Функция для тестирования системы
+async function testSystem() {
+    console.log('=== ТЕСТИРОВАНИЕ СИСТЕМЫ ===');
+    
+    // Тест Firebase
+    const firebaseOk = await initFirebase();
+    console.log('Firebase подключение:', firebaseOk ? 'OK' : 'FAILED');
+    
+    // Тест Telegram
+    try {
+        const testResponse = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getMe`);
+        const data = await testResponse.json();
+        console.log('Telegram бот:', data.ok ? 'OK' : 'FAILED');
+    } catch (error) {
+        console.error('Ошибка теста Telegram:', error);
+    }
+    
+    console.log('Текущий пользователь:', user);
+    console.log('Локальные покупки:', JSON.parse(localStorage.getItem('flowie_purchases') || '[]'));
+    
+    console.log('=== ТЕСТ ЗАВЕРШЕН ===');
+}
+
+// Добавляем тестовую кнопку в режиме разработки
+if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    document.addEventListener('DOMContentLoaded', function() {
+        const testBtn = document.createElement('button');
+        testBtn.innerHTML = '🧪 Тест';
+        testBtn.style.cssText = `
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            background: #30D158;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 9999;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        `;
+        testBtn.onclick = testSystem;
+        document.body.appendChild(testBtn);
+    });
 }
