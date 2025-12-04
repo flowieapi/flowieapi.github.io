@@ -220,13 +220,10 @@ body {
 }
 
 @keyframes pulse {
-
-    0%,
-    100% {
+    0%, 100% {
         opacity: 1;
         transform: scale(1);
     }
-
     50% {
         opacity: 0.7;
         transform: scale(1.1);
@@ -384,15 +381,16 @@ body {
     z-index: 1;
 }
 
+/* Обновленные стили для карточек статистики */
 .stats-grid-container {
     overflow-x: auto;
     margin: 0 -16px;
     padding: 0 16px 40px 16px;
-    /* Увеличиваем паддинг снизу */
     scrollbar-width: none;
     -ms-overflow-style: none;
     position: relative;
     min-height: 200px;
+    -webkit-overflow-scrolling: touch;
 }
 
 .stats-grid-container::-webkit-scrollbar {
@@ -404,100 +402,8 @@ body {
     gap: 12px;
     padding: 10px 5px 40px 5px;
     min-width: 100%;
+    width: max-content;
     scroll-snap-type: x mandatory;
-}
-
-.stats-grid-container {
-    -webkit-overflow-scrolling: touch;
-}
-
-/* Добавляем индикатор при скролле */
-.stats-grid-container.scrolling::after {
-    content: '';
-    position: absolute;
-    bottom: 8px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 40px;
-    height: 4px;
-    background: rgba(34, 197, 94, 0.3);
-    border-radius: 2px;
-    animation: scrollIndicator 2s ease-in-out infinite;
-}
-
-@keyframes scrollIndicator {
-
-    0%,
-    100% {
-        width: 40px;
-        opacity: 0.5;
-    }
-
-    50% {
-        width: 60px;
-        opacity: 1;
-    }
-}
-
-/* Скрываем индикатор при достижении конца */
-.stats-grid-container.scrolled-to-end::after {
-    opacity: 0;
-    animation: none;
-}
-
-.smooth-scroll {
-    scroll-behavior: smooth;
-}
-
-/* Анимация при появлении индикатора */
-@keyframes indicatorFadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.scroll-indicator {
-    animation: indicatorFadeIn 0.5s ease-out;
-}
-
-
-/* Интерактивные эффекты для карточек при скролле */
-.stats-grid-container.scrolling .stat-card {
-    transition: transform 0.1s ease-out;
-}
-
-/* Подсветка активной точки */
-.scroll-dot.active::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(34, 197, 94, 0.4) 0%, transparent 70%);
-    animation: activeGlow 2s ease-in-out infinite;
-}
-
-@keyframes activeGlow {
-
-    0%,
-    100% {
-        opacity: 0.5;
-        transform: translate(-50%, -50%) scale(1);
-    }
-
-    50% {
-        opacity: 0.8;
-        transform: translate(-50%, -50%) scale(1.2);
-    }
 }
 
 .stats-grid-scroll .stat-card {
@@ -518,79 +424,13 @@ body {
     cursor: pointer;
     transition: all 0.3s ease;
     scroll-snap-align: start;
+    animation: cardAppear 0.4s ease-out backwards;
 }
 
-.stats-grid-scroll .stat-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 5px;
-    background: linear-gradient(90deg, transparent, var(--card-color, var(--pubg-accent)), transparent);
-    border-radius: 20px 20px 0 0;
-    opacity: 0.7;
-}
-
-.stats-grid-scroll .stat-card:hover {
-    transform: translateY(-10px) scale(1.03);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3),
-        0 0 0 1px rgba(34, 197, 94, 0.3),
-        0 0 30px rgba(34, 197, 94, 0.2);
-    border-color: rgba(34, 197, 94, 0.4);
-    background: rgba(34, 197, 94, 0.12);
-}
-
-.stat-glow {
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, var(--glow-color, rgba(34, 197, 94, 0.1)) 0%, transparent 70%);
-    opacity: 0;
-    transition: opacity 0.5s ease;
-    pointer-events: none;
-    z-index: 1;
-}
-
-.stats-grid-scroll .stat-card:hover .stat-glow {
-    opacity: 1;
-}
-
-/* Пульсирующая анимация */
-.pulse-animation {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    border-radius: 20px;
-    border: 2px solid transparent;
-    animation: pulseBorder 3s ease-in-out infinite;
-    pointer-events: none;
-    opacity: 0.5;
-}
-
-@keyframes pulseBorder {
-
-    0%,
-    100% {
-        border-color: rgba(34, 197, 94, 0.1);
-        transform: scale(1);
-    }
-
-    50% {
-        border-color: rgba(34, 197, 94, 0.4);
-        transform: scale(1.02);
-    }
-}
-
-/* Обновленные иконки */
+/* Иконки для карточек */
 .stats-grid-scroll .stat-card i {
     font-size: 32px;
     margin-bottom: 15px;
-    background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 0.3));
     width: 65px;
     height: 65px;
     display: flex;
@@ -602,29 +442,30 @@ body {
     transition: all 0.3s ease;
 }
 
-.stats-grid-scroll .stat-card:hover i {
-    transform: rotate(5deg) scale(1.15);
-    background: linear-gradient(135deg, var(--icon-gradient-hover-start, rgba(34, 197, 94, 0.2)), var(--icon-gradient-hover-end, rgba(34, 197, 94, 0.4)));
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3),
-        inset 0 2px 10px rgba(255, 255, 255, 0.1);
+/* Специфичные стили для иконок каждой карточки */
+.stats-grid-scroll .stat-card:nth-child(1) i {
+    color: #3b82f6;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.3));
 }
 
-.stats-grid-scroll .stat-card i::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-    border-radius: 50%;
-    opacity: 0;
-    transition: opacity 0.3s ease;
+.stats-grid-scroll .stat-card:nth-child(2) i {
+    color: #22c55e;
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 0.3));
 }
 
-.stats-grid-scroll .stat-card:hover i::after {
-    opacity: 1;
+.stats-grid-scroll .stat-card:nth-child(3) i {
+    color: #8b5cf6;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(139, 92, 246, 0.3));
+}
+
+.stats-grid-scroll .stat-card:nth-child(4) i {
+    color: #f59e0b;
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.3));
+}
+
+.stats-grid-scroll .stat-card:nth-child(5) i {
+    color: #ef4444;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.3));
 }
 
 .stat-info {
@@ -648,11 +489,6 @@ body {
     color: transparent;
 }
 
-.stats-grid-scroll .stat-card:hover .stat-value {
-    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-    transform: scale(1.05);
-}
-
 .stat-name {
     font-size: 11px;
     color: var(--text-secondary);
@@ -663,6 +499,37 @@ body {
     line-height: 1.2;
 }
 
+/* Плавная анимация при наведении */
+.stats-grid-scroll .stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    border-color: rgba(34, 197, 94, 0.3);
+}
+
+.stats-grid-scroll .stat-card:hover i {
+    transform: scale(1.1);
+}
+
+@keyframes cardAppear {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.stats-grid-scroll .stat-card:nth-child(1) { animation-delay: 0.1s; }
+.stats-grid-scroll .stat-card:nth-child(2) { animation-delay: 0.2s; }
+.stats-grid-scroll .stat-card:nth-child(3) { animation-delay: 0.3s; }
+.stats-grid-scroll .stat-card:nth-child(4) { animation-delay: 0.4s; }
+.stats-grid-scroll .stat-card:nth-child(5) { animation-delay: 0.5s; }
+
+/* Адаптивные стили для разных размеров экранов */
+
+/* Для очень маленьких экранов (до 320px) */
 @media (max-width: 320px) {
     .stats-grid-scroll .stat-card {
         width: 125px;
@@ -769,480 +636,6 @@ body {
     .stat-name {
         font-size: 9px;
     }
-}
-
-/* Плавная анимация при наведении */
-.stats-grid-scroll .stat-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-    border-color: rgba(34, 197, 94, 0.3);
-}
-
-.stats-grid-scroll .stat-card:hover i {
-    transform: scale(1.1);
-}
-
-/* Анимация появления */
-@keyframes cardAppear {
-    from {
-        opacity: 0;
-        transform: translateY(20px) scale(0.9);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
-.stats-grid-scroll .stat-card {
-    animation: cardAppear 0.4s ease-out backwards;
-}
-
-.stats-grid-scroll .stat-card:hover .stat-name {
-    color: var(--card-color, var(--pubg-accent));
-    opacity: 1;
-    letter-spacing: 2px;
-}
-
-/* Специфичные стили для разных типов статистики */
-.stats-grid-scroll .stat-card:nth-child(1) {
-    --card-color: #3b82f6;
-}
-
-.stats-grid-scroll .stat-card:nth-child(2) {
-    --card-color: #22c55e;
-}
-
-.stats-grid-scroll .stat-card:nth-child(3) {
-    --card-color: #8b5cf6;
-}
-
-.stats-grid-scroll .stat-card:nth-child(4) {
-    --card-color: #f59e0b;
-}
-
-.stats-grid-scroll .stat-card:nth-child(5) {
-    --card-color: #ef4444;
-}
-
-.
-
-/* Специфичные стили для иконок каждой карточки */
-.stats-grid-scroll .stat-card:nth-child(1) i {
-    color: #3b82f6;
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.3));
-}
-
-.stats-grid-scroll .stat-card:nth-child(2) i {
-    color: #22c55e;
-    background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 0.3));
-}
-
-.stats-grid-scroll .stat-card:nth-child(3) i {
-    color: #8b5cf6;
-    background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(139, 92, 246, 0.3));
-}
-
-.stats-grid-scroll .stat-card:nth-child(4) i {
-    color: #f59e0b;
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.3));
-}
-
-.stats-grid-scroll .stat-card:nth-child(5) i {
-    color: #ef4444;
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.3));
-}
-
-.scroll-indicator {
-    position: absolute;
-    bottom: 15px;
-    left: 0;
-    right: 0;
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    z-index: 10;
-    pointer-events: none;
-    /* Чтобы не мешал скроллу */
-}
-
-
-/* Делаем точки интерактивными */
-.scroll-dot {
-    width: 10px;
-    height: 10px;
-    background: rgba(34, 197, 94, 0.2);
-    border-radius: 50%;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    cursor: pointer;
-    position: relative;
-    pointer-events: auto;
-    /* Включаем события для точек */
-}
-
-.scroll-indicator::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: rgba(34, 197, 94, 0.1);
-    transform: translateY(-50%);
-    z-index: -1;
-    border-radius: 1px;
-}
-
-
-.scroll-dot::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background: rgba(34, 197, 94, 0.1);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.scroll-dot:hover::after {
-    opacity: 1;
-}
-
-.scroll-dot.active {
-    background: var(--pubg-accent);
-    transform: scale(1.4);
-    box-shadow:
-        0 0 0 2px rgba(34, 197, 94, 0.3),
-        0 0 15px rgba(34, 197, 94, 0.5);
-}
-
-.scroll-dot:hover:not(.active) {
-    background: rgba(34, 197, 94, 0.4);
-    transform: scale(1.2);
-}
-
-@keyframes cardFloatIn {
-    0% {
-        opacity: 0;
-        transform: translateY(30px) scale(0.9);
-    }
-
-    100% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
-@keyframes iconFloat {
-
-    0%,
-    100% {
-        transform: translateY(0);
-    }
-
-    50% {
-        transform: translateY(-10px);
-    }
-}
-
-@media (max-width: 768px) {
-    .scroll-indicator {
-        display: flex;
-    }
-
-    .stats-grid-container {
-        padding-bottom: 50px;
-        /* Больше места для индикатора и подсказки */
-    }
-}
-
-/* Адаптация для очень маленьких экранов */
-@media (max-width: 350px) {
-    .scroll-hint {
-        font-size: 11px;
-        padding: 6px 12px;
-    }
-
-    .stats-grid-container {
-        padding-bottom: 45px;
-    }
-}
-
-.scroll-hint-wrapper {
-    position: absolute;
-    bottom: 15px;
-    left: 0;
-    right: 0;
-    text-align: center;
-    pointer-events: none;
-    /* Чтобы не мешала скроллу */
-    z-index: 10;
-}
-
-.scroll-hint:hover {
-    background: rgba(15, 20, 25, 0.95);
-    border-color: rgba(34, 197, 94, 0.5);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
-}
-
-/* Анимация точек при скролле */
-@keyframes dotPulse {
-
-    0%,
-    100% {
-        transform: scale(1);
-        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
-    }
-
-    50% {
-        transform: scale(1.1);
-        box-shadow: 0 0 0 4px rgba(34, 197, 94, 0);
-    }
-}
-
-.scroll-dot.active {
-    animation: dotPulse 2s ease-in-out infinite;
-}
-
-@media (max-width: 768px) {
-    .scroll-indicator {
-        display: flex;
-    }
-
-    .stats-grid-container {
-        padding-bottom: 50px;
-        /* Больше места для индикатора */
-    }
-}
-
-.scroll-hint i {
-    color: var(--pubg-accent);
-    font-size: 10px;
-    transition: transform 0.3s ease;
-}
-
-.scroll-hint:hover i:first-child {
-    transform: translateX(-2px);
-}
-
-.scroll-hint:hover i:last-child {
-    transform: translateX(2px);
-}
-
-.scroll-hint {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    background: rgba(15, 20, 25, 0.85);
-    backdrop-filter: blur(10px);
-    padding: 8px 16px;
-    border-radius: 20px;
-    border: 1px solid rgba(34, 197, 94, 0.3);
-    color: var(--text-secondary);
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-    pointer-events: auto;
-    /* Включаем события для hover */
-    transition: all 0.3s ease;
-    animation: bounceIn 0.6s ease-out, fadeInOut 3s ease-in-out infinite 0.6s;
-}
-
-/* Анимации */
-@keyframes fadeInOut {
-
-    0%,
-    100% {
-        opacity: 0.7;
-        transform: scale(0.98);
-    }
-
-    50% {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-
-@keyframes bounceIn {
-    0% {
-        opacity: 0;
-        transform: translateY(20px) scale(0.8);
-    }
-
-    50% {
-        transform: translateY(-5px) scale(1.05);
-    }
-
-    100% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
-/* Эффект исчезновения при скролле до конца */
-.scroll-hint.fade-out {
-    opacity: 0;
-    transform: scale(0.9);
-    pointer-events: none;
-}
-
-.scroll-hint i {
-    color: var(--pubg-accent);
-    font-size: 10px;
-}
-
-/* Улучшаем отображение на мобильных */
-@media (max-width: 380px) {
-    .stats-grid-scroll .stat-card {
-        width: 145px;
-        min-width: 145px;
-        padding: 18px 14px;
-    }
-
-    .stats-grid-scroll .stat-card i {
-        font-size: 28px;
-        width: 50px;
-        height: 50px;
-    }
-
-    .stat-value {
-        font-size: 24px;
-    }
-}
-
-/* Анимация появления карточек */
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px) scale(0.95);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
-.stats-grid-scroll .stat-card {
-    animation: cardFloatIn 0.6s ease-out backwards;
-}
-
-
-.stats-grid-scroll .stat-card:nth-child(1) {
-    animation-delay: 0.1s;
-}
-
-.stats-grid-scroll .stat-card:nth-child(2) {
-    animation-delay: 0.2s;
-}
-
-.stats-grid-scroll .stat-card:nth-child(3) {
-    animation-delay: 0.3s;
-}
-
-.stats-grid-scroll .stat-card:nth-child(4) {
-    animation-delay: 0.4s;
-}
-
-.stats-grid-scroll .stat-card:nth-child(5) {
-    animation-delay: 0.5s;
-}
-
-.stats-grid-scroll .stat-card i {
-    animation: iconFloat 4s ease-in-out infinite;
-}
-
-.stats-grid-scroll .stat-card:nth-child(1) i {
-    animation-delay: 0s;
-}
-
-.stats-grid-scroll .stat-card:nth-child(2) i {
-    animation-delay: 0.8s;
-}
-
-.stats-grid-scroll .stat-card:nth-child(3) i {
-    animation-delay: 1.6s;
-}
-
-.stats-grid-scroll .stat-card:nth-child(4) i {
-    animation-delay: 2.4s;
-}
-
-.stats-grid-scroll .stat-card:nth-child(5) i {
-    animation-delay: 3.2s;
-}
-
-/* Адаптивность */
-@media (max-width: 380px) {
-    .stats-grid-scroll .stat-card {
-        width: 155px;
-        min-width: 155px;
-        padding: 20px 15px;
-    }
-
-    .stats-grid-scroll .stat-card i {
-        font-size: 36px;
-        width: 70px;
-        height: 70px;
-    }
-
-    .stat-value {
-        font-size: 32px;
-    }
-
-    .scroll-dot {
-        width: 8px;
-        height: 8px;
-    }
-}
-
-@media (max-width: 350px) {
-    .stats-grid-scroll .stat-card {
-        width: 145px;
-        min-width: 145px;
-        padding: 18px 12px;
-    }
-
-    .stats-grid-scroll .stat-card i {
-        font-size: 32px;
-        width: 65px;
-        height: 65px;
-    }
-
-    .stat-value {
-        font-size: 28px;
-    }
-}
-
-
-/* Эффект блеска на карточках */
-.stats-grid-scroll .stat-card::after {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: linear-gradient(to right,
-            transparent 20%,
-            rgba(255, 255, 255, 0.1) 50%,
-            transparent 80%);
-    transform: rotate(30deg);
-    transition: transform 0.8s;
-    pointer-events: none;
-    opacity: 0;
-}
-
-.stats-grid-scroll .stat-card:hover::after {
-    transform: rotate(30deg) translate(20%, 20%);
-    opacity: 1;
 }
 
 /* Категории VPN */
@@ -1498,33 +891,40 @@ body {
 
 /* Игровые преимущества */
 .game-advantages {
-    margin-bottom: 24px;
+    margin-bottom: 16px;
 }
 
 .advantages-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
+    gap: 10px;
+    margin-top: 8px;
 }
 
 .advantage-card {
     background: linear-gradient(135deg, rgba(26, 32, 44, 0.9) 0%, rgba(45, 55, 72, 0.9) 100%);
-    border-radius: 16px;
-    padding: 20px;
+    border-radius: 14px; /* Уменьшено с 16px */
+    padding: 14px; /* Уменьшено с 20px */
     text-align: center;
     border: 1px solid var(--glass-border);
     backdrop-filter: blur(10px);
-    transition: transform 0.3s ease;
+    transition: transform 0.2s ease;
+    min-height: 120px; /* Фиксированная минимальная высота */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 .advantage-card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-3px); /* Уменьшено с -5px */
 }
 
 .advantage-icon {
-    font-size: 40px;
-    margin-bottom: 12px;
+    font-size: 32px; /* Уменьшено с 40px */
+    margin-bottom: 8px; /* Уменьшено с 12px */
     display: inline-block;
+    line-height: 1;
 }
 
 .headshot {
@@ -1544,16 +944,19 @@ body {
 }
 
 .advantage-card h4 {
-    font-size: 16px;
-    font-weight: 800;
-    margin-bottom: 8px;
+    font-size: 14px; /* Уменьшено с 16px */
+    font-weight: 700; /* Уменьшено с 800 */
+    margin-bottom: 4px; /* Уменьшено с 8px */
     color: var(--text-primary);
+    line-height: 1.2;
 }
 
 .advantage-card p {
-    font-size: 12px;
+    font-size: 11px; /* Уменьшено с 12px */
     color: var(--text-secondary);
-    line-height: 1.4;
+    line-height: 1.3;
+    max-width: 90%;
+    margin: 0 auto;
 }
 
 /* Нижняя навигация */
@@ -2092,12 +1495,6 @@ body {
         height: 20px;
         font-size: 9px;
     }
-
-    .stats-grid-scroll .stat-card {
-        width: 130px;
-        min-width: 130px;
-        padding: 12px;
-    }
 }
 
 @media (min-width: 768px) {
@@ -2123,35 +1520,16 @@ body {
 
 /* Анимации */
 @keyframes float {
-
-    0%,
-    100% {
+    0%, 100% {
         transform: translateY(0);
     }
-
     50% {
         transform: translateY(-5px);
     }
 }
 
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
 .floating {
     animation: float 3s ease-in-out infinite;
-}
-
-.stat-card {
-    animation: slideIn 0.3s ease-out;
 }
 
 /* Стили для скролла */
