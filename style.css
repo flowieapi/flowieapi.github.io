@@ -1,14 +1,13 @@
-/* Стиль Glassmorphism - iOS стиль */
+/* PUBG Mobile Стиль - ФЛОУИ VPN */
 :root {
-    --primary-green: #00ff88;
-    --secondary-green: #00cc6a;
-    --dark-green: #008844;
-    --glass-bg: rgba(255, 255, 255, 0.1);
-    --glass-border: rgba(255, 255, 255, 0.2);
-    --glass-shadow: rgba(0, 0, 0, 0.1);
-    --text-primary: #ffffff;
-    --text-secondary: rgba(255, 255, 255, 0.8);
-    --bg-gradient: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+    --pubg-green: #00ff00;
+    --pubg-dark: #0f1419;
+    --pubg-gray: #1a1f25;
+    --pubg-light: #2d3748;
+    --pubg-red: #ff3333;
+    --pubg-blue: #00ccff;
+    --pubg-yellow: #ffff00;
+    --pubg-accent: #00ff00;
 }
 
 * {
@@ -20,34 +19,18 @@
 
 body {
     font-family: 'Rajdhani', 'Arial Narrow', Arial, sans-serif;
-    background: var(--bg-gradient);
-    color: var(--text-primary);
+    background: linear-gradient(180deg, var(--pubg-dark) 0%, #111827 100%);
+    color: #e2e8f0;
     min-height: 100vh;
     padding-bottom: 70px;
     overflow-x: hidden;
-    backdrop-filter: blur(20px);
-}
-
-/* Glassmorphism эффекты */
-.glass {
-    background: var(--glass-bg);
-    backdrop-filter: blur(20px);
-    border: 1px solid var(--glass-border);
-    border-radius: 20px;
-    box-shadow: 0 8px 32px var(--glass-shadow);
-}
-
-.glass-light {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* PUBG Header */
 .pubg-header {
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(30px);
-    border-bottom: 1px solid var(--glass-border);
+    background: linear-gradient(180deg, rgba(15, 20, 25, 0.95) 0%, rgba(15, 20, 25, 0.85) 100%);
+    backdrop-filter: blur(10px);
+    border-bottom: 2px solid var(--pubg-accent);
     padding: 12px 16px;
     position: sticky;
     top: 0;
@@ -69,22 +52,25 @@ body {
 
 .logo-icon {
     font-size: 36px;
-    color: var(--primary-green);
-    filter: drop-shadow(0 0 10px var(--primary-green));
+    background: linear-gradient(45deg, #00ff00, #00ffaa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 2px 4px rgba(0, 255, 0, 0.4));
 }
 
 .logo-text h1 {
     font-size: 22px;
     font-weight: 800;
     letter-spacing: 1px;
-    background: linear-gradient(45deg, var(--primary-green), var(--secondary-green));
+    background: linear-gradient(45deg, #00ff00, #00ffaa);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .tagline {
     font-size: 11px;
-    color: var(--text-secondary);
+    color: #94a3b8;
     font-weight: 600;
     letter-spacing: 0.5px;
     text-transform: uppercase;
@@ -100,25 +86,24 @@ body {
     display: flex;
     align-items: center;
     gap: 6px;
-    background: rgba(0, 255, 136, 0.1);
+    background: rgba(0, 255, 0, 0.1);
     padding: 6px 12px;
     border-radius: 20px;
-    border: 1px solid rgba(0, 255, 136, 0.2);
+    border: 1px solid rgba(0, 255, 0, 0.3);
 }
 
 .stat-item i {
-    color: var(--primary-green);
+    color: var(--pubg-accent);
     font-size: 14px;
 }
 
 .stat-item span {
     font-size: 12px;
     font-weight: 700;
-    color: var(--primary-green);
 }
 
 #current-ping {
-    color: var(--primary-green);
+    color: #00ff00;
 }
 
 .player-avatar {
@@ -133,14 +118,14 @@ body {
 .avatar-placeholder {
     width: 45px;
     height: 45px;
-    background: linear-gradient(45deg, rgba(0, 255, 136, 0.2), rgba(0, 204, 106, 0.3));
+    background: linear-gradient(45deg, #1a202c, #2d3748);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 2px solid var(--primary-green);
+    border: 2px solid var(--pubg-accent);
     font-size: 20px;
-    color: white;
+    color: #e2e8f0;
     overflow: hidden;
 }
 
@@ -155,8 +140,8 @@ body {
     position: absolute;
     bottom: -5px;
     right: -5px;
-    background: var(--primary-green);
-    color: black;
+    background: var(--pubg-accent);
+    color: white;
     width: 22px;
     height: 22px;
     border-radius: 50%;
@@ -165,7 +150,7 @@ body {
     justify-content: center;
     font-size: 10px;
     font-weight: 800;
-    border: 2px solid rgba(0, 0, 0, 0.8);
+    border: 2px solid var(--pubg-dark);
     z-index: 2;
 }
 
@@ -175,8 +160,7 @@ body {
     align-items: center;
     background: rgba(255, 255, 255, 0.05);
     padding: 8px 12px;
-    border-radius: 12px;
-    backdrop-filter: blur(10px);
+    border-radius: 8px;
 }
 
 .status-indicator {
@@ -188,49 +172,48 @@ body {
 .status-dot {
     width: 8px;
     height: 8px;
-    background: var(--primary-green);
+    background: #00ff00;
     border-radius: 50%;
     animation: pulse 2s infinite;
-    filter: drop-shadow(0 0 5px var(--primary-green));
 }
 
 .status-indicator span {
     font-size: 13px;
-    color: var(--text-secondary);
+    color: #cbd5e1;
 }
 
 .status-indicator strong {
-    color: var(--primary-green);
+    color: #00ff00;
 }
 
 .btn-change-server {
-    background: rgba(0, 255, 136, 0.1);
-    border: 1px solid rgba(0, 255, 136, 0.3);
-    color: var(--primary-green);
+    background: rgba(0, 255, 0, 0.2);
+    border: 1px solid rgba(0, 255, 0, 0.4);
+    color: var(--pubg-accent);
     width: 32px;
     height: 32px;
-    border-radius: 10px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     transition: all 0.2s;
-    backdrop-filter: blur(10px);
 }
 
 .btn-change-server:active {
-    background: rgba(0, 255, 136, 0.2);
+    background: rgba(0, 255, 0, 0.4);
     transform: scale(0.95);
 }
 
 @keyframes pulse {
-    0%, 100% { 
+
+    0%,
+    100% {
         opacity: 1;
-        transform: scale(1);
     }
-    50% { 
+
+    50% {
         opacity: 0.5;
-        transform: scale(1.1);
     }
 }
 
@@ -241,12 +224,11 @@ body {
 
 /* Приветственная секция */
 .welcome-section {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(20px);
-    border-radius: 24px;
+    background: linear-gradient(135deg, rgba(26, 32, 44, 0.9) 0%, rgba(45, 55, 72, 0.9) 100%);
+    border-radius: 16px;
     padding: 20px;
     margin-bottom: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(0, 255, 0, 0.2);
     position: relative;
     overflow: hidden;
 }
@@ -258,7 +240,7 @@ body {
     right: 0;
     width: 100px;
     height: 100px;
-    background: radial-gradient(circle, rgba(0, 255, 136, 0.1) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(0, 255, 0, 0.1) 0%, transparent 70%);
     border-radius: 50%;
 }
 
@@ -270,23 +252,22 @@ body {
 }
 
 .highlight {
-    color: var(--primary-green);
-    text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+    color: var(--pubg-accent);
+    text-shadow: 0 2px 4px rgba(0, 255, 0, 0.4);
 }
 
 .subtitle {
-    color: var(--text-secondary);
+    color: #94a3b8;
     font-size: 14px;
     margin-bottom: 20px;
 }
 
 .connection-widget {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 20px;
-    padding: 20px;
+    background: rgba(15, 20, 25, 0.7);
+    border-radius: 12px;
+    padding: 16px;
     margin-bottom: 20px;
     border: 1px solid rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
 }
 
 .ping-display {
@@ -297,16 +278,15 @@ body {
 .ping-value {
     font-size: 48px;
     font-weight: 800;
-    background: linear-gradient(45deg, var(--primary-green), var(--secondary-green));
+    background: linear-gradient(45deg, #00ff00, #00cc00);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     line-height: 1;
     margin-bottom: 4px;
-    filter: drop-shadow(0 0 10px rgba(0, 255, 136, 0.3));
 }
 
 .ping-label {
-    color: var(--text-secondary);
+    color: #94a3b8;
     font-size: 12px;
     font-weight: 600;
     text-transform: uppercase;
@@ -320,28 +300,28 @@ body {
 }
 
 .btn-connect-vpn {
-    background: linear-gradient(45deg, var(--primary-green), var(--secondary-green));
+    background: linear-gradient(45deg, #00aa00, #00ff00);
     border: none;
-    border-radius: 16px;
-    padding: 18px;
+    border-radius: 12px;
+    padding: 16px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     cursor: pointer;
     transition: all 0.2s;
-    box-shadow: 0 4px 20px rgba(0, 255, 136, 0.3);
+    box-shadow: 0 4px 12px rgba(0, 255, 0, 0.4);
 }
 
 .btn-connect-vpn:active {
     transform: translateY(2px);
-    box-shadow: 0 2px 10px rgba(0, 255, 136, 0.3);
+    box-shadow: 0 2px 6px rgba(0, 255, 0, 0.4);
 }
 
 .btn-content {
     display: flex;
     align-items: center;
     gap: 12px;
-    color: black;
+    color: white;
     font-weight: 700;
     font-size: 16px;
 }
@@ -360,26 +340,6 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.server-selector select {
-    width: 100%;
-    padding: 14px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
-    color: white;
-    font-family: inherit;
-    font-weight: 600;
-    font-size: 14px;
-    cursor: pointer;
-    appearance: none;
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2300ff88'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
-    background-repeat: no-repeat;
-    background-position: right 16px center;
-    background-size: 20px;
-    padding-right: 48px;
-    backdrop-filter: blur(10px);
-}
-
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -388,18 +348,17 @@ body {
 
 .stat-card {
     background: rgba(255, 255, 255, 0.05);
-    border-radius: 16px;
+    border-radius: 12px;
     padding: 12px;
     display: flex;
     align-items: center;
     gap: 12px;
     border: 1px solid rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
 }
 
 .stat-card i {
     font-size: 20px;
-    color: var(--primary-green);
+    color: var(--pubg-accent);
 }
 
 .stat-info {
@@ -416,7 +375,7 @@ body {
 
 .stat-name {
     font-size: 10px;
-    color: var(--text-secondary);
+    color: #94a3b8;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-top: 2px;
@@ -438,11 +397,11 @@ body {
 }
 
 .section-title i {
-    color: var(--primary-green);
+    color: var(--pubg-accent);
 }
 
 .section-subtitle {
-    color: var(--text-secondary);
+    color: #94a3b8;
     font-size: 14px;
     margin-bottom: 20px;
 }
@@ -454,11 +413,10 @@ body {
 }
 
 .vpn-category-card {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(20px);
-    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(26, 32, 44, 0.9) 0%, rgba(45, 55, 72, 0.9) 100%);
+    border-radius: 16px;
     padding: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 2px solid transparent;
     transition: all 0.3s;
     position: relative;
     overflow: hidden;
@@ -471,19 +429,19 @@ body {
     left: 0;
     right: 0;
     height: 4px;
-    background: linear-gradient(90deg, var(--primary-green), transparent);
+    background: linear-gradient(90deg, var(--pubg-accent), transparent);
 }
 
 .vpn-category-card.cheap::before {
-    background: linear-gradient(90deg, var(--primary-green), transparent);
+    background: linear-gradient(90deg, #00ff00, transparent);
 }
 
 .vpn-category-card.medium::before {
-    background: linear-gradient(90deg, var(--primary-green), transparent);
+    background: linear-gradient(90deg, #00ccff, transparent);
 }
 
 .vpn-category-card.vip::before {
-    background: linear-gradient(90deg, var(--primary-green), transparent);
+    background: linear-gradient(90deg, #ffff00, transparent);
 }
 
 .category-header {
@@ -501,7 +459,6 @@ body {
 
 .category-icon {
     font-size: 28px;
-    color: var(--primary-green);
 }
 
 .category-name h3 {
@@ -513,7 +470,7 @@ body {
 .category-price {
     font-size: 24px;
     font-weight: 800;
-    color: var(--primary-green);
+    color: var(--pubg-accent);
 }
 
 .category-features {
@@ -530,7 +487,7 @@ body {
 }
 
 .feature-item i {
-    color: var(--primary-green);
+    color: #00ff00;
     font-size: 12px;
     min-width: 16px;
 }
@@ -539,7 +496,7 @@ body {
     width: 100%;
     padding: 14px;
     border: none;
-    border-radius: 16px;
+    border-radius: 12px;
     font-weight: 700;
     font-size: 16px;
     cursor: pointer;
@@ -548,8 +505,21 @@ body {
     justify-content: center;
     align-items: center;
     gap: 10px;
-    background: linear-gradient(45deg, var(--primary-green), var(--secondary-green));
-    color: black;
+}
+
+.btn-cheap {
+    background: #00aa00;
+    color: white;
+}
+
+.btn-medium {
+    background: #0088cc;
+    color: white;
+}
+
+.btn-vip {
+    background: linear-gradient(45deg, #ffaa00, #ffcc00);
+    color: white;
 }
 
 .category-btn:active {
@@ -558,12 +528,11 @@ body {
 
 /* Активная подписка */
 .active-subscription {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(20px);
-    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(26, 32, 44, 0.9) 0%, rgba(45, 55, 72, 0.9) 100%);
+    border-radius: 16px;
     padding: 20px;
     margin-bottom: 24px;
-    border: 1px solid rgba(0, 255, 136, 0.3);
+    border: 2px solid var(--pubg-accent);
 }
 
 .subscription-header {
@@ -583,22 +552,20 @@ body {
 }
 
 .btn-upgrade {
-    background: rgba(0, 255, 136, 0.1);
-    border: 1px solid var(--primary-green);
-    color: var(--primary-green);
+    background: rgba(0, 255, 0, 0.2);
+    border: 1px solid var(--pubg-accent);
+    color: var(--pubg-accent);
     padding: 8px 16px;
-    border-radius: 16px;
+    border-radius: 20px;
     font-weight: 700;
     font-size: 14px;
     cursor: pointer;
-    backdrop-filter: blur(10px);
 }
 
 .subscription-card {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 16px;
+    background: rgba(15, 20, 25, 0.5);
+    border-radius: 12px;
     padding: 16px;
-    backdrop-filter: blur(10px);
 }
 
 .sub-info {
@@ -611,12 +578,12 @@ body {
 .sub-name {
     font-size: 20px;
     font-weight: 800;
-    color: var(--primary-green);
+    color: var(--pubg-accent);
 }
 
 .sub-badge {
-    background: var(--primary-green);
-    color: black;
+    background: #00aa00;
+    color: white;
     padding: 4px 12px;
     border-radius: 20px;
     font-size: 12px;
@@ -636,7 +603,7 @@ body {
 }
 
 .feature i {
-    color: var(--primary-green);
+    color: #00ff00;
 }
 
 .sub-stats {
@@ -653,7 +620,7 @@ body {
 
 .stat-icon {
     font-size: 24px;
-    color: var(--primary-green);
+    color: var(--pubg-accent);
 }
 
 .stat-data {
@@ -669,7 +636,7 @@ body {
 
 .stat-label {
     font-size: 11px;
-    color: var(--text-secondary);
+    color: #94a3b8;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -686,9 +653,8 @@ body {
 }
 
 .advantage-card {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(20px);
-    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(26, 32, 44, 0.9) 0%, rgba(45, 55, 72, 0.9) 100%);
+    border-radius: 16px;
     padding: 20px;
     text-align: center;
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -698,23 +664,22 @@ body {
     font-size: 40px;
     margin-bottom: 12px;
     display: inline-block;
-    color: var(--primary-green);
 }
 
 .headshot {
-    color: var(--primary-green);
+    color: #ff3333;
 }
 
 .damage {
-    color: var(--primary-green);
+    color: #ff3333;
 }
 
 .lag {
-    color: var(--primary-green);
+    color: #00ccff;
 }
 
 .win {
-    color: var(--primary-green);
+    color: #00ff00;
 }
 
 .advantage-card h4 {
@@ -726,7 +691,7 @@ body {
 
 .advantage-card p {
     font-size: 12px;
-    color: var(--text-secondary);
+    color: #94a3b8;
     line-height: 1.4;
 }
 
@@ -736,9 +701,9 @@ body {
     bottom: 0;
     left: 0;
     right: 0;
-    background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(30px);
-    border-top: 1px solid var(--glass-border);
+    background: rgba(15, 20, 25, 0.95);
+    backdrop-filter: blur(20px);
+    border-top: 2px solid var(--pubg-accent);
     display: flex;
     justify-content: space-around;
     padding: 12px 16px;
@@ -748,14 +713,14 @@ body {
 .nav-btn {
     background: none;
     border: none;
-    color: var(--text-secondary);
+    color: #94a3b8;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 4px;
     cursor: pointer;
     padding: 8px;
-    border-radius: 16px;
+    border-radius: 12px;
     transition: all 0.2s;
     flex: 1;
     max-width: 64px;
@@ -773,8 +738,8 @@ body {
 }
 
 .nav-btn.active {
-    color: var(--primary-green);
-    background: rgba(0, 255, 136, 0.1);
+    color: var(--pubg-accent);
+    background: rgba(0, 255, 0, 0.1);
 }
 
 .nav-btn:active {
@@ -789,7 +754,7 @@ body {
     right: 0;
     bottom: 0;
     background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(20px);
+    backdrop-filter: blur(10px);
     display: flex;
     align-items: flex-end;
     justify-content: center;
@@ -805,15 +770,13 @@ body {
 }
 
 .pubg-modal {
-    background: rgba(26, 26, 26, 0.95);
-    backdrop-filter: blur(40px);
+    background: linear-gradient(180deg, var(--pubg-dark) 0%, #1a202c 100%);
     width: 100%;
     border-radius: 24px 24px 0 0;
     transform: translateY(100%);
     transition: transform 0.3s;
     max-height: 80vh;
     overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .modal-overlay.active .pubg-modal {
@@ -822,11 +785,11 @@ body {
 
 .modal-header {
     padding: 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 2px solid var(--pubg-accent);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(15, 20, 25, 0.9);
 }
 
 .modal-header h3 {
@@ -839,18 +802,17 @@ body {
 }
 
 .close-modal {
-    background: rgba(0, 255, 136, 0.1);
+    background: rgba(0, 255, 0, 0.2);
     border: none;
-    color: var(--primary-green);
+    color: var(--pubg-accent);
     width: 36px;
     height: 36px;
-    border-radius: 12px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     font-size: 18px;
-    backdrop-filter: blur(10px);
 }
 
 .modal-body {
@@ -866,26 +828,24 @@ body {
 
 .payment-info {
     padding: 20px;
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(15, 20, 25, 0.5);
     margin-bottom: 20px;
 }
 
 .payment-details {
-    background: rgba(0, 255, 136, 0.1);
-    border: 1px solid rgba(0, 255, 136, 0.2);
-    border-radius: 16px;
+    background: rgba(0, 255, 0, 0.1);
+    border: 1px solid rgba(0, 255, 0, 0.3);
+    border-radius: 12px;
     padding: 16px;
     margin-bottom: 20px;
-    backdrop-filter: blur(10px);
 }
 
 .bank-card {
     background: rgba(255, 255, 255, 0.05);
-    border-radius: 16px;
+    border-radius: 12px;
     padding: 16px;
     margin-bottom: 16px;
     border: 1px solid rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
 }
 
 .card-number {
@@ -897,16 +857,15 @@ body {
     margin: 12px 0;
     background: rgba(0, 0, 0, 0.3);
     padding: 12px;
-    border-radius: 12px;
+    border-radius: 8px;
     text-align: center;
-    backdrop-filter: blur(10px);
 }
 
 .card-info {
     display: flex;
     justify-content: space-between;
     font-size: 14px;
-    color: var(--text-secondary);
+    color: #94a3b8;
 }
 
 .payment-steps {
@@ -920,15 +879,14 @@ body {
     margin-bottom: 16px;
     padding: 12px;
     background: rgba(255, 255, 255, 0.05);
-    border-radius: 16px;
-    backdrop-filter: blur(10px);
+    border-radius: 12px;
 }
 
 .step-number {
     width: 32px;
     height: 32px;
-    background: var(--primary-green);
-    color: black;
+    background: var(--pubg-accent);
+    color: white;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -941,21 +899,20 @@ body {
     font-size: 16px;
     font-weight: 600;
     margin-bottom: 4px;
-    color: white;
 }
 
 .step-content p {
     font-size: 12px;
-    color: var(--text-secondary);
+    color: #94a3b8;
 }
 
 .btn-pay-now {
     width: 100%;
     padding: 16px;
-    background: linear-gradient(45deg, var(--primary-green), var(--secondary-green));
+    background: linear-gradient(45deg, #00aa00, #00ff00);
     border: none;
-    border-radius: 16px;
-    color: black;
+    border-radius: 12px;
+    color: white;
     font-size: 18px;
     font-weight: 700;
     cursor: pointer;
@@ -964,7 +921,6 @@ body {
     justify-content: center;
     gap: 12px;
     margin-top: 20px;
-    box-shadow: 0 4px 20px rgba(0, 255, 136, 0.3);
 }
 
 /* Загрузка чека */
@@ -973,24 +929,23 @@ body {
 }
 
 .upload-area {
-    border: 2px dashed rgba(0, 255, 136, 0.3);
-    border-radius: 20px;
+    border: 2px dashed rgba(0, 255, 0, 0.5);
+    border-radius: 16px;
     padding: 40px 20px;
     text-align: center;
     cursor: pointer;
     margin-bottom: 20px;
     transition: all 0.3s;
-    backdrop-filter: blur(10px);
 }
 
 .upload-area:hover {
-    background: rgba(0, 255, 136, 0.05);
-    border-color: var(--primary-green);
+    background: rgba(0, 255, 0, 0.05);
+    border-color: var(--pubg-accent);
 }
 
 .upload-area i {
     font-size: 48px;
-    color: var(--primary-green);
+    color: var(--pubg-accent);
     margin-bottom: 16px;
 }
 
@@ -1003,23 +958,22 @@ body {
 
 .file-size {
     font-size: 12px;
-    color: var(--text-secondary);
+    color: #94a3b8;
 }
 
 .selected-file {
-    background: rgba(0, 255, 136, 0.1);
-    border: 1px solid rgba(0, 255, 136, 0.3);
-    border-radius: 16px;
+    background: rgba(0, 170, 0, 0.1);
+    border: 1px solid rgba(0, 170, 0, 0.3);
+    border-radius: 12px;
     padding: 16px;
     display: flex;
     align-items: center;
     gap: 12px;
     margin-bottom: 20px;
-    backdrop-filter: blur(10px);
 }
 
 .selected-file i {
-    color: var(--primary-green);
+    color: #00aa00;
     font-size: 20px;
 }
 
@@ -1030,25 +984,23 @@ body {
 }
 
 .btn-remove {
-    background: rgba(255, 59, 48, 0.2);
-    border: 1px solid rgba(255, 59, 48, 0.4);
-    color: #ff3b30;
+    background: rgba(255, 51, 51, 0.2);
+    border: 1px solid rgba(255, 51, 51, 0.4);
+    color: #ff3333;
     width: 32px;
     height: 32px;
-    border-radius: 10px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    backdrop-filter: blur(10px);
 }
 
 .payment-instructions {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 16px;
+    background: rgba(15, 20, 25, 0.5);
+    border-radius: 12px;
     padding: 16px;
     margin-bottom: 20px;
-    backdrop-filter: blur(10px);
 }
 
 .payment-instructions h4 {
@@ -1066,16 +1018,16 @@ body {
 .payment-instructions li {
     margin-bottom: 8px;
     font-size: 14px;
-    color: var(--text-secondary);
+    color: #94a3b8;
 }
 
 .btn-submit-receipt {
     width: 100%;
     padding: 16px;
-    background: linear-gradient(45deg, var(--primary-green), var(--secondary-green));
+    background: linear-gradient(45deg, #00aa00, #00ff00);
     border: none;
-    border-radius: 16px;
-    color: black;
+    border-radius: 12px;
+    color: white;
     font-size: 16px;
     font-weight: 700;
     cursor: pointer;
@@ -1084,14 +1036,12 @@ body {
     justify-content: center;
     gap: 12px;
     transition: all 0.2s;
-    box-shadow: 0 4px 20px rgba(0, 255, 136, 0.3);
 }
 
 .btn-submit-receipt:disabled {
-    background: rgba(255, 255, 255, 0.1);
-    color: var(--text-secondary);
+    background: #4a5568;
     cursor: not-allowed;
-    box-shadow: none;
+    opacity: 0.5;
 }
 
 .btn-submit-receipt:not(:disabled):active {
@@ -1104,8 +1054,7 @@ body {
 }
 
 .purchase-item {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(20px);
+    background: linear-gradient(135deg, rgba(26, 32, 44, 0.9) 0%, rgba(45, 55, 72, 0.9) 100%);
     border-radius: 16px;
     padding: 16px;
     margin-bottom: 12px;
@@ -1133,21 +1082,21 @@ body {
 }
 
 .status-pending {
-    background: rgba(255, 204, 0, 0.1);
-    color: #ffcc00;
-    border: 1px solid rgba(255, 204, 0, 0.3);
+    background: rgba(245, 158, 11, 0.2);
+    color: #f59e0b;
+    border: 1px solid rgba(245, 158, 11, 0.3);
 }
 
 .status-confirmed {
-    background: rgba(0, 255, 136, 0.1);
-    color: var(--primary-green);
-    border: 1px solid rgba(0, 255, 136, 0.3);
+    background: rgba(0, 170, 0, 0.2);
+    color: #00aa00;
+    border: 1px solid rgba(0, 170, 0, 0.3);
 }
 
 .status-rejected {
-    background: rgba(255, 59, 48, 0.1);
-    color: #ff3b30;
-    border: 1px solid rgba(255, 59, 48, 0.3);
+    background: rgba(255, 51, 51, 0.2);
+    color: #ff3333;
+    border: 1px solid rgba(255, 51, 51, 0.3);
 }
 
 .purchase-details {
@@ -1159,7 +1108,7 @@ body {
 
 .purchase-detail {
     font-size: 12px;
-    color: var(--text-secondary);
+    color: #94a3b8;
 }
 
 .purchase-detail strong {
@@ -1174,38 +1123,36 @@ body {
 
 .no-subscription i {
     font-size: 48px;
-    color: var(--primary-green);
+    color: var(--pubg-accent);
     margin-bottom: 16px;
 }
 
 .no-subscription p {
-    color: var(--text-secondary);
+    color: #94a3b8;
     margin-bottom: 24px;
     font-size: 16px;
 }
 
 .btn-buy {
-    background: linear-gradient(45deg, var(--primary-green), var(--secondary-green));
+    background: linear-gradient(45deg, #00aa00, #00ff00);
     border: none;
-    border-radius: 16px;
+    border-radius: 12px;
     padding: 16px 32px;
-    color: black;
+    color: white;
     font-size: 16px;
     font-weight: 700;
     cursor: pointer;
-    box-shadow: 0 4px 20px rgba(0, 255, 136, 0.3);
 }
 
 .no-purchases {
     text-align: center;
     padding: 40px 20px;
-    color: var(--text-secondary);
+    color: #94a3b8;
 }
 
 .no-purchases i {
     font-size: 48px;
     margin-bottom: 16px;
-    color: var(--primary-green);
 }
 
 /* Уведомления */
@@ -1214,19 +1161,18 @@ body {
     top: 20px;
     left: 50%;
     transform: translateX(-50%) translateY(-100px);
-    background: linear-gradient(90deg, var(--primary-green), var(--secondary-green));
-    color: black;
+    background: linear-gradient(90deg, #00aa00, #00ff00);
+    color: white;
     padding: 12px 24px;
     border-radius: 25px;
     font-weight: 700;
     z-index: 3000;
-    box-shadow: 0 4px 20px rgba(0, 255, 136, 0.4);
+    box-shadow: 0 4px 20px rgba(0, 255, 0, 0.4);
     display: flex;
     align-items: center;
     gap: 10px;
     transition: all 0.3s;
     opacity: 0;
-    backdrop-filter: blur(20px);
 }
 
 .pubg-notification.show {
@@ -1249,21 +1195,21 @@ body {
     .logo-text h1 {
         font-size: 18px;
     }
-    
+
     .ping-value {
         font-size: 36px;
     }
-    
+
     .advantages-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .avatar-placeholder {
         width: 40px;
         height: 40px;
         font-size: 18px;
     }
-    
+
     .player-level {
         width: 20px;
         height: 20px;
@@ -1278,13 +1224,13 @@ body {
         box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
         min-height: 100vh;
     }
-    
+
     .pubg-nav {
         max-width: 500px;
         left: 50%;
         transform: translateX(-50%);
     }
-    
+
     .pubg-modal {
         max-width: 500px;
         margin: 0 auto;
@@ -1294,8 +1240,15 @@ body {
 
 /* Анимации */
 @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-5px); }
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-5px);
+    }
 }
 
 .floating {
@@ -1309,12 +1262,11 @@ body {
 
 ::-webkit-scrollbar-track {
     background: rgba(255, 255, 255, 0.05);
-    border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: var(--primary-green);
-    border-radius: 10px;
+    background: var(--pubg-accent);
+    border-radius: 3px;
 }
 
 /* Улучшение для мобильных */
@@ -1322,21 +1274,21 @@ body {
     .pubg-header {
         padding: 8px 16px;
     }
-    
+
     .pubg-main {
         padding: 12px;
         padding-bottom: 60px;
     }
-    
+
     .welcome-section {
         padding: 16px;
         margin-bottom: 16px;
     }
-    
+
     .advantages-grid {
         grid-template-columns: repeat(4, 1fr);
     }
-    
+
     .pubg-nav {
         padding: 8px;
     }
@@ -1356,30 +1308,54 @@ body {
 }
 
 /* Отключение выделения на кнопках */
-button, .nav-btn, .category-btn {
+button,
+.nav-btn,
+.category-btn {
     user-select: none;
     -webkit-user-select: none;
 }
 
 /* Плавные переходы */
-button, .nav-btn, .category-btn, .modal-overlay, .pubg-notification {
+button,
+.nav-btn,
+.category-btn,
+.modal-overlay,
+.pubg-notification {
     transition: all 0.2s ease;
 }
 
-/* Эффект свечения */
-.glow {
-    box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+/* Стили для горизонтальной прокрутки статистики */
+.stats-grid-container {
+    overflow-x: auto;
+    margin: 0 -16px;
+    padding: 0 16px;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
 }
 
-.glow-text {
-    text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+.stats-grid-container::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
 }
 
-/* Стеклянный эффект для карточек */
-.glass-card {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(20px);
-    border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+.stats-grid-scroll {
+    display: flex;
+    gap: 12px;
+    padding-bottom: 10px;
+    width: max-content;
+    min-width: 100%;
+}
+
+.stats-grid-scroll .stat-card {
+    flex: 0 0 auto;
+    width: 150px;
+    min-width: 150px;
+    padding: 16px;
+}
+
+/* Улучшаем отображение на мобильных */
+@media (max-width: 380px) {
+    .stats-grid-scroll .stat-card {
+        width: 140px;
+        min-width: 140px;
+    }
 }
