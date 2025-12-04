@@ -2,237 +2,313 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ФЛОУИ VPN - PUBG Mobile</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
 </head>
 <body>
-    <!-- Шапка -->
-    <header class="header">
-        <div class="container">
-            <div class="logo">
-                <div class="logo-icon">🚀</div>
-                <h1>ФЛОУИ <span class="highlight">VPN</span></h1>
-                <div class="badge">PUBG MOBILE</div>
-            </div>
-            <div class="user-mini">
-                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=user1" alt="Аватар" class="avatar-small">
-            </div>
-        </div>
-    </header>
-
+    <!-- Фон с градиентом -->
+    <div class="background"></div>
+    
     <!-- Контент -->
-    <main class="main-content">
-        <div class="container">
-            <!-- Виджет проверки пинга -->
-            <section class="ping-widget card">
-                <h2><i class="fas fa-wifi"></i> Проверка пинга</h2>
-                <div class="ping-display">
-                    <div class="ping-value" id="pingValue">--</div>
-                    <div class="ping-label">мс</div>
+    <div class="app-container">
+        <!-- Шапка -->
+        <header class="glass-header">
+            <div class="header-content">
+                <div class="logo-container">
+                    <div class="logo-pulse">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <div class="logo-text">
+                        <h1>ФЛОУИ <span class="gradient-text">VPN</span></h1>
+                        <p class="logo-subtitle">PUBG MOBILE OPTIMIZED</p>
+                    </div>
                 </div>
-                <p class="ping-description">Текущий пинг в PUBG Mobile</p>
-                <button class="btn btn-primary btn-block" id="checkPingBtn">
-                    <i class="fas fa-sync-alt"></i> Проверить пинг
+                <div class="header-actions">
+                    <div class="user-avatar">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=user1&backgroundType=gradientLinear" alt="Аватар">
+                        <span class="online-dot"></span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Основной контент -->
+        <main class="main-content">
+            <!-- Виджет пинга -->
+            <section class="glass-card ping-widget animate__animated animate__fadeIn">
+                <div class="card-header">
+                    <h2><i class="fas fa-wifi"></i> Проверка пинга</h2>
+                    <div class="ping-badge">
+                        <i class="fas fa-chart-line"></i> LIVE
+                    </div>
+                </div>
+                <div class="ping-display">
+                    <div class="ping-circle">
+                        <div class="ping-value" id="pingValue">--</div>
+                        <div class="ping-label">мс</div>
+                        <div class="ping-ring"></div>
+                    </div>
+                    <p class="ping-description">Текущая задержка в PUBG Mobile</p>
+                </div>
+                <button class="glass-btn btn-primary btn-ping" id="checkPingBtn">
+                    <i class="fas fa-sync-alt"></i> Проверить сейчас
                 </button>
                 <div class="ping-status">
-                    <div class="status-indicator excellent"></div>
-                    <span class="status-text">Отличное соединение</span>
+                    <div class="status-indicators">
+                        <div class="status-indicator excellent active"></div>
+                        <div class="status-indicator good"></div>
+                        <div class="status-indicator normal"></div>
+                    </div>
+                    <span class="status-text">Идеальное соединение</span>
                 </div>
             </section>
 
-            <!-- Тарифы VPN -->
-            <section class="tariffs">
-                <h2 class="section-title"><i class="fas fa-crown"></i> Выберите ваш VPN</h2>
-                
-                <div class="tariff-cards">
+            <!-- Тарифы -->
+            <section class="tariffs-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-crown"></i> Выберите свой VPN</h2>
+                    <p class="section-subtitle">Оптимизировано для PUBG Mobile</p>
+                </div>
+
+                <div class="tariffs-container">
                     <!-- Лайт VPN -->
-                    <div class="tariff-card">
+                    <div class="glass-card tariff-card animate__animated animate__fadeInUp" style="--card-color: #00ff88;">
+                        <div class="tariff-badge">ПОПУЛЯРНО</div>
                         <div class="tariff-header">
-                            <div class="tariff-icon" style="background: #4CAF50;">
+                            <div class="tariff-icon">
                                 <i class="fas fa-bolt"></i>
                             </div>
                             <h3>Лайт VPN</h3>
-                            <div class="tariff-price">299 ₽<span>/месяц</span></div>
+                            <div class="tariff-price">
+                                <span class="price">299</span>
+                                <span class="currency">₽/мес</span>
+                            </div>
                         </div>
                         <div class="tariff-features">
                             <div class="feature">
-                                <i class="fas fa-check-circle" style="color: #4CAF50;"></i>
-                                <span>Уменьшение пинга 30-50мс</span>
+                                <i class="fas fa-check-circle"></i>
+                                <span>Пинг: -30-50мс</span>
                             </div>
                             <div class="feature">
-                                <i class="fas fa-check-circle" style="color: #4CAF50;"></i>
+                                <i class="fas fa-check-circle"></i>
                                 <span>Лучшая регистрация урона</span>
                             </div>
                             <div class="feature">
-                                <i class="fas fa-check-circle" style="color: #4CAF50;"></i>
+                                <i class="fas fa-check-circle"></i>
                                 <span>Серверы в РФ и Европе</span>
                             </div>
+                            <div class="feature">
+                                <i class="fas fa-check-circle"></i>
+                                <span>24/7 Поддержка</span>
+                            </div>
                         </div>
-                        <button class="btn btn-outline btn-block buy-btn" data-plan="light">
-                            <i class="fas fa-shopping-cart"></i> Купить сейчас
+                        <button class="glass-btn btn-outline buy-btn" data-plan="light">
+                            Выбрать тариф
                         </button>
                     </div>
 
                     <!-- Про VPN -->
-                    <div class="tariff-card featured">
-                        <div class="badge-popular">ПОПУЛЯРНЫЙ</div>
+                    <div class="glass-card tariff-card featured animate__animated animate__fadeInUp" style="--card-color: #00ccff;" data-wow-delay="0.2s">
+                        <div class="tariff-badge premium">РЕКОМЕНДУЕМ</div>
                         <div class="tariff-header">
-                            <div class="tariff-icon" style="background: #2196F3;">
+                            <div class="tariff-icon">
                                 <i class="fas fa-rocket"></i>
                             </div>
                             <h3>Про VPN</h3>
-                            <div class="tariff-price">599 ₽<span>/месяц</span></div>
+                            <div class="tariff-price">
+                                <span class="price">599</span>
+                                <span class="currency">₽/мес</span>
+                            </div>
                         </div>
                         <div class="tariff-features">
                             <div class="feature">
-                                <i class="fas fa-check-circle" style="color: #2196F3;"></i>
-                                <span>Высокая скорость соединения</span>
+                                <i class="fas fa-check-circle"></i>
+                                <span>Высокая скорость</span>
                             </div>
                             <div class="feature">
-                                <i class="fas fa-check-circle" style="color: #2196F3;"></i>
-                                <span>Лучшая регистрация урона</span>
-                            </div>
-                            <div class="feature">
-                                <i class="fas fa-check-circle" style="color: #2196F3;"></i>
+                                <i class="fas fa-check-circle"></i>
                                 <span>Больше хедшотов</span>
                             </div>
                             <div class="feature">
-                                <i class="fas fa-check-circle" style="color: #2196F3;"></i>
+                                <i class="fas fa-check-circle"></i>
                                 <span>Приоритет на серверах</span>
                             </div>
+                            <div class="feature">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Авто-оптимизация</span>
+                            </div>
+                            <div class="feature">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Безлимитный трафик</span>
+                            </div>
                         </div>
-                        <button class="btn btn-primary btn-block buy-btn" data-plan="pro">
-                            <i class="fas fa-bolt"></i> Купить сейчас
+                        <button class="glass-btn btn-primary buy-btn" data-plan="pro">
+                            Выбрать тариф
                         </button>
                     </div>
 
                     <!-- Флоуи VPN -->
-                    <div class="tariff-card premium">
+                    <div class="glass-card tariff-card premium animate__animated animate__fadeInUp" style="--card-color: #9d4edd;" data-wow-delay="0.4s">
+                        <div class="tariff-badge vip">PREMIUM</div>
                         <div class="tariff-header">
-                            <div class="tariff-icon" style="background: #9C27B0;">
+                            <div class="tariff-icon">
                                 <i class="fas fa-gem"></i>
                             </div>
                             <h3>Флоуи VPN</h3>
-                            <div class="tariff-price">999 ₽<span>/месяц</span></div>
+                            <div class="tariff-price">
+                                <span class="price">999</span>
+                                <span class="currency">₽/мес</span>
+                            </div>
                         </div>
                         <div class="tariff-features">
                             <div class="feature">
-                                <i class="fas fa-check-circle" style="color: #9C27B0;"></i>
-                                <span>Максимальное уменьшение пинга</span>
+                                <i class="fas fa-check-circle"></i>
+                                <span>Максимальный пинг</span>
                             </div>
                             <div class="feature">
-                                <i class="fas fa-check-circle" style="color: #9C27B0;"></i>
-                                <span>Всё из тарифов Лайт и Про</span>
-                            </div>
-                            <div class="feature">
-                                <i class="fas fa-check-circle" style="color: #9C27B0;"></i>
+                                <i class="fas fa-check-circle"></i>
                                 <span>Эксклюзивные серверы</span>
                             </div>
                             <div class="feature">
-                                <i class="fas fa-check-circle" style="color: #9C27B0;"></i>
-                                <span>Приоритетная поддержка 24/7</span>
+                                <i class="fas fa-check-circle"></i>
+                                <span>Приоритетная поддержка</span>
                             </div>
                             <div class="feature">
-                                <i class="fas fa-check-circle" style="color: #9C27B0;"></i>
-                                <span>Авто-оптимизация под ваш регион</span>
+                                <i class="fas fa-check-circle"></i>
+                                <span>Все фишки Про VPN</span>
+                            </div>
+                            <div class="feature">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Аналитика игры</span>
+                            </div>
+                            <div class="feature">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Персональный менеджер</span>
                             </div>
                         </div>
-                        <button class="btn btn-premium btn-block buy-btn" data-plan="flowi">
+                        <button class="glass-btn btn-premium buy-btn" data-plan="flowi">
                             <i class="fas fa-gem"></i> Премиум доступ
                         </button>
                     </div>
                 </div>
             </section>
 
-            <!-- Информация о преимуществах -->
-            <section class="benefits card">
-                <h2><i class="fas fa-chart-line"></i> Что даёт ФЛОУИ VPN?</h2>
+            <!-- Преимущества -->
+            <section class="benefits-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-star"></i> Преимущества</h2>
+                    <p class="section-subtitle">Почему выбирают нас</p>
+                </div>
+                
                 <div class="benefits-grid">
-                    <div class="benefit">
-                        <div class="benefit-icon" style="background: rgba(0, 255, 0, 0.1);">
-                            <i class="fas fa-tachometer-alt" style="color: #00FF00;"></i>
+                    <div class="glass-card benefit-card">
+                        <div class="benefit-icon">
+                            <i class="fas fa-shield-alt"></i>
                         </div>
-                        <h4>Низкий пинг</h4>
-                        <p>Стабильное соединение 10-33мс для быстрой реакции</p>
+                        <h4>Защита от DDoS</h4>
+                        <p>Полная защита от атак и скрытие реального IP</p>
                     </div>
-                    <div class="benefit">
-                        <div class="benefit-icon" style="background: rgba(33, 150, 243, 0.1);">
-                            <i class="fas fa-crosshairs" style="color: #2196F3;"></i>
+                    
+                    <div class="glass-card benefit-card">
+                        <div class="benefit-icon">
+                            <i class="fas fa-tachometer-alt"></i>
                         </div>
-                        <h4>Точные попадания</h4>
-                        <p>Улучшенная регистрация выстрелов и урона</p>
+                        <h4>Стабильность 99.9%</h4>
+                        <p>Минимальные потери пакетов и стабильное соединение</p>
                     </div>
-                    <div class="benefit">
-                        <div class="benefit-icon" style="background: rgba(156, 39, 176, 0.1);">
-                            <i class="fas fa-shield-alt" style="color: #9C27B0;"></i>
+                    
+                    <div class="glass-card benefit-card">
+                        <div class="benefit-icon">
+                            <i class="fas fa-headset"></i>
                         </div>
-                        <h4>Безопасность</h4>
-                        <p>Защита от DDoS и скрытие реального IP-адреса</p>
+                        <h4>Поддержка 24/7</h4>
+                        <p>Круглосуточная помощь и быстрые ответы</p>
                     </div>
                 </div>
             </section>
-        </div>
-    </main>
+        </main>
 
-    <!-- Навигация -->
-    <nav class="bottom-nav">
-        <a href="index.html" class="nav-item active">
-            <i class="fas fa-vpnlock"></i>
-            <span>VPN</span>
-        </a>
-        <a href="purchases.html" class="nav-item">
-            <i class="fas fa-shopping-bag"></i>
-            <span>Покупки</span>
-        </a>
-        <a href="profile.html" class="nav-item">
-            <i class="fas fa-user"></i>
-            <span>Профиль</span>
-        </a>
-        <a href="settings.html" class="nav-item">
-            <i class="fas fa-cog"></i>
-            <span>Настройки</span>
-        </a>
-    </nav>
+        <!-- Навигация -->
+        <nav class="glass-nav">
+            <a href="index.html" class="nav-item active">
+                <div class="nav-icon">
+                    <i class="fas fa-vpnlock"></i>
+                </div>
+                <span class="nav-label">VPN</span>
+            </a>
+            <a href="purchases.html" class="nav-item">
+                <div class="nav-icon">
+                    <i class="fas fa-shopping-bag"></i>
+                </div>
+                <span class="nav-label">Покупки</span>
+            </a>
+            <a href="profile.html" class="nav-item">
+                <div class="nav-icon">
+                    <i class="fas fa-user"></i>
+                </div>
+                <span class="nav-label">Профиль</span>
+            </a>
+            <a href="settings.html" class="nav-item">
+                <div class="nav-icon">
+                    <i class="fas fa-cog"></i>
+                </div>
+                <span class="nav-label">Настройки</span>
+            </a>
+        </nav>
+    </div>
 
     <!-- Модальное окно покупки -->
-    <div id="buyModal" class="modal">
-        <div class="modal-content">
+    <div id="buyModal" class="modal-overlay">
+        <div class="modal-container glass-card">
             <div class="modal-header">
-                <h3 id="modalTitle">Купить VPN</h3>
-                <button class="close-modal">&times;</button>
+                <h3 id="modalTitle">Оформление заказа</h3>
+                <button class="modal-close">&times;</button>
             </div>
             <div class="modal-body">
-                <div id="modalPlanInfo"></div>
-                <div class="payment-methods">
-                    <h4>Способ оплаты:</h4>
-                    <div class="payment-option">
-                        <input type="radio" id="card" name="payment" checked>
-                        <label for="card">
-                            <i class="fas fa-credit-card"></i> Банковская карта
+                <div class="selected-plan" id="selectedPlanInfo"></div>
+                
+                <div class="payment-section">
+                    <h4><i class="fas fa-credit-card"></i> Способ оплаты</h4>
+                    <div class="payment-methods">
+                        <label class="payment-method active">
+                            <input type="radio" name="payment" checked>
+                            <div class="payment-icon">
+                                <i class="fab fa-cc-visa"></i>
+                            </div>
+                            <span>Карта Visa/Mastercard</span>
                         </label>
-                    </div>
-                    <div class="payment-option">
-                        <input type="radio" id="crypto" name="payment">
-                        <label for="crypto">
-                            <i class="fas fa-coins"></i> Криптовалюта
+                        
+                        <label class="payment-method">
+                            <input type="radio" name="payment">
+                            <div class="payment-icon">
+                                <i class="fab fa-bitcoin"></i>
+                            </div>
+                            <span>Криптовалюта</span>
                         </label>
-                    </div>
-                    <div class="payment-option">
-                        <input type="radio" id="qiwi" name="payment">
-                        <label for="qiwi">
-                            <i class="fas fa-wallet"></i> QIWI
+                        
+                        <label class="payment-method">
+                            <input type="radio" name="payment">
+                            <div class="payment-icon">
+                                <i class="fas fa-wallet"></i>
+                            </div>
+                            <span>QIWI / ЮMoney</span>
                         </label>
                     </div>
                 </div>
-                <button class="btn btn-primary btn-block" id="confirmBuyBtn">
+                
+                <button class="glass-btn btn-primary btn-block" id="confirmBuyBtn">
                     <i class="fas fa-lock"></i> Перейти к оплате
                 </button>
             </div>
         </div>
     </div>
+
+    <!-- Уведомление -->
+    <div id="notification" class="notification"></div>
 
     <script src="script.js"></script>
 </body>
