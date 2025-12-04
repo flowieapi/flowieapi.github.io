@@ -401,12 +401,10 @@ body {
 
 .stats-grid-scroll {
     display: flex;
-    gap: 15px;
-    padding-bottom: 40px;
-    /* Отступ для индикатора */
-    width: max-content;
+    gap: 12px;
+    padding: 10px 5px 40px 5px;
     min-width: 100%;
-    padding: 15px 5px 40px 5px;
+    scroll-snap-type: x mandatory;
 }
 
 .stats-grid-container {
@@ -428,10 +426,13 @@ body {
 }
 
 @keyframes scrollIndicator {
-    0%, 100% {
+
+    0%,
+    100% {
         width: 40px;
         opacity: 0.5;
     }
+
     50% {
         width: 60px;
         opacity: 1;
@@ -454,6 +455,7 @@ body {
         opacity: 0;
         transform: translateY(10px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -485,10 +487,13 @@ body {
 }
 
 @keyframes activeGlow {
-    0%, 100% {
+
+    0%,
+    100% {
         opacity: 0.5;
         transform: translate(-50%, -50%) scale(1);
     }
+
     50% {
         opacity: 0.8;
         transform: translate(-50%, -50%) scale(1.2);
@@ -497,13 +502,13 @@ body {
 
 .stats-grid-scroll .stat-card {
     flex: 0 0 auto;
-    width: 170px;
-    min-width: 170px;
-    padding: 25px 20px;
+    width: 140px;
+    min-width: 140px;
+    padding: 20px 15px;
     background: rgba(34, 197, 94, 0.07);
     border: 1.5px solid rgba(34, 197, 94, 0.15);
-    backdrop-filter: blur(15px);
-    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    border-radius: 18px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -511,8 +516,8 @@ body {
     position: relative;
     overflow: hidden;
     cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    animation: cardFloatIn 0.6s ease-out backwards;
+    transition: all 0.3s ease;
+    scroll-snap-align: start;
 }
 
 .stats-grid-scroll .stat-card::before {
@@ -583,18 +588,18 @@ body {
 
 /* Обновленные иконки */
 .stats-grid-scroll .stat-card i {
-    font-size: 42px;
-    margin-bottom: 20px;
-    background: linear-gradient(135deg, var(--icon-gradient-start, rgba(34, 197, 94, 0.1)), var(--icon-gradient-end, rgba(34, 197, 94, 0.3)));
-    width: 80px;
-    height: 80px;
+    font-size: 32px;
+    margin-bottom: 15px;
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 0.3));
+    width: 65px;
+    height: 65px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
     position: relative;
     z-index: 2;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s ease;
 }
 
 .stats-grid-scroll .stat-card:hover i {
@@ -631,20 +636,16 @@ body {
 }
 
 .stat-value {
-    font-size: 36px;
-    font-weight: 900;
+    font-size: 28px;
+    font-weight: 800;
     color: var(--text-primary);
     line-height: 1;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     font-family: 'Rajdhani', sans-serif;
-    letter-spacing: -1px;
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-    background: linear-gradient(45deg, var(--card-color, var(--pubg-accent)), var(--text-primary));
+    background: linear-gradient(45deg, var(--pubg-accent), var(--text-primary));
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
-    position: relative;
-    transition: all 0.3s ease;
 }
 
 .stats-grid-scroll .stat-card:hover .stat-value {
@@ -653,13 +654,148 @@ body {
 }
 
 .stat-name {
-    font-size: 12px;
+    font-size: 11px;
     color: var(--text-secondary);
     text-transform: uppercase;
-    letter-spacing: 1.5px;
+    letter-spacing: 1px;
     font-weight: 700;
     opacity: 0.9;
-    transition: all 0.3s ease;
+    line-height: 1.2;
+}
+
+@media (max-width: 320px) {
+    .stats-grid-scroll .stat-card {
+        width: 125px;
+        min-width: 125px;
+        padding: 15px 12px;
+    }
+    
+    .stats-grid-scroll .stat-card i {
+        font-size: 28px;
+        width: 55px;
+        height: 55px;
+        margin-bottom: 12px;
+    }
+    
+    .stat-value {
+        font-size: 24px;
+        margin-bottom: 6px;
+    }
+    
+    .stat-name {
+        font-size: 10px;
+        letter-spacing: 0.8px;
+    }
+}
+
+/* Для экранов 321px - 375px */
+@media (min-width: 321px) and (max-width: 375px) {
+    .stats-grid-scroll .stat-card {
+        width: 135px;
+        min-width: 135px;
+    }
+}
+
+/* Для экранов 376px - 414px (большинство современных телефонов) */
+@media (min-width: 376px) and (max-width: 414px) {
+    .stats-grid-scroll .stat-card {
+        width: 145px;
+        min-width: 145px;
+    }
+    
+    .stats-grid-scroll .stat-card i {
+        font-size: 34px;
+        width: 70px;
+        height: 70px;
+    }
+    
+    .stat-value {
+        font-size: 30px;
+    }
+}
+
+/* Для экранов больше 415px */
+@media (min-width: 415px) {
+    .stats-grid-scroll .stat-card {
+        width: 150px;
+        min-width: 150px;
+        padding: 22px 18px;
+    }
+    
+    .stats-grid-scroll .stat-card i {
+        font-size: 36px;
+        width: 75px;
+        height: 75px;
+    }
+    
+    .stat-value {
+        font-size: 32px;
+    }
+}
+
+/* Для планшетов и больших экранов */
+@media (min-width: 768px) {
+    .stats-grid-scroll .stat-card {
+        width: 160px;
+        min-width: 160px;
+    }
+}
+
+/* Горизонтальная ориентация */
+@media (orientation: landscape) and (max-height: 600px) {
+    .stats-grid-scroll {
+        gap: 10px;
+        padding-bottom: 30px;
+    }
+    
+    .stats-grid-scroll .stat-card {
+        width: 120px;
+        min-width: 120px;
+        padding: 15px 10px;
+    }
+    
+    .stats-grid-scroll .stat-card i {
+        font-size: 26px;
+        width: 50px;
+        height: 50px;
+        margin-bottom: 10px;
+    }
+    
+    .stat-value {
+        font-size: 22px;
+        margin-bottom: 5px;
+    }
+    
+    .stat-name {
+        font-size: 9px;
+    }
+}
+
+/* Плавная анимация при наведении */
+.stats-grid-scroll .stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    border-color: rgba(34, 197, 94, 0.3);
+}
+
+.stats-grid-scroll .stat-card:hover i {
+    transform: scale(1.1);
+}
+
+/* Анимация появления */
+@keyframes cardAppear {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.stats-grid-scroll .stat-card {
+    animation: cardAppear 0.4s ease-out backwards;
 }
 
 .stats-grid-scroll .stat-card:hover .stat-name {
@@ -689,49 +825,32 @@ body {
     --card-color: #ef4444;
 }
 
+.
+
+/* Специфичные стили для иконок каждой карточки */
 .stats-grid-scroll .stat-card:nth-child(1) i {
     color: #3b82f6;
-    --icon-gradient-start: rgba(59, 130, 246, 0.1);
-    --icon-gradient-end: rgba(59, 130, 246, 0.3);
-    --icon-gradient-hover-start: rgba(59, 130, 246, 0.2);
-    --icon-gradient-hover-end: rgba(59, 130, 246, 0.4);
-    --glow-color: rgba(59, 130, 246, 0.1);
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.3));
 }
 
 .stats-grid-scroll .stat-card:nth-child(2) i {
     color: #22c55e;
-    --icon-gradient-start: rgba(34, 197, 94, 0.1);
-    --icon-gradient-end: rgba(34, 197, 94, 0.3);
-    --icon-gradient-hover-start: rgba(34, 197, 94, 0.2);
-    --icon-gradient-hover-end: rgba(34, 197, 94, 0.4);
-    --glow-color: rgba(34, 197, 94, 0.1);
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 0.3));
 }
 
 .stats-grid-scroll .stat-card:nth-child(3) i {
     color: #8b5cf6;
-    --icon-gradient-start: rgba(139, 92, 246, 0.1);
-    --icon-gradient-end: rgba(139, 92, 246, 0.3);
-    --icon-gradient-hover-start: rgba(139, 92, 246, 0.2);
-    --icon-gradient-hover-end: rgba(139, 92, 246, 0.4);
-    --glow-color: rgba(139, 92, 246, 0.1);
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(139, 92, 246, 0.3));
 }
 
 .stats-grid-scroll .stat-card:nth-child(4) i {
     color: #f59e0b;
-    --icon-gradient-start: rgba(245, 158, 11, 0.1);
-    --icon-gradient-end: rgba(245, 158, 11, 0.3);
-    --icon-gradient-hover-start: rgba(245, 158, 11, 0.2);
-    --icon-gradient-hover-end: rgba(245, 158, 11, 0.4);
-    --glow-color: rgba(245, 158, 11, 0.1);
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.3));
 }
 
 .stats-grid-scroll .stat-card:nth-child(5) i {
     color: #ef4444;
-    --icon-gradient-start: rgba(239, 68, 68, 0.1);
-    --icon-gradient-end: rgba(239, 68, 68, 0.3);
-    --icon-gradient-hover-start: rgba(239, 68, 68, 0.2);
-    --icon-gradient-hover-end: rgba(239, 68, 68, 0.4);
-    --glow-color: rgba(239, 68, 68, 0.1);
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.3));
 }
 
 .scroll-indicator {
