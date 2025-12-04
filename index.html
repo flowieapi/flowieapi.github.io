@@ -78,27 +78,58 @@
                 </div>
             </div>
 
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <i class="fas fa-tachometer-alt-fast"></i>
-                    <div class="stat-info">
-                        <div class="stat-value">-60ms</div>
-                        <div class="stat-name">Снижение пинга</div>
+            <div class="stats-grid-container">
+                <div class="stats-grid-scroll">
+                    <!-- Карточка снижения пинга -->
+                    <div class="stat-card">
+                        <i class="fas fa-tachometer-alt-fast"></i>
+                        <div class="stat-info">
+                            <div class="stat-value">-60ms</div>
+                            <div class="stat-name">Снижение пинга</div>
+                        </div>
+                    </div>
+
+                    <!-- Карточка стабильности -->
+                    <div class="stat-card">
+                        <i class="fas fa-shield-check"></i>
+                        <div class="stat-info">
+                            <div class="stat-value">99.9%</div>
+                            <div class="stat-name">Стабильность</div>
+                        </div>
+                    </div>
+
+                    <!-- Карточка поддержки -->
+                    <div class="stat-card">
+                        <i class="fas fa-headset"></i>
+                        <div class="stat-info">
+                            <div class="stat-value">24/7</div>
+                            <div class="stat-name">Поддержка</div>
+                        </div>
+                    </div>
+
+                    <!-- Дополнительная карточка (если нужно больше) -->
+                    <div class="stat-card">
+                        <i class="fas fa-server"></i>
+                        <div class="stat-info">
+                            <div class="stat-value">Авто</div>
+                            <div class="stat-name">Сервер</div>
+                        </div>
                     </div>
                 </div>
-                <div class="stat-card">
-                    <i class="fas fa-shield-check"></i>
-                    <div class="stat-info">
-                        <div class="stat-value">99.9%</div>
-                        <div class="stat-name">Стабильность</div>
-                    </div>
+
+                <!-- Индикатор прокрутки для мобильных -->
+                <div class="scroll-indicator">
+                    <span class="scroll-dot active"></span>
+                    <span class="scroll-dot"></span>
+                    <span class="scroll-dot"></span>
+                    <span class="scroll-dot"></span>
                 </div>
-                <div class="stat-card">
-                    <i class="fas fa-headset"></i>
-                    <div class="stat-info">
-                        <div class="stat-value">24/7</div>
-                        <div class="stat-name">Поддержка</div>
-                    </div>
+
+                <!-- Подсказка прокрутки -->
+                <div class="scroll-hint">
+                    <i class="fas fa-chevron-left"></i>
+                    <span>Листайте для просмотра</span>
+                    <i class="fas fa-chevron-right"></i>
                 </div>
             </div>
         </section>

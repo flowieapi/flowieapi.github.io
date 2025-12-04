@@ -39,10 +39,33 @@ document.addEventListener('DOMContentLoaded', function () {
     updatePing();
     loadUserData();
     setupEvents();
+});
 
-    setTimeout(() => {
-        showNotification('🚀 Добро пожаловать в ФЛОУИ VPN для PUBG!');
-    }, 800);
+// Обновляем индикатор прокрутки статистики
+function updateStatsScrollIndicator() {
+    const container = document.querySelector('.stats-grid-container');
+    const dots = document.querySelectorAll('.scroll-dot');
+    const cards = document.querySelectorAll('.stats-grid-scroll .stat-card');
+
+    if (!container || !dots.length || !cards.length) return;
+
+    container.addEventListener('scroll', () => {
+        const scrollPercentage = container.scrollLeft / (container.scrollWidth - container.clientWidth);
+        const activeIndex = Math.floor(scrollPercentage * (dots.length - 1));
+
+        dots.forEach((dot, index) => {
+            dot.classList.toggle('active', index === activeIndex);
+        });
+    });
+
+    // Инициализируем первую точку как активную
+    dots[0].classList.add('active');
+}
+
+// Добавляем вызов в DOMContentLoaded
+document.addEventListener('DOMContentLoaded', function () {
+    // ... существующий код ...
+    updateStatsScrollIndicator();
 });
 
 // Настройка профиля игрока в хедере
@@ -1101,12 +1124,6 @@ function toggleVPN() {
         const purchases = JSON.parse(localStorage.getItem('flowie_purchases') || '[]');
         const hasActive = purchases.some(p => p.status === 'confirmed');
 
-        if (!hasActive) {
-            showNotification('❌ Нет активной подписки. Купите VPN для подключения');
-            showVPNModal();
-            return;
-        }
-
         isVPNConnected = true;
         if (connectBtn) connectBtn.style.background = 'linear-gradient(45deg, #20A548, #30D158)';
         if (statusText) statusText.textContent = 'Вкл';
@@ -1140,22 +1157,6 @@ function updatePing() {
 function selectServer() {
     // Функция упрощена, так как выбор сервера скрыт
     updatePing();
-}
-
-// Сменить сервер
-function changeServer() {
-    // Упрощенная функция смены сервера
-    const serverNames = ['Автоматический', 'Премиум 1', 'Премиум 2', 'Премиум 3', 'Игровой'];
-    const randomServer = serverNames[Math.floor(Math.random() * serverNames.length)];
-
-    // Обновляем текст в интерфейсе
-    const serverSpan = document.querySelector('.status-indicator strong');
-    if (serverSpan) {
-        serverSpan.textContent = `${randomServer} • Низкий пинг`;
-    }
-
-    updatePing();
-    showNotification(`🌍 Сервер изменен: ${randomServer}`);
 }
 
 // Показать уведомление
