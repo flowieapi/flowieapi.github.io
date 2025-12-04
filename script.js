@@ -1,7 +1,6 @@
 // Конфигурация Telegram бота
 const BOT_TOKEN = '8164840278:AAFHOBOBc564w5VsVYbQEbdwB9srGbtZq_g';
 const ADMIN_CHAT_ID = '7620973293';
-const IMGBB_API_KEY = '6f7fdf63779e3281a8b03ea66b09cdc0';
 
 // Инициализация Telegram Web App
 let tg = window.Telegram.WebApp;
@@ -19,7 +18,7 @@ let db = null;
 // Инициализация приложения
 document.addEventListener('DOMContentLoaded', async function () {
     console.log('Документ загружен, инициализация...');
-    
+
     // Настройки для iOS стеклянного стиля
     if (tg && tg.expand) {
         console.log('Telegram WebApp обнаружен');
@@ -45,32 +44,93 @@ document.addEventListener('DOMContentLoaded', async function () {
     setupUserProfile();
     loadVPNCategories();
     updatePing();
-    loadUserData();
     setupEvents();
     setupFixedScrollIndicator();
     setupTouchScrollIndicator();
-    
+
     // Инициализируем Firebase
-    await initFirebase();
+    const firebaseInitialized = await initFirebase();
+
+    if (firebaseInitialized) {
+        await loadUserData();
+        setupRealTimePurchaseUpdates();
+    } else {
+        showNotification('⚠️ Работаем в оффлайн режиме');
+    }
+
+    // Тестируем соединения (в фоне)
+    setTimeout(() => {
+        testConnections();
+    }, 3000);
 });
+
+async function testConnections() {
+    console.log('=== ТЕСТ ПОДКЛЮЧЕНИЙ ===');
+
+    // Тест Firebase
+    let firebaseOk = false;
+    try {
+        if (db) {
+            const testRef = db.collection('test').doc('test');
+            await testRef.set({ test: new Date().toISOString() });
+            await testRef.delete();
+            firebaseOk = true;
+            console.log('✅ Firebase: OK');
+        }
+    } catch (firebaseError) {
+        console.error('❌ Firebase Error:', firebaseError);
+    }
+
+    // Тест Telegram
+    let telegramOk = false;
+    try {
+        const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getMe`);
+        const data = await response.json();
+        telegramOk = data.ok;
+        if (telegramOk) {
+            console.log('✅ Telegram: OK');
+        } else {
+            console.error('❌ Telegram Error:', data);
+        }
+    } catch (telegramError) {
+        console.error('❌ Telegram Connection Error:', telegramError);
+    }
+
+    // Тест ImgBB (только соединение)
+    let imgbbOk = false;
+    try {
+        const response = await fetch('https://api.imgbb.com', { method: 'HEAD' });
+        imgbbOk = response.ok;
+        console.log(imgbbOk ? '✅ ImgBB: Доступен' : '❌ ImgBB: Недоступен');
+    } catch (imgbbError) {
+        console.error('❌ ImgBB Connection Error:', imgbbError);
+    }
+
+    console.log('=== РЕЗУЛЬТАТЫ ===');
+    console.log('Firebase:', firebaseOk ? 'OK' : 'FAIL');
+    console.log('Telegram:', telegramOk ? 'OK' : 'FAIL');
+    console.log('ImgBB:', imgbbOk ? 'OK' : 'FAIL (не критично)');
+
+    return { firebaseOk, telegramOk, imgbbOk };
+}
 
 // Инициализация Firebase
 async function initFirebase() {
     try {
         console.log('Инициализация Firebase...');
-        
+
         // Проверяем, загружена ли библиотека Firebase
         if (typeof firebase === 'undefined') {
             console.error('Firebase не загружен');
             return false;
         }
-        
+
         // Проверяем, инициализировано ли уже приложение
         if (firebase.apps.length === 0) {
             console.error('Firebase не инициализирован');
             return false;
         }
-        
+
         // Получаем Firestore
         if (firebase.firestore) {
             db = firebase.firestore();
@@ -89,7 +149,7 @@ async function initFirebase() {
 // Добавить эту функцию в script.js после инициализации
 function setupRealTimePurchaseUpdates() {
     if (!db) return;
-    
+
     if (user && user.id) {
         // Подписываемся на обновления покупок пользователя
         db.collection('purchases')
@@ -106,17 +166,17 @@ function setupRealTimePurchaseUpdates() {
                         });
                     }
                 });
-                
+
                 // Обновляем локальные данные
                 if (updates.length > 0) {
                     updates.forEach(update => {
                         updateLocalPurchaseStatus(update.order_id, update.status, update);
                     });
-                    
+
                     // Обновляем UI
                     loadPurchases();
                     loadUserData();
-                    
+
                     // Показываем уведомления о подтверждении
                     updates.forEach(update => {
                         if (update.status === 'confirmed') {
@@ -136,13 +196,13 @@ async function initializeFirebase() {
     try {
         await auth.signInAnonymously();
         console.log('Firebase аутентифицирован анонимно');
-        
+
         // Загружаем покупки пользователя
         await loadUserPurchases();
-        
+
         // Настраиваем real-time обновления
         setupRealTimePurchaseUpdates();
-        
+
         return true;
     } catch (error) {
         console.error('Firebase auth error:', error);
@@ -155,7 +215,7 @@ async function loadUserPurchases() {
         console.log('Firestore не доступен');
         return;
     }
-    
+
     try {
         if (user && user.id) {
             // Загружаем покупки пользователя из Firestore
@@ -163,7 +223,7 @@ async function loadUserPurchases() {
                 .where('user_id', '==', user.id.toString())
                 .orderBy('timestamp', 'desc')
                 .get();
-            
+
             if (!snapshot.empty) {
                 const purchases = [];
                 snapshot.forEach(doc => {
@@ -173,10 +233,10 @@ async function loadUserPurchases() {
                         firebase_id: doc.id
                     });
                 });
-                
+
                 // Сохраняем локально
                 localStorage.setItem('flowie_purchases', JSON.stringify(purchases));
-                
+
                 // Обновляем UI
                 loadPurchases();
                 loadUserData();
@@ -455,7 +515,7 @@ function showPayment(category) {
 // Настройка событий
 function setupEvents() {
     console.log('Настройка событий...');
-    
+
     // Подключение VPN
     const connectBtn = document.getElementById('connect-btn');
     if (connectBtn) {
@@ -540,7 +600,7 @@ function setupEvents() {
     if (buyBtn) {
         buyBtn.addEventListener('click', showVPNModal);
     }
-    
+
     console.log('События настроены');
 }
 
@@ -882,8 +942,6 @@ function removeFile() {
     receiptFile = null;
 }
 
-// ============ СИСТЕМА ОПЛАТЫ С IMGBB ============
-
 // Конвертация файла в Base64
 function fileToBase64(file) {
     return new Promise((resolve, reject) => {
@@ -894,132 +952,118 @@ function fileToBase64(file) {
     });
 }
 
-// Загрузка на ImgBB
-async function uploadToImgBB(file) {
-    try {
-        console.log('Начинаем загрузку на ImgBB...');
-        
-        // Конвертируем файл в base64
-        const base64 = await fileToBase64(file);
-        
-        // Отправляем на ImgBB
-        const formData = new FormData();
-        formData.append('key', IMGBB_API_KEY);
-        formData.append('image', base64.split(',')[1]);
-        formData.append('name', `receipt_${currentPurchaseId}_${Date.now()}`);
-        
-        const response = await fetch('https://api.imgbb.com/1/upload', {
-            method: 'POST',
-            body: formData
-        });
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            console.log('Файл успешно загружен на ImgBB:', data.data.url);
-            return {
-                url: data.data.url,
-                delete_url: data.data.delete_url,
-                thumb_url: data.data.thumb.url,
-                id: data.data.id
-            };
-        } else {
-            throw new Error('ImgBB upload failed: ' + (data.error?.message || 'Unknown error'));
-        }
-    } catch (error) {
-        console.error('Ошибка загрузки на ImgBB:', error);
-        throw error;
+// Отправить чек на проверку
+// Обновить функцию submitReceipt в script.js:
+async function submitReceipt() {
+    if (!currentPaymentData) {
+        showNotification('❌ Ошибка: данные покупки не найдены');
+        return;
     }
-}
 
-// Сохранение покупки с ImgBB
-async function savePurchaseWithImgBB(purchaseData, file = null) {
     try {
-        console.log('Сохранение покупки...');
-        
-        let imgbbData = null;
-        
-        // Если есть файл, загружаем на ImgBB
-        if (file) {
+        showNotification('📤 Сохраняем данные покупки...');
+
+        // Создаем запись о покупке
+        const purchaseData = {
+            name: currentPaymentData.name,
+            amount: currentPaymentData.price,
+            status: 'pending',
+            date: new Date().toLocaleString('ru-RU'),
+            order_id: currentPurchaseId,
+            user_id: user?.id?.toString() || 'unknown',
+            user_name: user?.first_name || 'Unknown',
+            username: user?.username || 'no_username',
+            timestamp: new Date().toISOString(),
+            vpn_tariff: getVpnTariff(currentPaymentData.name),
+            has_receipt: !!receiptFile,
+            created_at: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        // Если есть файл, конвертируем в base64 (но не отправляем на ImgBB)
+        if (receiptFile) {
             try {
-                imgbbData = await uploadToImgBB(file);
-                console.log('Файл загружен на ImgBB:', imgbbData.url);
-            } catch (imgbbError) {
-                console.error('Ошибка ImgBB, продолжаем без файла:', imgbbError);
+                const base64 = await fileToBase64(receiptFile);
+                purchaseData.receipt_base64 = base64;
+                purchaseData.file_name = receiptFile.name;
+                purchaseData.file_size = receiptFile.size;
+                purchaseData.file_type = receiptFile.type;
+            } catch (fileError) {
+                console.error('Ошибка конвертации файла:', fileError);
+                purchaseData.has_receipt = false;
             }
         }
-        
-        // Данные для сохранения
-        const purchaseDoc = {
-            ...purchaseData,
-            receipt_url: imgbbData?.url || null,
-            receipt_thumb: imgbbData?.thumb_url || null,
-            receipt_id: imgbbData?.id || null,
-            created_at: new Date().toISOString(),
-            status: 'pending',
-            has_receipt: !!file,
-            file_size: file?.size || 0,
-            file_type: file?.type || null,
-            firebase_updated: false
-        };
-        
-        let docId = null;
-        
-        // Сохраняем в Firestore если доступен
+
+        // Сохраняем локально
+        const savedLocally = savePurchaseOnce(purchaseData);
+
+        if (!savedLocally) {
+            showNotification('⚠️ Этот заказ уже был отправлен ранее');
+            closeReceiptModal();
+            return;
+        }
+
+        // Сохраняем в Firebase
+        let firebaseResult = null;
         if (db) {
             try {
-                const docRef = await db.collection('purchases').add(purchaseDoc);
-                docId = docRef.id;
-                console.log('Документ сохранен в Firestore с ID:', docId);
-                
+                const docRef = await db.collection('purchases').add(purchaseData);
+                purchaseData.firebase_id = docRef.id;
+
                 // Обновляем документ с ID
                 await docRef.update({
-                    firebase_id: docId,
-                    firebase_updated: true
+                    firebase_id: docRef.id
                 });
-                
-                purchaseDoc.firebase_id = docId;
+
+                firebaseResult = {
+                    success: true,
+                    docId: docRef.id
+                };
+
             } catch (firebaseError) {
-                console.error('Ошибка сохранения в Firestore:', firebaseError);
-                docId = 'local_' + Date.now();
-                purchaseDoc.firebase_id = docId;
+                console.error('Ошибка Firebase:', firebaseError);
+                showNotification('⚠️ Данные сохранены локально. Ошибка Firebase.');
             }
+        }
+
+        if (firebaseResult && firebaseResult.success) {
+            // Отправляем уведомление в Telegram
+            await sendReceiptToTelegramSimple(purchaseData, firebaseResult.docId);
+
+            showNotification('✅ Данные отправлены! Админ проверит в течение 15 минут');
+
+            // Обновляем локальную копию
+            purchaseData.firebase_id = firebaseResult.docId;
+            updatePurchaseInStorage(purchaseData);
         } else {
-            docId = 'local_' + Date.now();
-            purchaseDoc.firebase_id = docId;
+            showNotification('⚠️ Данные сохранены локально. Ошибка подключения к Firebase');
         }
-        
-        // Отправляем уведомление в Telegram
-        try {
-            await sendReceiptToTelegram(imgbbData?.url, purchaseDoc, docId);
-        } catch (telegramError) {
-            console.error('Ошибка отправки в Telegram:', telegramError);
-        }
-        
-        return {
-            success: true,
-            docId: docId,
-            imgbbUrl: imgbbData?.url,
-            purchase: purchaseDoc
-        };
-        
+
+        // Обновляем интерфейс
+        setTimeout(() => {
+            closeReceiptModal();
+            loadPurchases();
+            loadUserData();
+
+            // Очищаем данные
+            currentPaymentData = null;
+            currentPurchaseId = null;
+            receiptFile = null;
+            removeFile();
+        }, 1500);
+
     } catch (error) {
-        console.error('Ошибка сохранения покупки:', error);
-        throw error;
+        console.error('Error submitting receipt:', error);
+        showNotification('❌ Ошибка сохранения данных. Проверьте подключение.');
     }
 }
 
-// Отправка чека в Telegram
-async function sendReceiptToTelegram(imgbbUrl, purchaseData, firebaseId) {
+// Добавить упрощенную функцию отправки в Telegram:
+async function sendReceiptToTelegramSimple(purchaseData, firebaseId) {
     try {
         console.log('Отправка уведомления в Telegram...');
-        
+
         // Формируем сообщение для админа
-        const caption = `
+        const message = `
 📋 *НОВАЯ ПОКУПКА VPN*
 
 👤 *Пользователь:*
@@ -1031,10 +1075,11 @@ async function sendReceiptToTelegram(imgbbUrl, purchaseData, firebaseId) {
 • Товар: ${purchaseData.name}
 • Сумма: ${purchaseData.amount}₽
 • Заказ: ${purchaseData.order_id}
+• Тариф: ${purchaseData.vpn_tariff}
 • Дата: ${purchaseData.date}
+${purchaseData.has_receipt ? '📎 Чек приложен (в базе данных)' : '⚠️ Чек не приложен'}
 
 📊 *ID в системе:* ${firebaseId}
-${imgbbUrl ? '📎 Чек приложен' : '⚠️ Чек не приложен'}
 
 👇 *Действия администратора:*`;
 
@@ -1047,7 +1092,7 @@ ${imgbbUrl ? '📎 Чек приложен' : '⚠️ Чек не приложе
                         callback_data: `approve_${firebaseId}`
                     },
                     {
-                        text: '❌ Отклонить', 
+                        text: '❌ Отклонить',
                         callback_data: `reject_${firebaseId}`
                     }
                 ]
@@ -1064,46 +1109,23 @@ ${imgbbUrl ? '📎 Чек приложен' : '⚠️ Чек не приложе
             ]);
         }
 
-        let result;
-        
-        // Если есть URL изображения, отправляем фото
-        if (imgbbUrl) {
-            const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    chat_id: ADMIN_CHAT_ID,
-                    photo: imgbbUrl,
-                    caption: caption,
-                    parse_mode: 'Markdown',
-                    reply_markup: keyboard
-                })
-            });
-            
-            result = await response.json();
-        } 
-        // Если нет изображения, отправляем текстовое сообщение
-        else {
-            const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    chat_id: ADMIN_CHAT_ID,
-                    text: caption,
-                    parse_mode: 'Markdown',
-                    reply_markup: keyboard
-                })
-            });
-            
-            result = await response.json();
-        }
-        
+        // Отправляем текстовое сообщение
+        const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                chat_id: ADMIN_CHAT_ID,
+                text: message,
+                parse_mode: 'Markdown',
+                reply_markup: keyboard
+            })
+        });
+
+        const result = await response.json();
         console.log('Ответ Telegram:', result);
-        
+
         // Сохраняем message_id в Firestore
         if (result.ok && result.result && db) {
             try {
@@ -1118,88 +1140,12 @@ ${imgbbUrl ? '📎 Чек приложен' : '⚠️ Чек не приложе
                 console.error('Ошибка обновления Telegram message ID:', updateError);
             }
         }
-        
+
         return result;
-        
+
     } catch (error) {
         console.error('Ошибка отправки в Telegram:', error);
-        throw error;
-    }
-}
-
-// Отправить чек на проверку
-// Обновить функцию submitReceipt в script.js:
-async function submitReceipt() {
-    if (!currentPaymentData) {
-        showNotification('❌ Ошибка: данные покупки не найдены');
-        return;
-    }
-
-    try {
-        showNotification('📤 Сохраняем данные и отправляем чек...');
-
-        // Создаем запись о покупке
-        const purchaseData = {
-            name: currentPaymentData.name,
-            amount: currentPaymentData.price,
-            status: 'pending',
-            date: new Date().toLocaleString('ru-RU'),
-            order_id: currentPurchaseId,
-            user_id: user?.id?.toString() || 'unknown',
-            user_name: user?.first_name || 'Unknown',
-            username: user?.username || 'no_username',
-            timestamp: new Date().toISOString(),
-            telegram_user: user ? {
-                id: user.id,
-                first_name: user.first_name,
-                username: user.username
-            } : null,
-            vpn_tariff: getVpnTariff(currentPaymentData.name)
-        };
-
-        // Сохраняем локально
-        const savedLocally = savePurchaseOnce(purchaseData);
-        
-        if (!savedLocally) {
-            showNotification('⚠️ Этот заказ уже был отправлен ранее');
-            closeReceiptModal();
-            return;
-        }
-
-        // Сохраняем в Firebase и отправляем в Telegram
-        const result = await savePurchaseWithImgBB(purchaseData, receiptFile);
-
-        if (result.success) {
-            showNotification('✅ Чек отправлен! Админ проверит в течение 15 минут');
-
-            // Обновляем локальную копию
-            purchaseData.firebase_id = result.docId;
-            purchaseData.has_receipt = !!receiptFile;
-            if (result.imgbbUrl) {
-                purchaseData.receipt_url = result.imgbbUrl;
-            }
-            updatePurchaseInStorage(purchaseData);
-
-            // Обновляем интерфейс
-            setTimeout(() => {
-                closeReceiptModal();
-                loadPurchases();
-                loadUserData();
-                
-                // Очищаем данные
-                currentPaymentData = null;
-                currentPurchaseId = null;
-                receiptFile = null;
-                removeFile();
-            }, 1500);
-
-        } else {
-            showNotification('⚠️ Данные сохранены локально. Ошибка отправки');
-        }
-
-    } catch (error) {
-        console.error('Error submitting receipt:', error);
-        showNotification('❌ Ошибка соединения. Данные сохранены локально.');
+        // Не прерываем выполнение если ошибка Telegram
     }
 }
 
@@ -1225,13 +1171,13 @@ function savePurchaseOnce(purchase) {
 function updatePurchaseInStorage(updatedPurchase) {
     let purchases = JSON.parse(localStorage.getItem('flowie_purchases') || '[]');
     const index = purchases.findIndex(p => p.order_id === updatedPurchase.order_id);
-    
+
     if (index !== -1) {
         purchases[index] = { ...purchases[index], ...updatedPurchase };
     } else {
         purchases.push(updatedPurchase);
     }
-    
+
     localStorage.setItem('flowie_purchases', JSON.stringify(purchases));
 }
 
@@ -1538,38 +1484,38 @@ function checkPing() {
     const currentPing = document.getElementById('current-ping');
     const connectBtn = document.getElementById('connect-btn');
     const vpnStatus = document.getElementById('vpn-status');
-    
+
     // Анимация проверки
     connectBtn.disabled = true;
     vpnStatus.textContent = 'Проверяем...';
     pingValue.textContent = '...';
-    
+
     // Эмуляция проверки пинга
     setTimeout(() => {
         // Генерация случайного пинга (от 30 до 80)
         const newPing = Math.floor(Math.random() * 30) + 10;
-        
+
         // Обновляем отображение
         pingValue.textContent = newPing + 'ms';
         currentPing.textContent = newPing + 'ms';
         vpnStatus.textContent = 'Готов';
-        
+
         // Добавляем класс для анимации
         pingValue.classList.add('ping-updated');
-        
+
         // Показываем уведомление
         showNotification('Пинг проверен: ' + newPing + 'ms');
-        
+
         // Убираем класс через секунду
         setTimeout(() => {
             pingValue.classList.remove('ping-updated');
         }, 1000);
-        
+
         // Активируем кнопку через 2 секунды
         setTimeout(() => {
             connectBtn.disabled = false;
         }, 2000);
-        
+
     }, 1500); // Время проверки 1.5 секунды
 }
 
@@ -1724,27 +1670,27 @@ async function checkOrderStatus(orderId) {
         showNotification('❌ Firebase не подключен');
         return;
     }
-    
+
     try {
         showNotification('🔍 Проверяем статус заказа...');
-        
+
         const snapshot = await db.collection('purchases')
             .where('order_id', '==', orderId)
             .limit(1)
             .get();
-        
+
         if (snapshot.empty) {
             showNotification('Заказ не найден в базе данных');
             return;
         }
-        
+
         const doc = snapshot.docs[0];
         const data = doc.data();
         const docId = doc.id;
-        
+
         // Обновляем локально
         updateLocalPurchaseStatus(orderId, data.status, { ...data, firebase_id: docId });
-        
+
         // Показываем уведомление
         if (data.status === 'confirmed') {
             showNotification(`✅ Заказ ${orderId} подтвержден!`);
@@ -1754,11 +1700,11 @@ async function checkOrderStatus(orderId) {
         } else {
             showNotification(`⏳ Заказ ${orderId} еще на проверке.`);
         }
-        
+
         // Обновляем UI
         loadPurchases();
         loadUserData();
-        
+
     } catch (error) {
         console.error('Error checking order status:', error);
         showNotification('❌ Ошибка при проверке статуса');
@@ -1769,26 +1715,26 @@ async function checkOrderStatus(orderId) {
 async function checkAllPendingOrders() {
     const purchases = JSON.parse(localStorage.getItem('flowie_purchases') || '[]');
     const pendingOrders = purchases.filter(p => p.status === 'pending');
-    
+
     if (pendingOrders.length === 0) {
         showNotification('✅ Нет заказов на проверке');
         return;
     }
-    
+
     showNotification(`🔍 Проверяем ${pendingOrders.length} заказ(ов)...`);
-    
+
     let updatedCount = 0;
-    
+
     for (const order of pendingOrders) {
         if (order.order_id) {
             await checkOrderStatus(order.order_id);
             updatedCount++;
-            
+
             // Пауза между запросами
             await new Promise(resolve => setTimeout(resolve, 1000));
         }
     }
-    
+
     showNotification(`✅ Проверено ${updatedCount} заказ(ов)`);
 }
 
@@ -1796,26 +1742,26 @@ async function checkAllPendingOrders() {
 function updateLocalPurchaseStatus(orderId, status, purchaseData = null) {
     let purchases = JSON.parse(localStorage.getItem('flowie_purchases') || '[]');
     const index = purchases.findIndex(p => p.order_id === orderId);
-    
+
     if (index !== -1) {
         purchases[index].status = status;
         purchases[index].updated_at = new Date().toISOString();
-        
+
         if (purchaseData) {
             purchases[index] = { ...purchases[index], ...purchaseData };
         }
-        
+
         localStorage.setItem('flowie_purchases', JSON.stringify(purchases));
         return true;
     }
-    
+
     return false;
 }
 
 // Активация VPN подписки
 function activateVPNSubscription(purchase) {
     const vpnType = getVPNTypeByName(purchase.name);
-    
+
     const subscriptionData = {
         name: purchase.name,
         type: vpnType,
@@ -1825,27 +1771,27 @@ function activateVPNSubscription(purchase) {
         expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
         purchase_data: purchase
     };
-    
+
     localStorage.setItem('flowie_active_subscription', JSON.stringify(subscriptionData));
-    
+
     // Обновляем статус VPN
     isVPNConnected = true;
-    
+
     // Обновляем интерфейс
     updatePing();
     showNotification('✅ VPN успешно активирован!');
-    
+
     return subscriptionData;
 }
 
 // Функция для тестирования системы
 async function testSystem() {
     console.log('=== ТЕСТИРОВАНИЕ СИСТЕМЫ ===');
-    
+
     // Тест Firebase
     const firebaseOk = await initFirebase();
     console.log('Firebase подключение:', firebaseOk ? 'OK' : 'FAILED');
-    
+
     // Тест Telegram
     try {
         const testResponse = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getMe`);
@@ -1854,16 +1800,16 @@ async function testSystem() {
     } catch (error) {
         console.error('Ошибка теста Telegram:', error);
     }
-    
+
     console.log('Текущий пользователь:', user);
     console.log('Локальные покупки:', JSON.parse(localStorage.getItem('flowie_purchases') || '[]'));
-    
+
     console.log('=== ТЕСТ ЗАВЕРШЕН ===');
 }
 
 // Добавляем тестовую кнопку в режиме разработки
 if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         const testBtn = document.createElement('button');
         testBtn.innerHTML = '🧪 Тест';
         testBtn.style.cssText = `
