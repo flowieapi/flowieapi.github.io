@@ -447,7 +447,7 @@ function showProfileModal() {
                     }
                 </div>
                 <h3 style="font-size: 24px; font-weight: 800; margin-bottom: 8px;">
-                    ${user?.first_name || 'Игрок'}
+                    ${user?.first_name || 'Пользователь'}
                 </h3>
                 <p style="color: var(--pubg-orange); font-size: 16px; margin-bottom: 4px;">
                     @${user?.username || 'username'}
