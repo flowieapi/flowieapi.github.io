@@ -1298,26 +1298,8 @@ function showVPNModal() {
 
 // Включить/выключить VPN
 function toggleVPN() {
-    const connectBtn = document.getElementById('connect-btn');
-    const statusText = document.getElementById('vpn-status');
-
-    if (!isVPNConnected) {
-        // Проверяем, есть ли активная подписка
-        const purchases = JSON.parse(localStorage.getItem('flowie_purchases') || '[]');
-        const hasActive = purchases.some(p => p.status === 'confirmed');
-
-        isVPNConnected = true;
-        if (connectBtn) connectBtn.style.background = 'linear-gradient(45deg, #20A548, #30D158)';
-        if (statusText) statusText.textContent = 'Вкл';
-        showNotification('✅ VPN подключен! Пинг оптимизирован');
-        updatePing();
-    } else {
-        isVPNConnected = false;
-        if (connectBtn) connectBtn.style.background = 'linear-gradient(45deg, #30D158, #20A548)';
-        if (statusText) statusText.textContent = 'Выкл';
-        showNotification('❌ VPN отключен');
-        updatePing();
-    }
+    // Если нужно сохранить функционал VPN
+    showVPNModal();
 }
 
 // Обновить пинг
@@ -1331,8 +1313,48 @@ function updatePing() {
     if (pingValue) pingValue.textContent = newPing + 'ms';
     if (currentPing) {
         currentPing.textContent = newPing + 'ms';
-        currentPing.style.color = isVPNConnected ? '#30D158' : '#FF453A';
+        currentPing.style.color = '#30D158';
     }
+}
+
+function checkPing() {
+    const pingValue = document.getElementById('ping-value');
+    const currentPing = document.getElementById('current-ping');
+    const connectBtn = document.getElementById('connect-btn');
+    const vpnStatus = document.getElementById('vpn-status');
+    
+    // Анимация проверки
+    connectBtn.disabled = true;
+    vpnStatus.textContent = 'Проверяем...';
+    pingValue.textContent = '...';
+    
+    // Эмуляция проверки пинга
+    setTimeout(() => {
+        // Генерация случайного пинга (от 30 до 80)
+        const newPing = Math.floor(Math.random() * 30) + 10;
+        
+        // Обновляем отображение
+        pingValue.textContent = newPing + 'ms';
+        currentPing.textContent = newPing + 'ms';
+        vpnStatus.textContent = 'Готов';
+        
+        // Добавляем класс для анимации
+        pingValue.classList.add('ping-updated');
+        
+        // Показываем уведомление
+        showNotification('Пинг проверен: ' + newPing + 'ms');
+        
+        // Убираем класс через секунду
+        setTimeout(() => {
+            pingValue.classList.remove('ping-updated');
+        }, 1000);
+        
+        // Активируем кнопку через 2 секунды
+        setTimeout(() => {
+            connectBtn.disabled = false;
+        }, 2000);
+        
+    }, 1500); // Время проверки 1.5 секунды
 }
 
 // Выбор сервера (упрощенно)

@@ -114,7 +114,7 @@ body {
 }
 
 #current-ping {
-    color: var(--pubg-accent);
+    color: #16a34a;
 }
 
 .player-avatar {
@@ -240,7 +240,8 @@ body {
     background: linear-gradient(135deg, rgba(26, 32, 44, 0.9) 0%, rgba(45, 55, 72, 0.9) 100%);
     border-radius: 16px;
     padding: 20px;
-    margin-bottom: 20px;
+    padding-bottom: 0px;
+    margin-bottom: 16px;
     border: 1px solid rgba(34, 197, 94, 0.2);
     position: relative;
     overflow: hidden;
@@ -430,7 +431,7 @@ body {
 /* Иконки для карточек */
 .stats-grid-scroll .stat-card i {
     font-size: 32px;
-    margin-bottom: 15px;
+    margin-bottom: 16px;
     width: 65px;
     height: 65px;
     display: flex;
@@ -640,17 +641,17 @@ body {
 
 /* Категории VPN */
 .vpn-categories {
-    margin-bottom: 24px;
+    margin-bottom: 18px;
 }
 
 .section-title {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 800;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     color: var(--text-primary);
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
 }
 
 .section-title i {
@@ -659,20 +660,21 @@ body {
 
 .section-subtitle {
     color: var(--text-secondary);
-    font-size: 14px;
-    margin-bottom: 20px;
+    font-size: 12px;
+    margin-bottom: 14px;
+    line-height: 1.3;
 }
 
 .categories-container {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
 }
 
 .vpn-category-card {
     background: linear-gradient(135deg, rgba(26, 32, 44, 0.9) 0%, rgba(45, 55, 72, 0.9) 100%);
-    border-radius: 16px;
-    padding: 20px;
+    border-radius: 14px;
+    padding: 16px;
     border: 2px solid transparent;
     transition: all 0.3s;
     position: relative;
@@ -706,63 +708,63 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
 }
 
 .category-name {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
 }
 
 .category-icon {
-    font-size: 28px;
+    font-size: 24px;
 }
 
 .category-name h3 {
-    font-size: 18px;
-    font-weight: 800;
+    font-size: 16px;
+    font-weight: 700;
     color: var(--text-primary);
 }
 
 .category-price {
-    font-size: 24px;
+    font-size: 20px;
     font-weight: 800;
     color: var(--pubg-accent);
 }
 
 .category-features {
-    margin-bottom: 20px;
+    margin-bottom: 14px;
 }
 
 .feature-item {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px 0;
+    gap: 8px;
+    padding: 8px 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    font-size: 14px;
+    font-size: 13px;
 }
 
 .feature-item i {
     color: var(--pubg-accent);
-    font-size: 12px;
-    min-width: 16px;
+    font-size: 11px;
+    min-width: 14px;
 }
 
 .category-btn {
     width: 100%;
-    padding: 14px;
+    padding: 12px;
     border: none;
-    border-radius: 12px;
+    border-radius: 10px;
     font-weight: 700;
-    font-size: 16px;
+    font-size: 14px;
     cursor: pointer;
     transition: all 0.2s;
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     background: linear-gradient(45deg, var(--pubg-accent-dark), var(--pubg-accent));
     color: white;
 }
@@ -774,9 +776,9 @@ body {
 /* Активная подписка */
 .active-subscription {
     background: linear-gradient(135deg, rgba(26, 32, 44, 0.9) 0%, rgba(45, 55, 72, 0.9) 100%);
-    border-radius: 16px;
-    padding: 20px;
-    margin-bottom: 24px;
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 18px;
     border: 2px solid var(--pubg-accent);
     backdrop-filter: blur(10px);
 }
@@ -785,34 +787,34 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 14px;
 }
 
 .subscription-header h3 {
-    font-size: 18px;
-    font-weight: 800;
+    font-size: 16px;
+    font-weight: 700;
     color: var(--text-primary);
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
 }
 
 .btn-upgrade {
     background: rgba(34, 197, 94, 0.2);
     border: 1px solid var(--pubg-accent);
     color: var(--pubg-accent);
-    padding: 8px 16px;
-    border-radius: 20px;
+    padding: 6px 12px;
+    border-radius: 16px;
     font-weight: 700;
-    font-size: 14px;
+    font-size: 12px;
     cursor: pointer;
     backdrop-filter: blur(5px);
 }
 
 .subscription-card {
     background: rgba(15, 20, 25, 0.5);
-    border-radius: 12px;
-    padding: 16px;
+    border-radius: 10px;
+    padding: 12px;
     backdrop-filter: blur(5px);
 }
 
@@ -820,11 +822,11 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
 }
 
 .sub-name {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 800;
     color: var(--pubg-accent);
 }
@@ -832,22 +834,22 @@ body {
 .sub-badge {
     background: var(--pubg-accent);
     color: white;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 16px;
+    font-size: 11px;
     font-weight: 700;
 }
 
 .sub-features {
-    margin-bottom: 20px;
+    margin-bottom: 14px;
 }
 
 .feature {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 8px 0;
-    font-size: 14px;
+    gap: 8px;
+    padding: 6px 0;
+    font-size: 13px;
 }
 
 .feature i {
@@ -857,17 +859,17 @@ body {
 .sub-stats {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
+    gap: 12px;
 }
 
 .stat {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
 }
 
 .stat-icon {
-    font-size: 24px;
+    font-size: 20px;
     color: var(--pubg-accent);
 }
 
@@ -877,19 +879,19 @@ body {
 }
 
 .stat-value {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 800;
     color: var(--text-primary);
 }
 
 .stat-label {
-    font-size: 11px;
+    font-size: 10px;
     color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
-/* Игровые преимущества */
+/* Игровые преимущества - КОМПАКТНЫЙ ВАРИАНТ */
 .game-advantages {
     margin-bottom: 16px;
 }
@@ -903,13 +905,13 @@ body {
 
 .advantage-card {
     background: linear-gradient(135deg, rgba(26, 32, 44, 0.9) 0%, rgba(45, 55, 72, 0.9) 100%);
-    border-radius: 14px; /* Уменьшено с 16px */
-    padding: 14px; /* Уменьшено с 20px */
+    border-radius: 12px;
+    padding: 12px 8px;
     text-align: center;
     border: 1px solid var(--glass-border);
     backdrop-filter: blur(10px);
     transition: transform 0.2s ease;
-    min-height: 120px; /* Фиксированная минимальная высота */
+    min-height: 100px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -917,12 +919,12 @@ body {
 }
 
 .advantage-card:hover {
-    transform: translateY(-3px); /* Уменьшено с -5px */
+    transform: translateY(-2px);
 }
 
 .advantage-icon {
-    font-size: 32px; /* Уменьшено с 40px */
-    margin-bottom: 8px; /* Уменьшено с 12px */
+    font-size: 24px;
+    margin-bottom: 6px;
     display: inline-block;
     line-height: 1;
 }
@@ -944,19 +946,68 @@ body {
 }
 
 .advantage-card h4 {
-    font-size: 14px; /* Уменьшено с 16px */
-    font-weight: 700; /* Уменьшено с 800 */
-    margin-bottom: 4px; /* Уменьшено с 8px */
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 4px;
     color: var(--text-primary);
     line-height: 1.2;
 }
 
 .advantage-card p {
-    font-size: 11px; /* Уменьшено с 12px */
+    font-size: 10px;
     color: var(--text-secondary);
-    line-height: 1.3;
+    line-height: 1.2;
     max-width: 90%;
     margin: 0 auto;
+}
+
+/* Адаптивность для очень маленьких экранов */
+@media (max-width: 340px) {
+    .advantages-grid {
+        gap: 8px;
+    }
+    
+    .advantage-card {
+        padding: 8px 6px;
+        min-height: 90px;
+    }
+    
+    .advantage-icon {
+        font-size: 20px;
+        margin-bottom: 4px;
+    }
+    
+    .advantage-card h4 {
+        font-size: 12px;
+    }
+    
+    .advantage-card p {
+        font-size: 9px;
+    }
+}
+
+/* Для планшетов и больших экранов */
+@media (min-width: 768px) {
+    .advantages-grid {
+        gap: 12px;
+    }
+    
+    .advantage-card {
+        padding: 14px 10px;
+        min-height: 110px;
+    }
+    
+    .advantage-icon {
+        font-size: 28px;
+    }
+    
+    .advantage-card h4 {
+        font-size: 14px;
+    }
+    
+    .advantage-card p {
+        font-size: 11px;
+    }
 }
 
 /* Нижняя навигация */
@@ -1327,14 +1378,14 @@ body {
 
 /* Мои покупки */
 .my-purchases {
-    margin-bottom: 24px;
+    margin-bottom: 18px;
 }
 
 .purchase-item {
     background: linear-gradient(135deg, rgba(26, 32, 44, 0.9) 0%, rgba(45, 55, 72, 0.9) 100%);
-    border-radius: 16px;
-    padding: 16px;
-    margin-bottom: 12px;
+    border-radius: 14px;
+    padding: 12px;
+    margin-bottom: 10px;
     border: 1px solid var(--glass-border);
     backdrop-filter: blur(10px);
 }
@@ -1343,19 +1394,19 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
 }
 
 .purchase-name {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 600;
     color: var(--text-primary);
 }
 
 .purchase-status {
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 16px;
+    font-size: 11px;
     font-weight: 700;
 }
 
@@ -1380,12 +1431,12 @@ body {
 .purchase-details {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-    margin-bottom: 12px;
+    gap: 10px;
+    margin-bottom: 10px;
 }
 
 .purchase-detail {
-    font-size: 12px;
+    font-size: 11px;
     color: var(--text-secondary);
 }
 
@@ -1396,28 +1447,28 @@ body {
 
 .no-subscription {
     text-align: center;
-    padding: 40px 20px;
+    padding: 30px 20px;
 }
 
 .no-subscription i {
-    font-size: 48px;
+    font-size: 40px;
     color: var(--pubg-accent);
-    margin-bottom: 16px;
+    margin-bottom: 12px;
 }
 
 .no-subscription p {
     color: var(--text-secondary);
-    margin-bottom: 24px;
-    font-size: 16px;
+    margin-bottom: 20px;
+    font-size: 14px;
 }
 
 .btn-buy {
     background: linear-gradient(45deg, var(--pubg-accent-dark), var(--pubg-accent));
     border: none;
-    border-radius: 12px;
-    padding: 16px 32px;
+    border-radius: 10px;
+    padding: 14px 24px;
     color: white;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 700;
     cursor: pointer;
     box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
@@ -1425,13 +1476,13 @@ body {
 
 .no-purchases {
     text-align: center;
-    padding: 40px 20px;
+    padding: 30px 20px;
     color: var(--text-secondary);
 }
 
 .no-purchases i {
-    font-size: 48px;
-    margin-bottom: 16px;
+    font-size: 40px;
+    margin-bottom: 12px;
 }
 
 /* Уведомления */
@@ -1482,8 +1533,14 @@ body {
 
     .advantages-grid {
         grid-template-columns: 1fr;
+        gap: 8px;
     }
-
+    
+    .advantage-card {
+        min-height: 85px;
+        padding: 10px 6px;
+    }
+    
     .avatar-placeholder {
         width: 40px;
         height: 40px;
@@ -1564,6 +1621,24 @@ body {
 
     .advantages-grid {
         grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+    }
+    
+    .advantage-card {
+        min-height: 90px;
+        padding: 8px 6px;
+    }
+    
+    .advantage-icon {
+        font-size: 20px;
+    }
+    
+    .advantage-card h4 {
+        font-size: 12px;
+    }
+    
+    .advantage-card p {
+        font-size: 9px;
     }
 
     .pubg-nav {
