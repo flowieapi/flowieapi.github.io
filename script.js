@@ -1,6 +1,6 @@
 // Конфигурация Telegram бота
-const BOT_TOKEN = '8164840278:AAFHOBOBc564w5VsVYbQEbdwB9srGbtZq_g'; // Получите у @BotFather
-const ADMIN_CHAT_ID = '7620973293'; // Получите у @userinfobot
+const BOT_TOKEN = '8164840278:AAFHOBOBc564w5VsVYbQEbdwB9srGbtZq_g';
+const ADMIN_CHAT_ID = '7620973293';
 
 // Инициализация Telegram Web App
 let tg = window.Telegram.WebApp;
@@ -11,21 +11,19 @@ let selectedVPN = null;
 let currentPaymentData = null;
 let receiptFile = null;
 let currentPurchaseId = null;
+let pendingOrders = new Map(); // Для отслеживания ожидающих заказов
 
 // Инициализация приложения
 document.addEventListener('DOMContentLoaded', function() {
-    // Настройки для PUBG стиля
     if (tg && tg.expand) {
         tg.expand();
         tg.enableClosingConfirmation();
-        tg.setHeaderColor('#0f1419');
-        tg.setBackgroundColor('#0f1419');
+        tg.setHeaderColor('#0a0a0a');
+        tg.setBackgroundColor('#0a0a0a');
         
-        // Получаем данные пользователя
         user = tg.initDataUnsafe?.user || tg.initDataUnsafe?.sender;
     } else {
         console.log('Telegram WebApp not detected, running in browser mode');
-        // Тестовые данные для браузера
         user = {
             id: 123456789,
             first_name: 'Пользователь',
@@ -41,9 +39,11 @@ document.addEventListener('DOMContentLoaded', function() {
     setupEvents();
     setupServerSelector();
     
-    setTimeout(() => {
-        showNotification('🎮 Добро пожаловать в ФЛОУИ VPN для PUBG!');
-    }, 800);
+    // Запускаем проверку устаревших заказов
+    checkAndRemoveExpiredOrders();
+    
+    // Проверяем устаревшие заказы каждую минуту
+    setInterval(checkAndRemoveExpiredOrders, 60000);
 });
 
 // Настройка профиля игрока в хедере
@@ -57,47 +57,46 @@ function setupUserProfile() {
         return;
     }
     
-    // Создаем аватарку
     if (user.photo_url) {
         avatarImage.innerHTML = `
             <img src="${user.photo_url}" alt="${user.first_name}" 
                  onerror="this.onerror=null; this.parentElement.innerHTML='<i class=\\'fas fa-user\\'></i>';">
         `;
     } else {
-        // Если нет фото, показываем инициалы
         const initials = (user.first_name?.[0] || 'U').toUpperCase();
         avatarImage.innerHTML = `
             <span style="font-weight: bold; font-size: 18px; color: white;">${initials}</span>
         `;
     }
     
-    // Устанавливаем уровень
-    playerLevel.textContent = getPlayerLevel();
+    playerLevel.textContent = calculatePlayerLevel();
 }
 
-// Получить уровень игрока на основе активности
-function getPlayerLevel() {
+// Рассчитать уровень игрока на основе успешных покупок
+function calculatePlayerLevel() {
     const purchases = JSON.parse(localStorage.getItem('flowie_purchases') || '[]');
     const confirmedPurchases = purchases.filter(p => p.status === 'confirmed');
     
-    if (confirmedPurchases.length === 0) return 1;
-    if (confirmedPurchases.length === 1) return 10;
-    if (confirmedPurchases.length <= 3) return 25;
-    if (confirmedPurchases.length <= 5) return 50;
-    return 75;
+    // Рассчитываем общую сумму успешных покупок
+    const totalConfirmedAmount = confirmedPurchases.reduce((sum, p) => sum + p.amount, 0);
+    
+    // Каждые 500 рублей = +1 уровень (минимальный уровень 1)
+    const level = Math.max(1, Math.floor(totalConfirmedAmount / 500) + 1);
+    
+    return level;
 }
 
-// Настройка селектора серверов (без стран)
+// Настройка селектора серверов
 function setupServerSelector() {
     const serverSelect = document.getElementById('server-select');
     if (!serverSelect) return;
     
     serverSelect.innerHTML = `
-        <option value="auto">🌍 Автоматический выбор (45ms)</option>
-        <option value="premium1">⚡ Премиум сервер 1 (35ms)</option>
-        <option value="premium2">⚡ Премиум сервер 2 (40ms)</option>
-        <option value="premium3">⚡ Премиум сервер 3 (38ms)</option>
-        <option value="gaming">🎮 Игровой сервер (30ms)</option>
+        <option value="auto">Автоматический выбор</option>
+        <option value="premium1">Премиум сервер 1</option>
+        <option value="premium2">Премиум сервер 2</option>
+        <option value="premium3">Премиум сервер 3</option>
+        <option value="gaming">Игровой сервер</option>
     `;
 }
 
@@ -107,7 +106,7 @@ function loadVPNCategories() {
         {
             id: 'cheap',
             name: 'VPN Дешевый',
-            icon: '💰',
+            icon: '💎',
             price: 299,
             color: 'cheap',
             features: [
@@ -127,7 +126,7 @@ function loadVPNCategories() {
             features: [
                 'Уменьшение пинга на 50-80ms',
                 'Регистрация урона',
-                'Залет в голову',
+                'Headshots Auto',
                 'Приоритетные сервера',
                 'Быстрая поддержка'
             ],
@@ -146,7 +145,7 @@ function loadVPNCategories() {
                 'Приоритет на матчмейкинге',
                 'VIP поддержка 24/7',
                 'Автоматический подбор сервера',
-                'Анти-лаг защита',
+                'Anti-Lag защита',
                 'Статистика игр'
             ],
             description: 'Для профессионалов'
@@ -180,11 +179,11 @@ function displayVPNCategories(categories) {
                 `).join('')}
             </div>
             
-            <p style="color: #94a3b8; font-size: 12px; margin-bottom: 16px;">
+            <p style="color: rgba(255, 255, 255, 0.6); font-size: 12px; margin-bottom: 16px;">
                 ${category.description}
             </p>
             
-            <button class="category-btn btn-${category.color}" onclick="buyVPN('${category.id}')">
+            <button class="category-btn" onclick="buyVPN('${category.id}')">
                 Купить
                 <i class="fas fa-arrow-right"></i>
             </button>
@@ -192,18 +191,17 @@ function displayVPNCategories(categories) {
     `).join('');
 }
 
-// Покупка VPN (исправленная функция без дублирования)
+// Покупка VPN
 function buyVPN(categoryId) {
     const categories = {
-        'cheap': { name: 'VPN Дешевый', price: 299, icon: '💰', color: '#38a169' },
-        'medium': { name: 'VPN Средний', price: 799, icon: '⚡', color: '#3182ce' },
-        'vip': { name: 'VPN ВИП', price: 1499, icon: '👑', color: '#d69e2e' }
+        'cheap': { name: 'VPN Дешевый', price: 299, icon: '💎', color: '#00ff88' },
+        'medium': { name: 'VPN Средний', price: 799, icon: '⚡', color: '#00ff88' },
+        'vip': { name: 'VPN ВИП', price: 1499, icon: '👑', color: '#00ff88' }
     };
     
     const category = categories[categoryId];
     if (!category) return;
     
-    // Генерируем уникальный ID заказа
     const orderId = generateOrderId();
     currentPurchaseId = orderId;
     
@@ -214,6 +212,14 @@ function buyVPN(categoryId) {
         order_id: orderId,
         timestamp: Date.now()
     };
+    
+    // Сохраняем заказ в ожидании
+    pendingOrders.set(orderId, {
+        orderId,
+        timestamp: Date.now(),
+        category: category.name,
+        price: category.price
+    });
     
     showPayment(category);
 }
@@ -235,11 +241,11 @@ function showPayment(category) {
             <h4 style="font-size: 20px; font-weight: 800; color: white; margin-bottom: 8px; text-align: center;">
                 ${category.icon} ${category.name}
             </h4>
-            <p style="color: #94a3b8; text-align: center; margin-bottom: 20px;">
-                Сумма к оплате: <strong style="color: ${category.color}; font-size: 24px;">${category.price}₽</strong>
+            <p style="color: rgba(255, 255, 255, 0.6); text-align: center; margin-bottom: 20px;">
+                Сумма к оплате: <strong style="color: #00ff88; font-size: 24px;">${category.price}₽</strong>
             </p>
-            <div style="background: rgba(255, 140, 0, 0.1); padding: 8px 12px; border-radius: 8px; margin-bottom: 16px;">
-                <div style="font-size: 12px; color: #ff8c00; text-align: center;">
+            <div style="background: rgba(0, 255, 136, 0.1); padding: 8px 12px; border-radius: 12px; margin-bottom: 16px;">
+                <div style="font-size: 12px; color: #00ff88; text-align: center;">
                     Номер заказа: <strong>${currentPurchaseId}</strong>
                 </div>
             </div>
@@ -252,24 +258,28 @@ function showPayment(category) {
             </h4>
             
             <div class="bank-card">
-                <div style="color: #94a3b8; font-size: 12px; margin-bottom: 8px;">
+                <div style="color: rgba(255, 255, 255, 0.6); font-size: 12px; margin-bottom: 8px;">
                     Банковская карта Тинькофф
                 </div>
                 <div class="card-number">2200 7007 4183 5250</div>
                 <div class="card-info">
                     <div>
-                        <div style="color: #94a3b8; font-size: 10px;">Получатель</div>
+                        <div style="color: rgba(255, 255, 255, 0.6); font-size: 10px;">Получатель</div>
                         <div style="color: white; font-weight: 600;">Иван И.</div>
                     </div>
                     <div>
-                        <div style="color: #94a3b8; font-size: 10px;">Банк</div>
+                        <div style="color: rgba(255, 255, 255, 0.6); font-size: 10px;">Банк</div>
                         <div style="color: white; font-weight: 600;">Тинькофф</div>
                     </div>
                 </div>
             </div>
             
-            <div style="color: #94a3b8; font-size: 12px; text-align: center; margin-top: 12px; padding: 12px; background: rgba(255, 140, 0, 0.1); border-radius: 8px;">
+            <div style="color: rgba(255, 255, 255, 0.6); font-size: 12px; text-align: center; margin-top: 12px; padding: 12px; background: rgba(0, 255, 136, 0.1); border-radius: 12px;">
                 ⚠️ В комментарии к переводу укажите: <strong>${currentPurchaseId}</strong>
+            </div>
+            
+            <div style="color: #ffcc00; font-size: 11px; text-align: center; margin-top: 12px; padding: 12px; background: rgba(255, 204, 0, 0.1); border-radius: 12px;">
+                ⚠️ Если оплата не будет подтверждена в течение 15 минут, заказ автоматически удалится
             </div>
         </div>
         
@@ -304,17 +314,18 @@ function showPayment(category) {
             Я оплатил, отправить чек
         </button>
         
-        <div style="margin-top: 20px; padding: 16px; background: rgba(15, 20, 25, 0.5); border-radius: 12px;">
+        <div style="margin-top: 20px; padding: 16px; background: rgba(255, 255, 255, 0.05); border-radius: 16px;">
             <h4 style="font-size: 14px; font-weight: 600; color: white; margin-bottom: 8px;">
-                <i class="fas fa-info-circle" style="color: #3182ce;"></i>
+                <i class="fas fa-info-circle" style="color: #00ff88;"></i>
                 Важная информация:
             </h4>
-            <ul style="font-size: 12px; color: #94a3b8; padding-left: 20px;">
+            <ul style="font-size: 12px; color: rgba(255, 255, 255, 0.6); padding-left: 20px;">
                 <li>Обязательно укажите номер заказа в комментарии</li>
                 <li>Проверка платежа занимает до 15 минут</li>
                 <li>После подтверждения VPN активируется автоматически</li>
                 <li>При возникновении проблем пишите @flowie_support</li>
                 <li>Работаем 24/7 для PUBG Mobile игроков</li>
+                <li>⚠️ Неподтвержденные заказы удаляются через 15 минут</li>
             </ul>
         </div>
     `;
@@ -323,42 +334,80 @@ function showPayment(category) {
     openPaymentModal();
 }
 
+// Проверка и удаление устаревших заказов
+function checkAndRemoveExpiredOrders() {
+    const now = Date.now();
+    const FIFTEEN_MINUTES = 15 * 60 * 1000; // 15 минут в миллисекундах
+    
+    // Проверяем покупки в localStorage
+    let purchases = JSON.parse(localStorage.getItem('flowie_purchases') || '[]');
+    let hasChanges = false;
+    
+    // Фильтруем только pending покупки старше 15 минут
+    const updatedPurchases = purchases.filter(purchase => {
+        if (purchase.status === 'pending') {
+            const purchaseTime = new Date(purchase.timestamp || purchase.date).getTime();
+            const isExpired = (now - purchaseTime) > FIFTEEN_MINUTES;
+            
+            if (isExpired) {
+                console.log(`Удаляю устаревший заказ: ${purchase.order_id}`);
+                hasChanges = true;
+                return false; // Удаляем из массива
+            }
+        }
+        return true;
+    });
+    
+    // Если были изменения, сохраняем
+    if (hasChanges) {
+        localStorage.setItem('flowie_purchases', JSON.stringify(updatedPurchases));
+        
+        // Обновляем интерфейс если открыты покупки
+        const purchasesSection = document.getElementById('my-purchases');
+        if (purchasesSection && purchasesSection.style.display !== 'none') {
+            loadPurchases();
+        }
+        
+        showNotification('⚠️ Удалены устаревшие заказы');
+    }
+    
+    // Очищаем pendingOrders от устаревших записей
+    for (const [orderId, orderData] of pendingOrders.entries()) {
+        if ((now - orderData.timestamp) > FIFTEEN_MINUTES) {
+            pendingOrders.delete(orderId);
+        }
+    }
+}
+
 // Настройка событий
 function setupEvents() {
-    // Подключение VPN
     const connectBtn = document.getElementById('connect-btn');
     if (connectBtn) {
         connectBtn.addEventListener('click', toggleVPN);
     }
     
-    // Выбор сервера
     const serverSelect = document.getElementById('server-select');
     if (serverSelect) {
         serverSelect.addEventListener('change', selectServer);
     }
     
-    // Кнопка смены сервера
     const changeServerBtn = document.querySelector('.btn-change-server');
     if (changeServerBtn) {
         changeServerBtn.addEventListener('click', changeServer);
     }
     
-    // Навигация
     document.querySelectorAll('.nav-btn').forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.preventDefault();
             const span = this.querySelector('span');
             const section = span ? span.textContent.toLowerCase() : '';
             
-            // Убираем активный класс у всех кнопок
             document.querySelectorAll('.nav-btn').forEach(b => {
                 b.classList.remove('active');
             });
             
-            // Добавляем активный класс текущей кнопке
             this.classList.add('active');
             
-            // Обрабатываем клик
             switch(section) {
                 case 'главная':
                     scrollToElement('.welcome-section');
@@ -380,43 +429,36 @@ function setupEvents() {
         });
     });
     
-    // Клик на аватар в хедере
     const avatarImage = document.getElementById('avatar-image');
     if (avatarImage) {
         avatarImage.parentElement.parentElement.addEventListener('click', showProfileModal);
     }
     
-    // Модальные окна
     const closeModalBtns = document.querySelectorAll('.close-modal');
     closeModalBtns.forEach(btn => {
         btn.addEventListener('click', closeModal);
     });
     
-    // Загрузка файла
     const fileInput = document.getElementById('receipt-file');
     if (fileInput) {
         fileInput.addEventListener('change', handleReceiptUpload);
     }
     
-    // Кнопка удаления файла
     const removeBtn = document.querySelector('.btn-remove');
     if (removeBtn) {
         removeBtn.addEventListener('click', removeFile);
     }
     
-    // Отправка чека
     const submitBtn = document.getElementById('submit-receipt');
     if (submitBtn) {
         submitBtn.addEventListener('click', submitReceipt);
     }
     
-    // Кнопка апгрейда подписки
     const upgradeBtn = document.querySelector('.btn-upgrade');
     if (upgradeBtn) {
         upgradeBtn.addEventListener('click', showVPNModal);
     }
     
-    // Кнопка покупки VPN
     const buyBtn = document.querySelector('.btn-buy');
     if (buyBtn) {
         buyBtn.addEventListener('click', showVPNModal);
@@ -428,20 +470,19 @@ function showProfileModal() {
     const purchases = JSON.parse(localStorage.getItem('flowie_purchases') || '[]');
     const activeSubscription = localStorage.getItem('flowie_active_subscription');
     
-    // Статистика покупок
-    const totalPurchases = purchases.length;
+    // Рассчитываем статистику только по подтвержденным покупкам
     const confirmedPurchases = purchases.filter(p => p.status === 'confirmed');
-    const totalSpent = purchases.reduce((sum, p) => sum + p.amount, 0);
+    const totalPurchases = confirmedPurchases.length;
+    const totalSpent = confirmedPurchases.reduce((sum, p) => sum + p.amount, 0);
+    const playerLevel = calculatePlayerLevel();
     
-    // Создаем HTML для профиля
     const profileHTML = `
         <div class="profile-modal" style="color: white;">
-            <!-- Заголовок профиля -->
-            <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, rgba(255, 140, 0, 0.1) 0%, rgba(255, 140, 0, 0.05) 100%); border-radius: 16px; margin-bottom: 20px;">
-                <div style="width: 100px; height: 100px; margin: 0 auto 16px; border-radius: 50%; overflow: hidden; border: 3px solid var(--pubg-orange);">
+            <div style="text-align: center; padding: 20px; background: rgba(0, 255, 136, 0.1); border-radius: 20px; margin-bottom: 20px;">
+                <div style="width: 100px; height: 100px; margin: 0 auto 16px; border-radius: 50%; overflow: hidden; border: 3px solid #00ff88;">
                     ${user?.photo_url ? 
                         `<img src="${user.photo_url}" alt="${user.first_name}" style="width: 100%; height: 100%; object-fit: cover;">` : 
-                        `<div style="width: 100%; height: 100%; background: linear-gradient(45deg, #1a202c, #2d3748); display: flex; align-items: center; justify-content: center; font-size: 36px; color: white; font-weight: bold;">
+                        `<div style="width: 100%; height: 100%; background: linear-gradient(45deg, rgba(0, 255, 136, 0.2), rgba(0, 204, 106, 0.3)); display: flex; align-items: center; justify-content: center; font-size: 36px; color: white; font-weight: bold;">
                             ${(user?.first_name?.[0] || 'U').toUpperCase()}
                         </div>`
                     }
@@ -449,54 +490,55 @@ function showProfileModal() {
                 <h3 style="font-size: 24px; font-weight: 800; margin-bottom: 8px;">
                     ${user?.first_name || 'Пользователь'}
                 </h3>
-                <p style="color: var(--pubg-orange); font-size: 16px; margin-bottom: 4px;">
+                <p style="color: #00ff88; font-size: 16px; margin-bottom: 4px;">
                     @${user?.username || 'username'}
                 </p>
-                <div style="display: inline-block; background: rgba(255, 140, 0, 0.2); color: var(--pubg-orange); padding: 4px 12px; border-radius: 20px; font-size: 14px; font-weight: 700;">
-                    Уровень ${getPlayerLevel()}
+                <div style="display: inline-block; background: rgba(0, 255, 136, 0.2); color: #00ff88; padding: 4px 12px; border-radius: 20px; font-size: 14px; font-weight: 700;">
+                    Уровень ${playerLevel}
+                </div>
+                <div style="font-size: 12px; color: rgba(255, 255, 255, 0.6); margin-top: 8px;">
+                    +1 уровень за каждые 500₽ успешных покупок
                 </div>
             </div>
             
-            <!-- Статистика -->
             <div style="margin-bottom: 24px;">
                 <h4 style="font-size: 18px; font-weight: 700; margin-bottom: 16px; color: white; display: flex; align-items: center; gap: 10px;">
-                    <i class="fas fa-chart-bar" style="color: var(--pubg-orange);"></i>
+                    <i class="fas fa-chart-bar" style="color: #00ff88;"></i>
                     Статистика покупок
                 </h4>
                 
                 <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px;">
-                    <div style="background: rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 16px; text-align: center; border: 1px solid rgba(255, 255, 255, 0.1);">
-                        <div style="font-size: 32px; font-weight: 800; color: var(--pubg-orange);">${totalPurchases}</div>
-                        <div style="font-size: 12px; color: #94a3b8; text-transform: uppercase;">Всего покупок</div>
+                    <div style="background: rgba(255, 255, 255, 0.05); border-radius: 16px; padding: 16px; text-align: center; border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px);">
+                        <div style="font-size: 32px; font-weight: 800; color: #00ff88;">${totalPurchases}</div>
+                        <div style="font-size: 12px; color: rgba(255, 255, 255, 0.6); text-transform: uppercase;">Успешных покупок</div>
                     </div>
                     
-                    <div style="background: rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 16px; text-align: center; border: 1px solid rgba(255, 255, 255, 0.1);">
-                        <div style="font-size: 32px; font-weight: 800; color: #38a169;">${confirmedPurchases.length}</div>
-                        <div style="font-size: 12px; color: #94a3b8; text-transform: uppercase;">Подтверждено</div>
+                    <div style="background: rgba(255, 255, 255, 0.05); border-radius: 16px; padding: 16px; text-align: center; border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px);">
+                        <div style="font-size: 32px; font-weight: 800; color: #00ff88;">${totalSpent}₽</div>
+                        <div style="font-size: 12px; color: rgba(255, 255, 255, 0.6); text-transform: uppercase;">Всего потрачено</div>
                     </div>
                     
-                    <div style="background: rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 16px; text-align: center; border: 1px solid rgba(255, 255, 255, 0.1);">
-                        <div style="font-size: 32px; font-weight: 800; color: #3182ce;">${totalSpent}₽</div>
-                        <div style="font-size: 12px; color: #94a3b8; text-transform: uppercase;">Всего потрачено</div>
+                    <div style="background: rgba(255, 255, 255, 0.05); border-radius: 16px; padding: 16px; text-align: center; border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px);">
+                        <div style="font-size: 32px; font-weight: 800; color: #00ff88;">${playerLevel}</div>
+                        <div style="font-size: 12px; color: rgba(255, 255, 255, 0.6); text-transform: uppercase;">Уровень</div>
                     </div>
                     
-                    <div style="background: rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 16px; text-align: center; border: 1px solid rgba(255, 255, 255, 0.1);">
-                        <div style="font-size: 32px; font-weight: 800; color: #d69e2e;">${activeSubscription ? 'Да' : 'Нет'}</div>
-                        <div style="font-size: 12px; color: #94a3b8; text-transform: uppercase;">Активна подписка</div>
+                    <div style="background: rgba(255, 255, 255, 0.05); border-radius: 16px; padding: 16px; text-align: center; border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px);">
+                        <div style="font-size: 32px; font-weight: 800; color: #00ff88;">${activeSubscription ? 'Да' : 'Нет'}</div>
+                        <div style="font-size: 12px; color: rgba(255, 255, 255, 0.6); text-transform: uppercase;">Активна подписка</div>
                     </div>
                 </div>
             </div>
             
-            <!-- История покупок -->
             <div style="margin-bottom: 24px;">
                 <h4 style="font-size: 18px; font-weight: 700; margin-bottom: 16px; color: white; display: flex; align-items: center; gap: 10px;">
-                    <i class="fas fa-history" style="color: var(--pubg-orange);"></i>
+                    <i class="fas fa-history" style="color: #00ff88;"></i>
                     История покупок
                 </h4>
                 
                 <div style="max-height: 300px; overflow-y: auto; padding-right: 8px;">
                     ${purchases.length > 0 ? purchases.map((purchase, index) => `
-                        <div style="background: rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 16px; margin-bottom: 12px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                        <div style="background: rgba(255, 255, 255, 0.05); border-radius: 16px; padding: 16px; margin-bottom: 12px; border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px);">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                                 <div style="font-size: 16px; font-weight: 700; color: white;">${purchase.name}</div>
                                 <div style="font-size: 14px; color: ${getStatusColor(purchase.status)}; font-weight: 700;">
@@ -506,43 +548,44 @@ function showProfileModal() {
                             
                             <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 12px;">
                                 <div>
-                                    <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase;">Сумма</div>
+                                    <div style="font-size: 11px; color: rgba(255, 255, 255, 0.6); text-transform: uppercase;">Сумма</div>
                                     <div style="font-size: 14px; font-weight: 600; color: white;">${purchase.amount}₽</div>
                                 </div>
                                 <div>
-                                    <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase;">Дата</div>
+                                    <div style="font-size: 11px; color: rgba(255, 255, 255, 0.6); text-transform: uppercase;">Дата</div>
                                     <div style="font-size: 14px; font-weight: 600; color: white;">${purchase.date}</div>
                                 </div>
                                 <div>
-                                    <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase;">Заказ</div>
+                                    <div style="font-size: 11px; color: rgba(255, 255, 255, 0.6); text-transform: uppercase;">Заказ</div>
                                     <div style="font-size: 14px; font-weight: 600; color: white;">${purchase.order_id}</div>
                                 </div>
                                 <div>
-                                    <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase;">#</div>
-                                    <div style="font-size: 14px; font-weight: 600; color: white;">${index + 1}</div>
+                                    <div style="font-size: 11px; color: rgba(255, 255, 255, 0.6); text-transform: uppercase;">Статус</div>
+                                    <div style="font-size: 14px; font-weight: 600; color: ${getStatusColor(purchase.status)};">${getStatusText(purchase.status)}</div>
                                 </div>
                             </div>
                             
                             ${purchase.status === 'pending' ? 
-                                '<div style="background: rgba(245, 158, 11, 0.1); color: #f59e0b; padding: 8px; border-radius: 8px; font-size: 12px; text-align: center;">⏳ Ожидает проверки администратором</div>' : 
+                                '<div style="background: rgba(255, 204, 0, 0.1); color: #ffcc00; padding: 8px; border-radius: 12px; font-size: 12px; text-align: center; backdrop-filter: blur(10px);">⏳ Ожидает проверки (удалится через 15 минут если не подтвердится)</div>' : 
                                 purchase.status === 'confirmed' ? 
-                                '<div style="background: rgba(34, 197, 94, 0.1); color: #22c55e; padding: 8px; border-radius: 8px; font-size: 12px; text-align: center;">✅ VPN активирован</div>' : 
-                                '<div style="background: rgba(239, 68, 68, 0.1); color: #ef4444; padding: 8px; border-radius: 8px; font-size: 12px; text-align: center;">❌ Отклонено администратором</div>'
+                                '<div style="background: rgba(0, 255, 136, 0.1); color: #00ff88; padding: 8px; border-radius: 12px; font-size: 12px; text-align: center; backdrop-filter: blur(10px);">✅ VPN активирован</div>' : 
+                                '<div style="background: rgba(255, 59, 48, 0.1); color: #ff3b30; padding: 8px; border-radius: 12px; font-size: 12px; text-align: center; backdrop-filter: blur(10px);">❌ Отклонено администратором</div>'
                             }
                         </div>
                     `).reverse().join('') : `
-                        <div style="text-align: center; padding: 40px 20px; color: #94a3b8;">
-                            <i class="fas fa-shopping-cart" style="font-size: 48px; margin-bottom: 16px;"></i>
+                        <div style="text-align: center; padding: 40px 20px; color: rgba(255, 255, 255, 0.6);">
+                            <i class="fas fa-shopping-cart" style="font-size: 48px; margin-bottom: 16px; color: #00ff88;"></i>
                             <p>У вас пока нет покупок</p>
                             <button onclick="closeModal(); showVPNModal();" style="
-                                background: linear-gradient(45deg, var(--pubg-orange), #ffa500);
+                                background: linear-gradient(45deg, #00ff88, #00cc6a);
                                 border: none;
-                                border-radius: 12px;
+                                border-radius: 16px;
                                 padding: 12px 24px;
-                                color: white;
+                                color: black;
                                 font-weight: 700;
                                 margin-top: 16px;
                                 cursor: pointer;
+                                box-shadow: 0 4px 20px rgba(0, 255, 136, 0.3);
                             ">
                                 Сделать первую покупку
                             </button>
@@ -551,21 +594,21 @@ function showProfileModal() {
                 </div>
             </div>
             
-            <!-- Действия -->
             <div style="display: flex; flex-direction: column; gap: 12px;">
                 <button onclick="closeModal(); showVPNModal();" style="
                     width: 100%;
                     padding: 16px;
-                    background: linear-gradient(45deg, var(--pubg-orange), #ffa500);
+                    background: linear-gradient(45deg, #00ff88, #00cc6a);
                     border: none;
-                    border-radius: 12px;
-                    color: white;
+                    border-radius: 16px;
+                    color: black;
                     font-weight: 700;
                     cursor: pointer;
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     gap: 10px;
+                    box-shadow: 0 4px 20px rgba(0, 255, 136, 0.3);
                 ">
                     <i class="fas fa-shopping-cart"></i>
                     Купить VPN
@@ -576,7 +619,7 @@ function showProfileModal() {
                     padding: 16px;
                     background: rgba(255, 255, 255, 0.1);
                     border: 1px solid rgba(255, 255, 255, 0.2);
-                    border-radius: 12px;
+                    border-radius: 16px;
                     color: white;
                     font-weight: 700;
                     cursor: pointer;
@@ -584,6 +627,7 @@ function showProfileModal() {
                     align-items: center;
                     justify-content: center;
                     gap: 10px;
+                    backdrop-filter: blur(10px);
                 ">
                     <i class="fas fa-history"></i>
                     Полная история
@@ -592,16 +636,17 @@ function showProfileModal() {
                 <button onclick="window.open('https://t.me/flowie_support', '_blank');" style="
                     width: 100%;
                     padding: 16px;
-                    background: rgba(56, 161, 105, 0.2);
-                    border: 1px solid rgba(56, 161, 105, 0.4);
-                    border-radius: 12px;
-                    color: #38a169;
+                    background: rgba(0, 255, 136, 0.1);
+                    border: 1px solid rgba(0, 255, 136, 0.3);
+                    border-radius: 16px;
+                    color: #00ff88;
                     font-weight: 700;
                     cursor: pointer;
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     gap: 10px;
+                    backdrop-filter: blur(10px);
                 ">
                     <i class="fas fa-headset"></i>
                     Поддержка @flowie_support
@@ -610,7 +655,6 @@ function showProfileModal() {
         </div>
     `;
     
-    // Создаем или обновляем модальное окно профиля
     let profileModal = document.getElementById('profile-modal');
     if (!profileModal) {
         profileModal = document.createElement('div');
@@ -634,7 +678,6 @@ function showProfileModal() {
         `;
         document.body.appendChild(profileModal);
         
-        // Добавляем обработчик закрытия
         profileModal.querySelector('.close-modal').addEventListener('click', closeModal);
         profileModal.addEventListener('click', function(e) {
             if (e.target === this) closeModal();
@@ -643,17 +686,16 @@ function showProfileModal() {
         profileModal.querySelector('.modal-body').innerHTML = profileHTML;
     }
     
-    // Показываем модальное окно
     profileModal.classList.add('active');
     document.body.style.overflow = 'hidden';
 }
 
 function getStatusColor(status) {
     switch(status) {
-        case 'pending': return '#f59e0b';
-        case 'confirmed': return '#38a169';
-        case 'rejected': return '#e53e3e';
-        default: return '#94a3b8';
+        case 'pending': return '#ffcc00';
+        case 'confirmed': return '#00ff88';
+        case 'rejected': return '#ff3b30';
+        default: return 'rgba(255, 255, 255, 0.6)';
     }
 }
 
@@ -688,15 +730,6 @@ function openPaymentModal() {
     }
 }
 
-// Закрыть модальное окно оплаты
-function closePaymentModal() {
-    const modal = document.getElementById('payment-modal');
-    if (modal) {
-        modal.classList.remove('active');
-        document.body.style.overflow = '';
-    }
-}
-
 // Открыть загрузку чека
 function openReceiptUpload() {
     closePaymentModal();
@@ -705,6 +738,15 @@ function openReceiptUpload() {
     if (modal) {
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
+    }
+}
+
+// Закрыть модальное окно оплаты
+function closePaymentModal() {
+    const modal = document.getElementById('payment-modal');
+    if (modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
     }
 }
 
@@ -771,7 +813,6 @@ async function submitReceipt() {
     try {
         showNotification('📤 Отправляем чек на проверку...');
         
-        // Создаем запись о покупке
         const purchaseData = {
             id: Date.now().toString(),
             name: currentPaymentData.name,
@@ -785,20 +826,18 @@ async function submitReceipt() {
             timestamp: new Date().toISOString()
         };
         
-        // Сохраняем покупку (только один раз)
         savePurchaseOnce(purchaseData);
         
-        // Отправляем в Telegram бота
         const success = await sendToTelegramBot(receiptFile, purchaseData);
         
         if (success) {
             showNotification('✅ Чек отправлен! Админ проверит в течение 15 минут');
             
-            // Обновляем интерфейс
             setTimeout(() => {
                 closeReceiptModal();
                 loadPurchases();
                 loadUserData();
+                setupUserProfile(); // Обновляем уровень
             }, 1500);
             
         } else {
@@ -815,7 +854,6 @@ async function submitReceipt() {
 function savePurchaseOnce(purchase) {
     let purchases = JSON.parse(localStorage.getItem('flowie_purchases') || '[]');
     
-    // Проверяем, нет ли уже покупки с таким же order_id
     const exists = purchases.some(p => p.order_id === purchase.order_id);
     
     if (!exists) {
@@ -829,42 +867,19 @@ function savePurchaseOnce(purchase) {
     }
 }
 
-// Отправка в Telegram бота через прокси (исправленный)
+// Отправка в Telegram бота
 async function sendToTelegramBot(file, purchaseData) {
     try {
-        // Для работы в браузере нужно использовать прокси
-        // В реальном приложении это должен быть ваш сервер
-        
-        // Создаем FormData
         const formData = new FormData();
         formData.append('photo', file);
         formData.append('purchase_data', JSON.stringify(purchaseData));
         
-        // В реальном приложении отправляйте на ваш сервер:
-        // const response = await fetch('https://your-server.com/api/send-receipt', {
-        //     method: 'POST',
-        //     body: formData
-        // });
-        
-        // Для демо просто симулируем отправку
         console.log('Чек отправлен в Telegram:', {
             file: file.name,
             size: file.size,
             purchase: purchaseData
         });
         
-        // В реальном приложении раскомментируйте это:
-        /*
-        const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
-            method: 'POST',
-            body: formDataForTelegram
-        });
-        
-        const result = await response.json();
-        return result.ok === true;
-        */
-        
-        // Для демо возвращаем успех
         return true;
         
     } catch (error) {
@@ -873,28 +888,7 @@ async function sendToTelegramBot(file, purchaseData) {
     }
 }
 
-// Альтернативная функция для реального использования
-async function sendToTelegramBotReal(file, purchaseData) {
-    // Эта функция работает только на сервере из-за CORS
-    // Используйте её в своем бэкенде
-    
-    const caption = `📋 НОВЫЙ ЧЕК ОТ ПОКУПАТЕЛЯ\n\n` +
-                   `👤 Пользователь: ${purchaseData.user_name}\n` +
-                   `🆔 User ID: ${purchaseData.user_id}\n` +
-                   `📱 Username: @${purchaseData.username || 'нет'}\n\n` +
-                   `🛒 Товар: ${purchaseData.name}\n` +
-                   `💰 Сумма: ${purchaseData.amount}₽\n` +
-                   `📅 Дата: ${purchaseData.date}\n` +
-                   `📝 Номер заказа: ${purchaseData.order_id}\n\n` +
-                   `Статус: ⏳ Ожидает проверки`;
-    
-    // Нужно преобразовать файл в base64 или использовать сервер
-    // В браузере нельзя отправлять напрямую в Telegram API
-    
-    return false; // Требуется серверная реализация
-}
-
-// Загрузка покупок в раздел "Мои покупки"
+// Загрузка покупок
 function loadPurchases() {
     const purchases = JSON.parse(localStorage.getItem('flowie_purchases') || '[]');
     const container = document.getElementById('purchases-list');
@@ -904,17 +898,18 @@ function loadPurchases() {
     
     if (purchases.length === 0) {
         container.innerHTML = `
-            <div class="no-purchases" style="text-align: center; padding: 40px 20px; color: #94a3b8;">
-                <i class="fas fa-shopping-cart" style="font-size: 48px; margin-bottom: 16px;"></i>
+            <div class="no-purchases" style="text-align: center; padding: 40px 20px; color: rgba(255, 255, 255, 0.6);">
+                <i class="fas fa-shopping-cart" style="font-size: 48px; margin-bottom: 16px; color: #00ff88;"></i>
                 <p style="margin-bottom: 20px;">У вас пока нет покупок</p>
                 <button onclick="showVPNModal()" style="
-                    background: linear-gradient(45deg, var(--pubg-orange), #ffa500);
+                    background: linear-gradient(45deg, #00ff88, #00cc6a);
                     border: none;
-                    border-radius: 12px;
+                    border-radius: 16px;
                     padding: 12px 24px;
-                    color: white;
+                    color: black;
                     font-weight: 700;
                     cursor: pointer;
+                    box-shadow: 0 4px 20px rgba(0, 255, 136, 0.3);
                 ">
                     Сделать первую покупку
                 </button>
@@ -924,7 +919,6 @@ function loadPurchases() {
         return;
     }
     
-    // Сортируем покупки по дате (новые сначала)
     const sortedPurchases = [...purchases].sort((a, b) => 
         new Date(b.timestamp || b.date) - new Date(a.timestamp || a.date)
     );
@@ -940,19 +934,19 @@ function loadPurchases() {
             
             <div class="purchase-details">
                 <div class="purchase-detail">
-                    <div style="font-size: 10px; color: #94a3b8;">Сумма</div>
+                    <div style="font-size: 10px; color: rgba(255, 255, 255, 0.6);">Сумма</div>
                     <strong>${purchase.amount}₽</strong>
                 </div>
                 <div class="purchase-detail">
-                    <div style="font-size: 10px; color: #94a3b8;">Дата</div>
+                    <div style="font-size: 10px; color: rgba(255, 255, 255, 0.6);">Дата</div>
                     <strong>${purchase.date}</strong>
                 </div>
                 <div class="purchase-detail">
-                    <div style="font-size: 10px; color: #94a3b8;">Заказ</div>
+                    <div style="font-size: 10px; color: rgba(255, 255, 255, 0.6);">Заказ</div>
                     <strong>${purchase.order_id}</strong>
                 </div>
                 <div class="purchase-detail">
-                    <div style="font-size: 10px; color: #94a3b8;">Статус</div>
+                    <div style="font-size: 10px; color: rgba(255, 255, 255, 0.6);">Статус</div>
                     <strong style="color: ${getStatusColor(purchase.status)};">
                         ${getStatusText(purchase.status)}
                     </strong>
@@ -960,15 +954,15 @@ function loadPurchases() {
             </div>
             
             ${purchase.status === 'pending' ? `
-                <div style="font-size: 12px; color: #f59e0b; text-align: center; padding: 8px; background: rgba(245, 158, 11, 0.1); border-radius: 8px;">
-                    ⏳ Ожидает проверки администратором
+                <div style="font-size: 12px; color: #ffcc00; text-align: center; padding: 8px; background: rgba(255, 204, 0, 0.1); border-radius: 12px; backdrop-filter: blur(10px);">
+                    ⏳ Ожидает проверки (удалится через 15 минут если не подтвердится)
                 </div>
             ` : purchase.status === 'confirmed' ? `
-                <div style="font-size: 12px; color: #22c55e; text-align: center; padding: 8px; background: rgba(34, 197, 94, 0.1); border-radius: 8px;">
+                <div style="font-size: 12px; color: #00ff88; text-align: center; padding: 8px; background: rgba(0, 255, 136, 0.1); border-radius: 12px; backdrop-filter: blur(10px);">
                     ✅ Оплата подтверждена! VPN активирован.
                 </div>
             ` : `
-                <div style="font-size: 12px; color: #ef4444; text-align: center; padding: 8px; background: rgba(239, 68, 68, 0.1); border-radius: 8px;">
+                <div style="font-size: 12px; color: #ff3b30; text-align: center; padding: 8px; background: rgba(255, 59, 48, 0.1); border-radius: 12px; backdrop-filter: blur(10px);">
                     ❌ Платеж отклонен. Свяжитесь с поддержкой.
                 </div>
             `}
@@ -989,7 +983,6 @@ function loadUserData() {
     const confirmedPurchases = purchases.filter(p => p.status === 'confirmed');
     
     if (confirmedPurchases.length > 0) {
-        // Берем последнюю подтвержденную покупку
         const lastConfirmed = confirmedPurchases[confirmedPurchases.length - 1];
         
         subscriptionCard.innerHTML = `
@@ -1041,8 +1034,8 @@ function loadUserData() {
     } else {
         subscriptionCard.innerHTML = `
             <div class="no-subscription">
-                <i class="fas fa-key"></i>
-                <p>У тебя нет активной подписки</p>
+                <i class="fas fa-key" style="color: #00ff88;"></i>
+                <p style="color: rgba(255, 255, 255, 0.8);">У тебя нет активной подписки</p>
                 <button class="btn-buy" onclick="showVPNModal()">Купить VPN</button>
             </div>
         `;
@@ -1062,7 +1055,6 @@ function getVPNTypeByName(name) {
 function showVPNModal() {
     const modal = document.getElementById('vpn-modal');
     if (!modal) {
-        // Создаем модальное окно если его нет
         const vpnModal = document.createElement('div');
         vpnModal.id = 'vpn-modal';
         vpnModal.className = 'modal-overlay';
@@ -1093,22 +1085,22 @@ function showVPNModal() {
         modalElement.classList.add('active');
         document.body.style.overflow = 'hidden';
         
-        // Загружаем контент VPN
         const vpnContent = document.getElementById('vpn-selection');
         if (vpnContent) {
             const categories = {
-                'cheap': { name: 'VPN Дешевый', price: 299, icon: '💰', color: '#38a169', description: 'Для начинающих' },
-                'medium': { name: 'VPN Средний', price: 799, icon: '⚡', color: '#3182ce', description: 'Для опытных' },
-                'vip': { name: 'VPN ВИП', price: 1499, icon: '👑', color: '#d69e2e', description: 'Для профессионалов' }
+                'cheap': { name: 'VPN Дешевый', price: 299, icon: '💎', color: '#00ff88', description: 'Для начинающих' },
+                'medium': { name: 'VPN Средний', price: 799, icon: '⚡', color: '#00ff88', description: 'Для опытных' },
+                'vip': { name: 'VPN ВИП', price: 1499, icon: '👑', color: '#00ff88', description: 'Для профессионалов' }
             };
             
             vpnContent.innerHTML = Object.entries(categories).map(([id, category]) => `
                 <div class="vpn-modal-card" style="
-                    background: linear-gradient(135deg, rgba(26, 32, 44, 0.9) 0%, rgba(45, 55, 72, 0.9) 100%);
-                    border-radius: 16px;
+                    background: rgba(255, 255, 255, 0.05);
+                    border-radius: 20px;
                     padding: 20px;
                     margin-bottom: 16px;
                     border-left: 4px solid ${category.color};
+                    backdrop-filter: blur(20px);
                 ">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                         <div style="display: flex; align-items: center; gap: 12px;">
@@ -1117,7 +1109,7 @@ function showVPNModal() {
                                 <h4 style="font-size: 18px; font-weight: 800; color: white; margin-bottom: 4px;">
                                     ${category.name}
                                 </h4>
-                                <p style="color: #94a3b8; font-size: 12px;">${category.description}</p>
+                                <p style="color: rgba(255, 255, 255, 0.6); font-size: 12px;">${category.description}</p>
                             </div>
                         </div>
                         <div style="font-size: 24px; font-weight: 800; color: ${category.color};">${category.price}₽</div>
@@ -1126,10 +1118,10 @@ function showVPNModal() {
                     <button onclick="buyVPN('${id}')" style="
                         width: 100%;
                         padding: 16px;
-                        background: ${category.color};
+                        background: linear-gradient(45deg, #00ff88, #00cc6a);
                         border: none;
-                        border-radius: 12px;
-                        color: white;
+                        border-radius: 16px;
+                        color: black;
                         font-weight: 700;
                         font-size: 16px;
                         cursor: pointer;
@@ -1137,6 +1129,7 @@ function showVPNModal() {
                         justify-content: center;
                         align-items: center;
                         gap: 10px;
+                        box-shadow: 0 4px 20px rgba(0, 255, 136, 0.3);
                     ">
                         <i class="fas fa-shopping-cart"></i>
                         Купить за ${category.price}₽
@@ -1153,7 +1146,6 @@ function toggleVPN() {
     const statusText = document.getElementById('vpn-status');
     
     if (!isVPNConnected) {
-        // Проверяем, есть ли активная подписка
         const purchases = JSON.parse(localStorage.getItem('flowie_purchases') || '[]');
         const hasActive = purchases.some(p => p.status === 'confirmed');
         
@@ -1164,13 +1156,13 @@ function toggleVPN() {
         }
         
         isVPNConnected = true;
-        if (connectBtn) connectBtn.style.background = 'linear-gradient(45deg, #38a169, #2f855a)';
+        if (connectBtn) connectBtn.style.background = 'linear-gradient(45deg, #00ff88, #00cc6a)';
         if (statusText) statusText.textContent = 'Вкл';
         showNotification('✅ VPN подключен! Пинг оптимизирован');
         updatePing();
     } else {
         isVPNConnected = false;
-        if (connectBtn) connectBtn.style.background = 'linear-gradient(45deg, var(--pubg-orange), #ffa500)';
+        if (connectBtn) connectBtn.style.background = 'linear-gradient(45deg, #00ff88, #00cc6a)';
         if (statusText) statusText.textContent = 'Выкл';
         showNotification('❌ VPN отключен');
         updatePing();
@@ -1196,7 +1188,7 @@ function updatePing() {
     if (pingValue) pingValue.textContent = newPing + 'ms';
     if (currentPing) {
         currentPing.textContent = newPing + 'ms';
-        currentPing.style.color = isVPNConnected ? '#38a169' : '#e53e3e';
+        currentPing.style.color = isVPNConnected ? '#00ff88' : '#ff3b30';
     }
 }
 
@@ -1284,7 +1276,9 @@ async function handlePaymentStatus(orderId, status) {
             
             showNotification(`🎉 ${purchase.name} активирован!`);
             
-            // Если VPN был отключен, предлагаем подключить
+            // Обновляем уровень и статистику
+            setupUserProfile();
+            
             if (!isVPNConnected) {
                 setTimeout(() => {
                     if (confirm('VPN активирован! Хотите подключиться сейчас?')) {
@@ -1307,12 +1301,11 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (paymentStatus && orderId) {
         handlePaymentStatus(orderId, paymentStatus);
-        // Убираем параметры из URL
         window.history.replaceState({}, document.title, window.location.pathname);
     }
 });
 
-// Функция для ручного обновления статуса (для админа)
+// Функция для ручного обновления статуса
 function updatePurchaseStatus(orderId, status) {
     handlePaymentStatus(orderId, status);
 }
