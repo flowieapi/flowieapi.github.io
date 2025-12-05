@@ -199,7 +199,8 @@ small {
     gap: 0.75rem;
     flex: 1;
     min-width: 0;
-    margin-top: -4px; /* Компенсируем padding-top header-content */
+    padding-left: 10px;
+    margin-top: -5px; /* Компенсируем padding-top header-content */
 }
 
 .logo-icon {
@@ -217,7 +218,7 @@ small {
     backdrop-filter: var(--glass-backdrop);
     -webkit-backdrop-filter: var(--glass-backdrop);
     border: 1px solid rgba(255, 255, 255, 0.2);
-    margin-top: -2px; /* Компенсируем padding-top header-content */
+    margin-bottom: 5px; /* Компенсируем padding-top header-content */
 }
 
 .logo-text {
@@ -240,7 +241,7 @@ small {
     text-overflow: ellipsis;
     margin: 0;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    padding-top: 4px; /* Добавлено для опускания заголовка */
+    padding-top: 0px; /* Добавлено для опускания заголовка */
 }
 
 .logo-subtitle {
@@ -249,8 +250,8 @@ small {
     font-weight: 400;
     letter-spacing: 0.3px;
     line-height: 1;
-    margin-top: 2px;
-    padding-top: 2px; /* Добавлено для опускания подзаголовка */
+    margin-top: 0px;
+    padding-top: 0px; /* Добавлено для опускания подзаголовка */
 }
 
 /* Avatar styles with Telegram sync */
@@ -440,7 +441,7 @@ small {
 .ping-label {
     font-size: 0.85rem;
     color: var(--text-tertiary);
-    margin-top: 0.5rem;
+    margin-top: 0;
     font-weight: 500;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
@@ -526,6 +527,7 @@ small {
 }
 
 /* ===== SECTION HEADERS (ALL PAGES) ===== */
+/* ===== SECTION HEADERS (CENTERED WITH CUSTOM STYLES) ===== */
 .section-header {
     margin-bottom: 1.5rem;
     padding-top: 0.25rem;
@@ -560,6 +562,61 @@ small {
     max-width: 280px;
     line-height: 1.4;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Стиль для секции тарифов */
+.tariffs-section .section-header {
+    margin-bottom: 1.75rem;
+}
+
+.tariffs-section .section-header h2 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    padding-top: 0.25rem;
+    color: var(--text-primary);
+}
+
+.tariffs-section .section-subtitle {
+    font-size: 0.95rem;
+    opacity: 0.9;
+    color: var(--text-secondary);
+}
+
+/* Стиль для секции преимуществ */
+.benefits-section .section-header {
+    margin-bottom: 1.75rem;
+}
+
+.benefits-section .section-header h2 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    padding-top: 0.25rem;
+    color: var(--success-color);
+    text-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+}
+
+.benefits-section .section-subtitle {
+    font-size: 0.95rem;
+    opacity: 0.9;
+    color: var(--info-color);
+}
+
+/* Стиль для виджета пинга (если там будет свой .section-header) */
+.ping-widget .section-header {
+    margin-bottom: 0;
+    padding: 0;
+}
+
+.ping-widget .section-header h2 {
+    font-size: 1.1rem;
+    margin-bottom: 0;
+    padding-top: 0;
+    color: var(--text-primary);
+    justify-content: flex-start;
+}
+
+.ping-widget .section-subtitle {
+    display: none;
 }
 
 /* Специальный стиль для секции преимуществ */

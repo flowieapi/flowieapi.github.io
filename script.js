@@ -47,7 +47,6 @@ document.addEventListener('DOMContentLoaded', async function () {
     initPingCheck();
     initBuyButtons();
     initModals();
-    initNotifications();
 
     // Оптимизации для мобильных
     optimizeMobileExperience();
@@ -830,9 +829,6 @@ function simulatePingCheck() {
         
         checkPingBtn.style.opacity = '1';
         
-        // Используем маленькое уведомление снизу
-        showNotification(`Пинг: ${randomPing} мс`, 'success', 2000);
-        
         // Анимация успешной проверки
         pingValue.style.transform = 'scale(1.1)';
         pingValue.style.transition = 'transform 0.3s ease';
@@ -965,9 +961,6 @@ async function processPayment() {
             const planName = document.querySelector('#modalTitle')?.textContent?.replace('Оформление: ', '') || 'Про VPN';
             const planId = getPlanIdByName(planName);
 
-            // Обновляем UI покупки
-            showNotification('Оплата успешно завершена!', 'success');
-
             // Закрываем модальное окно
             modal.classList.remove('active');
             confirmBtn.disabled = false;
@@ -998,7 +991,6 @@ async function processPayment() {
 
         } catch (error) {
             console.error('Ошибка оплаты:', error);
-            showNotification('Ошибка оплаты. Попробуйте снова.', 'error');
             confirmBtn.disabled = false;
             confirmBtn.innerHTML = '<i class="fas fa-lock"></i> Перейти к оплате';
         }
@@ -1012,58 +1004,6 @@ function getPlanIdByName(name) {
         'Флоуи VPN': 'flowi'
     };
     return plans[name] || 'light';
-}
-
-// Уведомления
-function initNotifications() {
-    const notification = document.getElementById('notification');
-
-    if (!notification) {
-        const notificationEl = document.createElement('div');
-        notificationEl.id = 'notification';
-        notificationEl.className = 'notification';
-        document.body.appendChild(notificationEl);
-    }
-}
-
-function showNotification(message, type = 'info') {
-    const notification = document.getElementById('notification');
-    
-    if (!notification) return;
-    
-    // Удаляем предыдущее уведомление
-    notification.classList.remove('show', 'success', 'error', 'info');
-    notification.style.display = 'none';
-    
-    // Даем время на удаление анимации
-    setTimeout(() => {
-        // Устанавливаем тип и сообщение
-        notification.className = 'notification';
-        notification.classList.add(type);
-        
-        notification.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 0.75rem;">
-                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}" 
-                   style="color: ${type === 'success' ? 'var(--success-color)' : type === 'error' ? '#ff4757' : 'var(--info-color)'}">
-                </i>
-                <span>${message}</span>
-            </div>
-        `;
-        
-        // Показываем уведомление
-        notification.style.display = 'flex';
-        setTimeout(() => {
-            notification.classList.add('show');
-        }, 10);
-        
-        // Автоматическое скрытие через 3 секунды
-        setTimeout(() => {
-            notification.classList.remove('show');
-            setTimeout(() => {
-                notification.style.display = 'none';
-            }, 300);
-        }, 3000);
-    }, 50);
 }
 
 // Оптимизация для мобильных
