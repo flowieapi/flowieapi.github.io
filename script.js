@@ -31,7 +31,6 @@ document.addEventListener('DOMContentLoaded', async function () {
 
             // Инициализируем аватар с seed из Telegram
             initTelegramAvatar(telegramUser);
-            updateTelegramAvatarOnPageLoad();
         }
     }
 
@@ -174,30 +173,6 @@ function initTelegramWebApp() {
     // Готовим приложение
     if (tg.ready) {
         tg.ready();
-    }
-}
-
-// Функция для обновления аватара при переключении страниц
-function updateTelegramAvatarOnPageLoad() {
-    const telegramUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
-    if (telegramUser) {
-        // Проверяем, не устарел ли кэш (больше 1 часа)
-        try {
-            const lastUpdate = localStorage.getItem('telegram_avatar_last_update');
-            const now = Date.now();
-            
-            if (!lastUpdate || (now - parseInt(lastUpdate)) > 3600000) {
-                // Обновляем аватар
-                syncTelegramAvatar(telegramUser);
-                localStorage.setItem('telegram_avatar_last_update', now.toString());
-            } else {
-                // Загружаем из кэша
-                loadSavedAvatar();
-            }
-        } catch (e) {
-            // В случае ошибки просто синхронизируем
-            syncTelegramAvatar(telegramUser);
-        }
     }
 }
 
