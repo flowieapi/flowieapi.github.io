@@ -27,7 +27,7 @@
     --accent-2: #00ccff;
     --accent-3: #9d4edd;
     --radius-sm: 12px;
-    --radius-md: 16px;
+    --radius-md: 10px;
     --radius-lg: 20px;
     --radius-xl: 24px;
     --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.25);
@@ -120,8 +120,7 @@ small {
     position: sticky;
     top: 0;
     z-index: 1000;
-    padding: 0.75rem 0.75rem 0.75rem;
-    margin: 0;
+    padding: 0 0 0;
     backdrop-filter: var(--glass-blur);
     -webkit-backdrop-filter: var(--glass-blur);
     height: 60px;
@@ -2042,9 +2041,9 @@ input:checked + .toggle-slider:before {
     text-decoration: none;
     color: var(--text-tertiary);
     transition: all 0.3s ease;
-    padding: 0.375rem;
+    padding: 0px;
     border-radius: var(--radius-md);
-    width: 64px;
+    width: 75px;
     position: relative;
     -webkit-tap-highlight-color: transparent;
     backdrop-filter: var(--glass-backdrop);
@@ -2802,7 +2801,7 @@ input:checked + .toggle-slider:before {
         padding-top: max(0.75rem, env(safe-area-inset-top));
         padding-left: max(0.75rem, env(safe-area-inset-left));
         padding-right: max(0.75rem, env(safe-area-inset-right));
-        min-height: calc(60px + env(safe-area-inset-top));
+        min-height: calc(80px + env(safe-area-inset-top));
     }
     
     @media (max-width: 380px) {
