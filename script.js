@@ -677,45 +677,75 @@ function initPingCheck() {
     }
 }
 
+// В функции simulatePingCheck заменим этот код:
 function simulatePingCheck() {
     const checkPingBtn = document.getElementById('checkPingBtn');
     const pingValue = document.getElementById('pingValue');
     const statusText = document.querySelector('.status-text');
     const indicators = document.querySelectorAll('.status-indicator');
-
+    
     if (!checkPingBtn || !pingValue) return;
-
+    
     // Если уже идет проверка, выходим
     if (checkPingBtn.classList.contains('checking')) return;
-
+    
     checkPingBtn.classList.add('checking');
     checkPingBtn.disabled = true;
-    checkPingBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Проверяем...';
+    
+    // Сохраняем оригинальную высоту кнопки
+    const originalHeight = checkPingBtn.offsetHeight;
+    checkPingBtn.style.height = originalHeight + 'px';
+    checkPingBtn.style.minHeight = originalHeight + 'px';
+    
+    // Обновляем контент без изменения высоты
+    const originalContent = checkPingBtn.innerHTML;
+    checkPingBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Проверяем...</span>';
+    
+    // Устанавливаем фиксированную ширину для спиннера и текста
+    const spinner = checkPingBtn.querySelector('.fa-spinner');
+    const textSpan = checkPingBtn.querySelector('span');
+    
+    if (spinner) {
+        spinner.style.fontSize = '1em';
+        spinner.style.lineHeight = '1';
+    }
+    
+    if (textSpan) {
+        textSpan.style.fontSize = '0.95rem';
+        textSpan.style.lineHeight = '1';
+    }
+    
     checkPingBtn.style.opacity = '0.7';
-
+    
     let dots = 0;
     const interval = setInterval(() => {
         pingValue.textContent = '•'.repeat(dots + 1);
         dots = (dots + 1) % 3;
     }, 200);
-
+    
     const delay = 2000 + Math.random() * 1000;
-
+    
     setTimeout(() => {
         clearInterval(interval);
-
+        
         const randomPing = Math.floor(Math.random() * (28 - 8 + 1)) + 8;
         pingValue.textContent = randomPing;
-
+        
         updatePingStatus(randomPing, statusText, indicators);
-
+        
         checkPingBtn.classList.remove('checking');
         checkPingBtn.disabled = false;
-        checkPingBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Проверить сейчас';
+        checkPingBtn.innerHTML = '<i class="fas fa-sync-alt"></i><span>Проверить сейчас</span>';
+        
+        // Восстанавливаем оригинальную высоту
+        checkPingBtn.style.height = '';
+        checkPingBtn.style.minHeight = '';
+        
         checkPingBtn.style.opacity = '1';
-
-        showNotification(`Пинг проверен: ${randomPing} мс`, 'success');
-
+        
+        // Используем маленькое уведомление снизу
+        showNotification(`Пинг: ${randomPing} мс`, 'success', 2000);
+        
         // Анимация успешной проверки
         pingValue.style.transform = 'scale(1.1)';
         pingValue.style.transition = 'transform 0.3s ease';

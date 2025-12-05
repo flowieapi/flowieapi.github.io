@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -7,8 +8,10 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
 </head>
+
 <body>
     <!-- Контент -->
     <div class="app-container">
@@ -25,7 +28,8 @@
                     </div>
                 </div>
                 <div class="user-avatar">
-                    <img src="https://api.dicebear.com/7.x/thumbs/svg?seed=gamer&backgroundColor=00ff88,00ccff,9d4edd&backgroundType=gradientLinear" alt="Аватар">
+                    <img src="https://api.dicebear.com/7.x/thumbs/svg?seed=gamer&backgroundColor=00ff88,00ccff,9d4edd&backgroundType=gradientLinear"
+                        alt="Аватар">
                 </div>
             </div>
         </header>
@@ -95,8 +99,9 @@
                                 <span>Серверы в РФ и Европе</span>
                             </div>
                         </div>
-                        <button class="simple-btn btn-outline buy-btn" data-plan="light">
-                            Выбрать тариф
+                        <button class="simple-btn btn-primary buy-btn" data-plan="pro">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span>Выбрать тариф</span>
                         </button>
                     </div>
 
@@ -184,7 +189,7 @@
                     <h2><i class="fas fa-star"></i> Преимущества</h2>
                     <p class="section-subtitle">Почему выбирают нас</p>
                 </div>
-                
+
                 <div class="benefits-grid">
                     <div class="benefit-card">
                         <div class="benefit-icon">
@@ -193,7 +198,7 @@
                         <h4>Защита от DDoS</h4>
                         <p>Полная защита от атак</p>
                     </div>
-                    
+
                     <div class="benefit-card">
                         <div class="benefit-icon">
                             <i class="fas fa-tachometer-alt"></i>
@@ -201,7 +206,7 @@
                         <h4>Стабильность 99.9%</h4>
                         <p>Минимальные потери пакетов</p>
                     </div>
-                    
+
                     <div class="benefit-card">
                         <div class="benefit-icon">
                             <i class="fas fa-headset"></i>
@@ -259,7 +264,7 @@
             </div>
             <div class="modal-body">
                 <div class="selected-plan" id="selectedPlanInfo"></div>
-                
+
                 <div class="payment-section">
                     <h4><i class="fas fa-credit-card"></i> Способ оплаты</h4>
                     <div class="payment-methods">
@@ -270,7 +275,7 @@
                             </div>
                             <span>Карта</span>
                         </label>
-                        
+
                         <label class="payment-method">
                             <input type="radio" name="payment">
                             <div class="payment-icon">
@@ -278,7 +283,7 @@
                             </div>
                             <span>Криптовалюта</span>
                         </label>
-                        
+
                         <label class="payment-method">
                             <input type="radio" name="payment">
                             <div class="payment-icon">
@@ -288,7 +293,7 @@
                         </label>
                     </div>
                 </div>
-                
+
                 <button class="simple-btn btn-primary" id="confirmBuyBtn">
                     <i class="fas fa-lock"></i> Перейти к оплате
                 </button>
@@ -301,4 +306,5 @@
 
     <script src="script.js"></script>
 </body>
+
 </html>
