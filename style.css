@@ -66,7 +66,8 @@ body {
     position: sticky;
     top: 0;
     z-index: 1000;
-    padding: 1rem;
+    padding: 1rem; /* Уже есть отступы */
+    margin: 0; /* Убираем внешние отступы */
 }
 
 .glass-card {
@@ -80,7 +81,7 @@ body {
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
-    margin-bottom: 1.25rem;
+    margin: 0 0 1.25rem 0; /* Отступ только снизу */
 }
 
 .glass-card::before {
@@ -143,6 +144,7 @@ body {
     padding: 0.75rem;
     z-index: 1000;
     height: 70px;
+    margin: 0; /* Убираем отступы */
 }
 
 /* ===== APP CONTAINER ===== */
@@ -150,7 +152,7 @@ body {
     width: 100%;
     max-width: 480px;
     margin: 0 auto;
-    padding: 0 1rem 5rem;
+    padding: 1rem 1rem 5rem; /* Добавил отступ сверху */
     min-height: 100vh;
     min-height: -webkit-fill-available;
 }
@@ -326,13 +328,13 @@ body {
 
 /* ===== MAIN CONTENT ===== */
 .main-content {
-    padding: 20px 0;
+    padding: 1rem 0; /* Добавляем отступы сверху/снизу */
 }
 
 .section-header {
     margin-bottom: 10px;
-    opacity: 0;
-    transform: translateY(20px);
+    opacity: 100;
+    transform: translateY(-20px);
     transition: all 0.6s ease;
 }
 
@@ -525,7 +527,7 @@ body {
 /* ===== TARIFFS ===== */
 .tariffs-section {
     margin: 2.5rem 0;
-    opacity: 0;
+    opacity: 100;
     transform: translateY(30px);
     transition: all 0.8s ease 0.3s;
 }
@@ -539,6 +541,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
+    padding: 0; /* Убираем внутренние отступы, так как они у карточек */
 }
 
 .tariff-card {
@@ -746,6 +749,7 @@ body {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 1.25rem;
+    padding: 0; /* Убираем внутренние отступы */
 }
 
 .benefit-card {
@@ -1905,16 +1909,10 @@ input:checked + .toggle-slider:before {
 /* iOS Safe Areas */
 @supports (padding: max(0px)) {
     .app-container {
-        padding-left: max(0px, env(safe-area-inset-left));
-        padding-right: max(0px, env(safe-area-inset-right));
+        padding-left: max(0.75rem, env(safe-area-inset-left));
+        padding-right: max(0.75rem, env(safe-area-inset-right));
+        padding-top: max(0.75rem, 0px);
         padding-bottom: max(0px, calc(5rem + env(safe-area-inset-bottom)));
-    }
-    
-    .glass-nav {
-        padding-bottom: max(26px, env(safe-area-inset-bottom));
-        padding-left: max(0px, env(safe-area-inset-left));
-        padding-right: max(0px, env(safe-area-inset-right));
-        height: calc(100px + env(safe-area-inset-bottom));
     }
     
     .glass-header {
@@ -1922,6 +1920,13 @@ input:checked + .toggle-slider:before {
         padding-left: max(1rem, env(safe-area-inset-left));
         padding-right: max(1rem, env(safe-area-inset-right));
         min-height: calc(60px + env(safe-area-inset-top));
+    }
+    
+    .glass-nav {
+        padding-left: max(0.75rem, env(safe-area-inset-left));
+        padding-right: max(0.75rem, env(safe-area-inset-right));
+        padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+        height: calc(70px + env(safe-area-inset-bottom));
     }
 }
 
