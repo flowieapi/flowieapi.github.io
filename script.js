@@ -1,8 +1,3 @@
-// ============================================
-// FLOWIE VPN - Telegram Mini App
-// Полная версия с Firebase и Telegram интеграцией
-// ============================================
-
 // Конфигурация Firebase (замените на свои данные)
 const firebaseConfig = {
     apiKey: "AIzaSyDG7SJfMbSiIbTkBxV6BBoPAsTAKQsLPv8",
@@ -15,29 +10,20 @@ const firebaseConfig = {
     measurementId: "G-P8YJD4HCJ2"
 };
 
-// Глобальные переменные
-let tg = null;
+// Инициализация приложения
 let app, db, auth;
 let currentUser = null;
 let userPurchases = [];
 let userActiveSubscription = null;
 let telegramUser = null;
 
-// ============================================
-// ОСНОВНАЯ ИНИЦИАЛИЗАЦИЯ
-// ============================================
-
 document.addEventListener('DOMContentLoaded', async function () {
-    console.log('📱 FLOWIE VPN загружается...');
-    
-    // 1. Инициализация Telegram Web App
+    // Инициализация Telegram Web App
     if (window.Telegram?.WebApp) {
-        tg = window.Telegram.WebApp;
         initTelegramWebApp();
 
         // Получаем данные пользователя Telegram
-        telegramUser = tg.initDataUnsafe?.user;
-        console.log('👤 Telegram пользователь:', telegramUser?.id || 'не найден');
+        telegramUser = window.Telegram.WebApp.initDataUnsafe?.user;
 
         if (telegramUser) {
             // Обновляем профиль с данными из Telegram
@@ -48,58 +34,113 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     }
 
-    // 2. Инициализация Firebase (раскомментируйте когда добавите свои ключи)
-    // await initFirebase();
-    
-    // 3. Загрузка демо данных пока нет Firebase
+    // Инициализация Firebase (раскомментируйте когда добавите свои ключи)
+    // initFirebase();
+
+    // Загрузка демо данных пока нет Firebase
     loadDemoData();
 
-    // 4. Запуск анимаций появления
+    // Запуск анимаций появления
     initAppearanceAnimations();
 
-    // 5. Остальная инициализация
+    // Остальная инициализация
     initPingCheck();
     initBuyButtons();
     initModals();
 
-    // 6. Оптимизации для мобильных
+    // Оптимизации для мобильных
     optimizeMobileExperience();
 
-    // 7. Обновление UI с данными пользователя
+    // Обновление UI с данными пользователя
     updateUserInterface();
-    
-    console.log('✅ FLOWIE VPN готов к работе!');
 });
 
-// ============================================
-// TELEGRAM WEB APP ИНТЕГРАЦИЯ
-// ============================================
+// Инициализация Telegram Web App
+const tg = window.Telegram?.WebApp;
+
+
+function syncTelegramAvatar(user) {
+    if (!user) return;
+    
+    // Ищем все элементы с аватарками
+    const avatars = document.querySelectorAll('.user-avatar, .profile-avatar-large');
+    
+    // Пытаемся получить аватар из Telegram
+    let telegramAvatarUrl = null;
+    
+    // Если у пользователя есть фото в Telegram
+    if (user.photo_url) {
+        telegramAvatarUrl = user.photo_url;
+    }
+    
+    // Или создаем аватар на основе данных Telegram
+    if (!telegramAvatarUrl) {
+        const userId = user.id.toString();
+        telegramAvatarUrl = `https://api.dicebear.com/7.x/thumbs/svg?seed=telegram_${userId}&backgroundColor=0088cc,34b7f1,00ff88&backgroundType=gradientLinear`;
+    }
+    
+    // Обновляем все аватары
+    avatars.forEach(avatar => {
+        const img = avatar.querySelector('img');
+        if (img) {
+            img.src = telegramAvatarUrl;
+            img.onerror = function() {
+                // Fallback если изображение не загрузилось
+                this.src = `https://api.dicebear.com/7.x/thumbs/svg?seed=user_${Date.now()}&backgroundColor=00ff88,00ccff,9d4edd&backgroundType=gradientLinear`;
+            };
+        }
+        
+        // Добавляем класс для стилей Telegram
+        avatar.classList.add('telegram-synced');
+    });
+    
+    // Сохраняем аватар в localStorage для кэширования
+    try {
+        localStorage.setItem('telegram_avatar_url', telegramAvatarUrl);
+        localStorage.setItem('telegram_user_id', user.id.toString());
+    } catch (e) {
+        console.log('Не удалось сохранить аватар в localStorage');
+    }
+}
+
+// Функция для загрузки сохраненного аватара
+function loadSavedAvatar() {
+    try {
+        const savedAvatarUrl = localStorage.getItem('telegram_avatar_url');
+        const savedUserId = localStorage.getItem('telegram_user_id');
+        
+        if (savedAvatarUrl && savedUserId) {
+            const avatars = document.querySelectorAll('.user-avatar, .profile-avatar-large');
+            avatars.forEach(avatar => {
+                const img = avatar.querySelector('img');
+                if (img) {
+                    img.src = savedAvatarUrl;
+                    avatar.classList.add('telegram-synced');
+                }
+            });
+            return true;
+        }
+    } catch (e) {
+        console.log('Не удалось загрузить сохраненный аватар');
+    }
+    return false;
+}
+
 
 function initTelegramWebApp() {
-    if (!tg) {
-        console.log('⚠️ Telegram Web App не доступен');
-        return;
-    }
+    if (!tg) return;
 
-    console.log('🔗 Инициализация Telegram Web App...');
+    console.log('Telegram Web App инициализирован');
 
     // Расширяем приложение на весь экран
     if (tg.expand) {
         tg.expand();
-        console.log('📱 Приложение расширено на весь экран');
     }
 
     // Настраиваем кнопку "Назад" для страниц кроме главной
-    const currentPath = window.location.pathname;
-    const isMainPage = currentPath.includes('index.html') || 
-                       currentPath.endsWith('/') || 
-                       currentPath.endsWith('index.html');
-    
-    if (tg.BackButton && !isMainPage) {
-        console.log('◀️ Показываем кнопку "Назад"');
+    if (tg.BackButton && !window.location.pathname.includes('index.html') && !window.location.pathname.endsWith('/')) {
         tg.BackButton.show();
         tg.BackButton.onClick(() => {
-            console.log('← Нажата кнопка "Назад"');
             window.history.back();
         });
     }
@@ -109,46 +150,29 @@ function initTelegramWebApp() {
 
     // Подписываемся на изменения темы
     tg.onEvent('themeChanged', applyTelegramTheme);
-    
-    // Включаем индикатор загрузки
-    if (tg.MainButton) {
-        tg.MainButton.hide();
-    }
 
     // Синхронизируем аватар Telegram
+    const telegramUser = window.Telegram.WebApp.initDataUnsafe?.user;
     if (telegramUser) {
-        console.log('🔄 Синхронизация аватара Telegram...');
-        
         // Пробуем загрузить сохраненный аватар
         const loadedFromCache = loadSavedAvatar();
         
         // Если не загрузили из кэша или прошло много времени, обновляем
-        if (!loadedFromCache || !document.querySelector('.telegram-synced')) {
-            console.log('🖼️ Обновляем аватар Telegram');
-            setTimeout(() => {
-                syncTelegramAvatar(telegramUser);
-            }, 500);
-        } else {
-            console.log('💾 Используем аватар из кэша');
+        if (!loadedFromCache) {
+            syncTelegramAvatar(telegramUser);
         }
         
-        // Сохраняем данные пользователя
+        // Сохраняем данные пользователя для обновления аватара при необходимости
         currentUser = {
             telegramUser: telegramUser,
             lastAvatarUpdate: Date.now()
         };
-    } else {
-        console.log('👤 Пользователь Telegram не найден в initDataUnsafe');
     }
 
     // Готовим приложение
     if (tg.ready) {
         tg.ready();
-        console.log('🎯 Telegram Web App готов');
     }
-    
-    // Логируем версию Telegram Web App
-    console.log(`📊 Telegram Web App версия: ${tg.version}`);
 }
 
 // Применение темы Telegram
@@ -164,111 +188,31 @@ function applyTelegramTheme() {
         document.documentElement.style.setProperty('--card-bg', themeParams.secondary_bg_color || '#13131a');
         document.documentElement.style.setProperty('--dark-bg', themeParams.bg_color || '#0a0a0f');
         document.documentElement.style.setProperty('--card-border', themeParams.section_bg_color || '#2a2a3a');
-        
-        console.log('🎨 Применена тема Telegram');
     }
 }
 
-// Синхронизация аватара Telegram
-function syncTelegramAvatar(user) {
+// Обновление профиля из данных Telegram
+function updateUserProfileFromTelegram(user) {
     if (!user) return;
-    
-    console.log(`🖼️ Синхронизация аватара Telegram для пользователя: ${user.id}`);
-    
-    // Пытаемся получить аватар из Telegram
-    let telegramAvatarUrl = null;
-    
-    // Если у пользователя есть фото в Telegram
-    if (user.photo_url) {
-        telegramAvatarUrl = user.photo_url;
-        console.log('📸 Используем фото из Telegram');
-    }
-    
-    // Или создаем аватар на основе данных Telegram
-    if (!telegramAvatarUrl) {
-        const userId = user.id.toString();
-        telegramAvatarUrl = `https://api.dicebear.com/7.x/thumbs/svg?seed=telegram_${userId}&backgroundColor=0088cc,34b7f1,00ff88&backgroundType=gradientLinear`;
-        console.log('🎨 Создаем аватар на основе ID');
-    }
-    
-    // Обновляем все аватары на странице
-    const avatars = document.querySelectorAll('.user-avatar img, .profile-avatar-large img');
-    console.log(`🖼️ Найдено аватаров для обновления: ${avatars.length}`);
-    
-    avatars.forEach((avatar, index) => {
-        console.log(`🔄 Обновление аватара ${index + 1}...`);
-        
-        // Устанавливаем новый источник
-        avatar.src = telegramAvatarUrl;
-        
-        // Добавляем обработчик ошибок
-        avatar.onerror = function() {
-            console.log(`❌ Ошибка загрузки аватара ${index + 1}, используем fallback`);
-            // Fallback если изображение не загрузилось
-            const userId = user.id.toString();
-            this.src = `https://api.dicebear.com/7.x/thumbs/svg?seed=fallback_${userId}_${Date.now()}&backgroundColor=00ff88,00ccff,9d4edd&backgroundType=gradientLinear`;
-        };
-        
-        // Добавляем стиль для плавной загрузки
-        avatar.style.opacity = '0';
-        setTimeout(() => {
-            avatar.style.transition = 'opacity 0.3s ease';
-            avatar.style.opacity = '1';
-        }, 100);
-        
-        // Добавляем класс для стилей Telegram
-        const avatarContainer = avatar.closest('.user-avatar, .profile-avatar-large');
-        if (avatarContainer) {
-            avatarContainer.classList.add('telegram-synced');
-        }
-    });
-    
-    // Сохраняем аватар в localStorage для кэширования
-    try {
-        const cacheData = {
-            url: telegramAvatarUrl,
-            userId: user.id.toString(),
-            timestamp: Date.now()
-        };
-        localStorage.setItem('telegram_avatar_cache', JSON.stringify(cacheData));
-        console.log('💾 Аватар сохранен в кэш');
-    } catch (e) {
-        console.log('❌ Не удалось сохранить аватар в localStorage:', e);
-    }
-}
 
-// Загрузка сохраненного аватара
-function loadSavedAvatar() {
-    try {
-        const cacheData = localStorage.getItem('telegram_avatar_cache');
-        if (cacheData) {
-            const { url, userId, timestamp } = JSON.parse(cacheData);
-            
-            // Проверяем не устарели ли данные (больше 24 часов)
-            const cacheAge = Date.now() - timestamp;
-            const maxAge = 24 * 60 * 60 * 1000; // 24 часа
-            
-            if (cacheAge < maxAge) {
-                console.log(`💾 Загружаем аватар из кэша (возраст: ${Math.floor(cacheAge / 1000 / 60)} минут)`);
-                
-                const avatars = document.querySelectorAll('.user-avatar img, .profile-avatar-large img');
-                avatars.forEach(avatar => {
-                    avatar.src = url;
-                    const container = avatar.closest('.user-avatar, .profile-avatar-large');
-                    if (container) {
-                        container.classList.add('telegram-synced');
-                    }
-                });
-                return true;
-            } else {
-                console.log('🕐 Кэш устарел, требуется обновление');
-                localStorage.removeItem('telegram_avatar_cache');
-            }
-        }
-    } catch (e) {
-        console.log('❌ Ошибка загрузки из кэша:', e);
-    }
-    return false;
+    console.log('Данные пользователя Telegram:', user);
+
+    // Обновляем аватар на всех страницах
+    updateAllAvatars(user);
+
+    // Обновляем информацию в профиле
+    updateProfileInfo(user);
+
+    // Сохраняем пользователя для дальнейшего использования
+    currentUser = {
+        id: user.id.toString(),
+        username: user.username || `user_${user.id}`,
+        firstName: user.first_name || '',
+        lastName: user.last_name || '',
+        languageCode: user.language_code || 'ru',
+        isPremium: user.is_premium || false,
+        photoUrl: user.photo_url || null
+    };
 }
 
 // Инициализация аватара из Telegram
@@ -288,30 +232,6 @@ function initTelegramAvatar(user) {
             this.src = `https://api.dicebear.com/7.x/thumbs/svg?seed=telegram_${userId}`;
         };
     });
-}
-
-// Обновление профиля из данных Telegram
-function updateUserProfileFromTelegram(user) {
-    if (!user) return;
-
-    console.log('📝 Обновление профиля из данных Telegram');
-
-    // Обновляем аватар на всех страницах
-    updateAllAvatars(user);
-
-    // Обновляем информацию в профиле
-    updateProfileInfo(user);
-
-    // Сохраняем пользователя для дальнейшего использования
-    currentUser = {
-        id: user.id.toString(),
-        username: user.username || `user_${user.id}`,
-        firstName: user.first_name || '',
-        lastName: user.last_name || '',
-        languageCode: user.language_code || 'ru',
-        isPremium: user.is_premium || false,
-        photoUrl: user.photo_url || null
-    };
 }
 
 // Обновление всех аватаров на странице
@@ -394,15 +314,46 @@ function updateTelegramStats(user) {
     }
 }
 
-// ============================================
-// FIREBASE ИНТЕГРАЦИЯ
-// ============================================
+// Обновление заголовков страниц с данными пользователя
+function updatePageHeaders() {
+    if (!currentUser) return;
+
+    // Обновляем заголовок "ФЛОУИ VPN" чтобы был на всю ширину
+    const logoText = document.querySelector('.logo-text h1');
+    if (logoText) {
+        logoText.style.width = '100%';
+        logoText.style.whiteSpace = 'nowrap';
+        logoText.style.overflow = 'hidden';
+        logoText.style.textOverflow = 'ellipsis';
+    }
+
+    // Обновляем заголовки в хедере
+    const headerTitles = document.querySelectorAll('.header-title h1');
+    headerTitles.forEach(title => {
+        title.style.width = '100%';
+        title.style.whiteSpace = 'nowrap';
+        title.style.overflow = 'hidden';
+        title.style.textOverflow = 'ellipsis';
+    });
+
+    // Обновляем аватар в хедере если есть данные Telegram
+    if (telegramUser) {
+        const headerAvatar = document.querySelector('.header-content .user-avatar img');
+        if (headerAvatar) {
+            const seed = telegramUser.id.toString();
+            headerAvatar.src = `https://api.dicebear.com/7.x/thumbs/svg?seed=${seed}&backgroundColor=00ff88,00ccff,9d4edd&backgroundType=gradientLinear`;
+        }
+    }
+}
 
 // Инициализация Firebase
 async function initFirebase() {
     try {
-        console.log('🔥 Инициализация Firebase...');
-        
+        // Импорт Firebase (добавьте в HTML)
+        // <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
+        // <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js"></script>
+        // <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js"></script>
+
         if (!firebase.apps.length) {
             app = firebase.initializeApp(firebaseConfig);
             auth = firebase.auth();
@@ -410,10 +361,9 @@ async function initFirebase() {
 
             // Настройка авторизации через Telegram
             await setupTelegramAuth();
-            console.log('✅ Firebase инициализирован');
         }
     } catch (error) {
-        console.error('❌ Ошибка инициализации Firebase:', error);
+        console.error('Ошибка инициализации Firebase:', error);
         loadDemoData();
     }
 }
@@ -421,7 +371,7 @@ async function initFirebase() {
 // Настройка авторизации через Telegram
 async function setupTelegramAuth() {
     if (!tg?.initDataUnsafe?.user) {
-        console.log('⚠️ Пользователь Telegram не найден для Firebase');
+        console.log('Пользователь Telegram не найден');
         return;
     }
 
@@ -429,8 +379,6 @@ async function setupTelegramAuth() {
     const userId = telegramUser.id.toString();
 
     try {
-        console.log(`👤 Настройка авторизации для пользователя ${userId}...`);
-
         // Проверяем существование пользователя в Firebase
         const userRef = db.collection('users').doc(userId);
         const userDoc = await userRef.get();
@@ -456,21 +404,20 @@ async function setupTelegramAuth() {
                 }
             });
 
-            console.log('🆕 Новый пользователь создан в Firebase');
+            console.log('Новый пользователь создан');
         } else {
             // Обновляем время последнего входа
             await userRef.update({
                 lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
                 lastSeen: new Date().toISOString()
             });
-            console.log('🔄 Обновлено время входа пользователя');
         }
 
         // Загружаем данные пользователя
         await loadUserData(userId);
 
     } catch (error) {
-        console.error('❌ Ошибка авторизации Firebase:', error);
+        console.error('Ошибка авторизации:', error);
         loadDemoData();
     }
 }
@@ -478,13 +425,10 @@ async function setupTelegramAuth() {
 // Загрузка данных пользователя из Firebase
 async function loadUserData(userId) {
     try {
-        console.log(`📥 Загрузка данных пользователя ${userId}...`);
-        
         // Загружаем пользователя
         const userDoc = await db.collection('users').doc(userId).get();
         if (userDoc.exists) {
             currentUser = { id: userId, ...userDoc.data() };
-            console.log('✅ Данные пользователя загружены');
 
             // Загружаем покупки пользователя
             await loadUserPurchases(userId);
@@ -493,7 +437,7 @@ async function loadUserData(userId) {
             updateUserInterface();
         }
     } catch (error) {
-        console.error('❌ Ошибка загрузки данных пользователя:', error);
+        console.error('Ошибка загрузки данных пользователя:', error);
         loadDemoData();
     }
 }
@@ -501,8 +445,6 @@ async function loadUserData(userId) {
 // Загрузка покупок пользователя
 async function loadUserPurchases(userId) {
     try {
-        console.log(`🛒 Загрузка покупок пользователя ${userId}...`);
-        
         const purchasesSnapshot = await db.collection('purchases')
             .where('userId', '==', userId)
             .orderBy('purchaseDate', 'desc')
@@ -522,22 +464,16 @@ async function loadUserPurchases(userId) {
             }
         });
 
-        console.log(`✅ Загружено покупок: ${userPurchases.length}`);
-
         // Обновляем UI покупок
         updatePurchasesUI();
         updateProfileSubscriptionUI();
 
     } catch (error) {
-        console.error('❌ Ошибка загрузки покупок:', error);
+        console.error('Ошибка загрузки покупок:', error);
         // Используем демо данные
         loadDemoPurchases();
     }
 }
-
-// ============================================
-// UI ФУНКЦИИ
-// ============================================
 
 // Обновление UI покупок
 function updatePurchasesUI() {
@@ -644,8 +580,6 @@ function updateProfileSubscriptionUI() {
         // Убираем кнопку продления
         const renewBtn = subscriptionCard.querySelector('.simple-btn');
         if (renewBtn) renewBtn.style.display = 'none';
-        
-        console.log('✅ Активная подписка отображена');
     } else {
         subscriptionCard.classList.add('hidden');
 
@@ -668,8 +602,6 @@ function updateProfileSubscriptionUI() {
         } else {
             subscriptionPlaceholder.style.display = 'block';
         }
-        
-        console.log('ℹ️ Нет активной подписки');
     }
 }
 
@@ -709,13 +641,9 @@ function formatDate(timestamp) {
     });
 }
 
-// ============================================
-// ДЕМО ДАННЫЕ
-// ============================================
-
 // Демо данные (используются если нет Telegram или Firebase)
 function loadDemoData() {
-    console.log('🎮 Загружаем демо данные...');
+    console.log('Загружаем демо данные');
 
     // Если есть данные Telegram, используем их
     if (telegramUser) {
@@ -753,29 +681,6 @@ function loadDemoData() {
 
     loadDemoPurchases();
     updateUserInterface();
-    
-    console.log('✅ Демо данные загружены');
-}
-
-// Функция для демо покупок
-function loadDemoPurchases() {
-    console.log('🛍️ Загрузка демо покупок...');
-    
-    userPurchases = [
-        {
-            planId: 'pro',
-            price: 599,
-            status: 'active',
-            purchaseDate: { seconds: Date.now() / 1000 - 30 * 24 * 60 * 60 },
-            endDate: { seconds: Date.now() / 1000 + 30 * 24 * 60 * 60 }
-        }
-    ];
-    userActiveSubscription = userPurchases[0];
-
-    updatePurchasesUI();
-    updateProfileSubscriptionUI();
-    
-    console.log('✅ Демо покупки загружены');
 }
 
 // Обновление интерфейса пользователя
@@ -787,8 +692,6 @@ function updateUserInterface() {
 
     // Обновляем заголовки
     updatePageHeaders();
-    
-    console.log('🎨 UI пользователя обновлен');
 }
 
 // Обновление статистики в профиле
@@ -816,46 +719,8 @@ function updateProfileStats() {
     }
 }
 
-// Обновление заголовков страниц с данными пользователя
-function updatePageHeaders() {
-    if (!currentUser) return;
-
-    // Обновляем заголовок "ФЛОУИ VPN" чтобы был на всю ширину
-    const logoText = document.querySelector('.logo-text h1');
-    if (logoText) {
-        logoText.style.width = '100%';
-        logoText.style.whiteSpace = 'nowrap';
-        logoText.style.overflow = 'hidden';
-        logoText.style.textOverflow = 'ellipsis';
-    }
-
-    // Обновляем заголовки в хедере
-    const headerTitles = document.querySelectorAll('.header-title h1');
-    headerTitles.forEach(title => {
-        title.style.width = '100%';
-        title.style.whiteSpace = 'nowrap';
-        title.style.overflow = 'hidden';
-        title.style.textOverflow = 'ellipsis';
-    });
-
-    // Обновляем аватар в хедере если есть данные Telegram
-    if (telegramUser) {
-        const headerAvatar = document.querySelector('.header-content .user-avatar img');
-        if (headerAvatar) {
-            const seed = telegramUser.id.toString();
-            headerAvatar.src = `https://api.dicebear.com/7.x/thumbs/svg?seed=${seed}&backgroundColor=00ff88,00ccff,9d4edd&backgroundType=gradientLinear`;
-        }
-    }
-}
-
-// ============================================
-// АНИМАЦИИ И UI ЭФФЕКТЫ
-// ============================================
-
 // Анимации появления элементов
 function initAppearanceAnimations() {
-    console.log('🎬 Инициализация анимаций...');
-    
     // Показываем все заголовки сразу
     const sectionHeaders = document.querySelectorAll('.section-header');
     sectionHeaders.forEach(header => {
@@ -867,21 +732,6 @@ function initAppearanceAnimations() {
     setTimeout(() => {
         simulatePingCheck();
     }, 1000);
-
-    // Добавляем бейдж демо данных
-    if (!window.Telegram?.WebApp?.initDataUnsafe?.user) {
-        setTimeout(() => {
-            const demoBadge = document.createElement('div');
-            demoBadge.className = 'demo-badge';
-            demoBadge.textContent = '📱 Демо режим (Telegram не обнаружен)';
-            document.body.appendChild(demoBadge);
-            
-            setTimeout(() => {
-                demoBadge.style.opacity = '0';
-                setTimeout(() => demoBadge.remove(), 500);
-            }, 3000);
-        }, 2000);
-    }
 
     // Добавляем анимации при скролле
     const observerOptions = {
@@ -898,16 +748,10 @@ function initAppearanceAnimations() {
         });
     }, observerOptions);
 
-    document.querySelectorAll('.tariff-card, .benefit-card').forEach(card => {
+    document.querySelectorAll('.simple-card, .tariff-card, .benefit-card').forEach(card => {
         observer.observe(card);
     });
-    
-    console.log('✅ Анимации инициализированы');
 }
-
-// ============================================
-// ПРОВЕРКА ПИНГА
-// ============================================
 
 // Проверка пинга
 function initPingCheck() {
@@ -916,11 +760,10 @@ function initPingCheck() {
 
     if (checkPingBtn && pingValue) {
         checkPingBtn.addEventListener('click', simulatePingCheck);
-        console.log('📡 Кнопка проверки пинга инициализирована');
     }
 }
 
-// Симуляция проверки пинга
+// В функции simulatePingCheck заменим этот код:
 function simulatePingCheck() {
     const checkPingBtn = document.getElementById('checkPingBtn');
     const pingValue = document.getElementById('pingValue');
@@ -932,87 +775,69 @@ function simulatePingCheck() {
     // Если уже идет проверка, выходим
     if (checkPingBtn.classList.contains('checking')) return;
     
-    console.log('🔄 Начало проверки пинга...');
-    
-    // Добавляем класс для стилизации
     checkPingBtn.classList.add('checking');
     checkPingBtn.disabled = true;
     
-    // Сохраняем оригинальный текст
-    const originalHTML = checkPingBtn.innerHTML;
-    checkPingBtn.innerHTML = `
-        <i class="fas fa-spinner fa-spin"></i>
-        <span>Проверяем...</span>
-    `;
+    // Сохраняем оригинальную высоту кнопки
+    const originalHeight = checkPingBtn.offsetHeight;
+    checkPingBtn.style.height = originalHeight + 'px';
+    checkPingBtn.style.minHeight = originalHeight + 'px';
     
-    // Сброс текущего значения
-    pingValue.style.transition = 'opacity 0.3s ease';
-    pingValue.style.opacity = '0.5';
+    // Обновляем контент без изменения высоты
+    const originalContent = checkPingBtn.innerHTML;
+    checkPingBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Проверяем...</span>';
+    
+    // Устанавливаем фиксированную ширину для спиннера и текста
+    const spinner = checkPingBtn.querySelector('.fa-spinner');
+    const textSpan = checkPingBtn.querySelector('span');
+    
+    if (spinner) {
+        spinner.style.fontSize = '1em';
+        spinner.style.lineHeight = '1';
+    }
+    
+    if (textSpan) {
+        textSpan.style.fontSize = '0.95rem';
+        textSpan.style.lineHeight = '1';
+    }
+    
+    checkPingBtn.style.opacity = '0.7';
     
     let dots = 0;
     const interval = setInterval(() => {
-        const display = '•'.repeat(dots + 1) + ' '.repeat(2 - dots);
-        pingValue.textContent = display;
+        pingValue.textContent = '•'.repeat(dots + 1);
         dots = (dots + 1) % 3;
-    }, 300);
+    }, 200);
     
-    const delay = 1500 + Math.random() * 1000;
+    const delay = 2000 + Math.random() * 1000;
     
     setTimeout(() => {
         clearInterval(interval);
         
-        // Генерируем реалистичный пинг
-        let randomPing;
-        if (Math.random() > 0.7) {
-            // Отличное соединение
-            randomPing = Math.floor(Math.random() * 8) + 8; // 8-15 мс
-        } else if (Math.random() > 0.4) {
-            // Хорошее соединение
-            randomPing = Math.floor(Math.random() * 10) + 16; // 16-25 мс
-        } else {
-            // Нормальное соединение
-            randomPing = Math.floor(Math.random() * 10) + 26; // 26-35 мс
-        }
+        const randomPing = Math.floor(Math.random() * (28 - 8 + 1)) + 8;
+        pingValue.textContent = randomPing;
         
-        console.log(`📊 Пинг проверен: ${randomPing}мс`);
+        updatePingStatus(randomPing, statusText, indicators);
         
-        // Плавное отображение нового значения
-        pingValue.style.opacity = '0';
+        checkPingBtn.classList.remove('checking');
+        checkPingBtn.disabled = false;
+        checkPingBtn.innerHTML = '<i class="fas fa-sync-alt"></i><span>Проверить сейчас</span>';
+        
+        // Восстанавливаем оригинальную высоту
+        checkPingBtn.style.height = '';
+        checkPingBtn.style.minHeight = '';
+        
+        checkPingBtn.style.opacity = '1';
+        
+        // Анимация успешной проверки
+        pingValue.style.transform = 'scale(1.1)';
+        pingValue.style.transition = 'transform 0.3s ease';
         setTimeout(() => {
-            pingValue.textContent = randomPing;
-            pingValue.style.opacity = '1';
-            
-            // Обновляем статус
-            updatePingStatus(randomPing, statusText, indicators);
-            
-            // Анимация успеха
-            pingValue.style.transform = 'scale(1.15)';
-            setTimeout(() => {
-                pingValue.style.transform = 'scale(1)';
-            }, 200);
-            
-            // Восстанавливаем кнопку
-            checkPingBtn.classList.remove('checking');
-            checkPingBtn.disabled = false;
-            checkPingBtn.innerHTML = originalHTML;
-            
-            // Показываем уведомление
-            setTimeout(() => {
-                if (randomPing <= 15) {
-                    showNotification(`Пинг ${randomPing}мс! Идеальное соединение 🚀`, 'success');
-                } else if (randomPing <= 25) {
-                    showNotification(`Пинг ${randomPing}мс. Хорошее соединение ⚡`, 'info');
-                } else {
-                    showNotification(`Пинг ${randomPing}мс. VPN может улучшить соединение 📊`, 'info');
-                }
-            }, 500);
-            
-        }, 200);
-        
+            pingValue.style.transform = 'scale(1)';
+        }, 300);
     }, delay);
 }
 
-// Обновление статуса пинга
 function updatePingStatus(ping, statusText, indicators) {
     if (!statusText || !indicators) return;
 
@@ -1039,10 +864,6 @@ function updatePingStatus(ping, statusText, indicators) {
     }
 }
 
-// ============================================
-// ПОКУПКИ И ОПЛАТА
-// ============================================
-
 // Обработка покупки
 function initBuyButtons() {
     const buyButtons = document.querySelectorAll('.buy-btn');
@@ -1054,13 +875,10 @@ function initBuyButtons() {
             const planId = this.getAttribute('data-plan');
 
             if (planId) {
-                console.log(`🛒 Нажата кнопка покупки: ${planId}`);
                 openBuyModal(planId);
             }
         });
     });
-    
-    console.log(`✅ Инициализировано кнопок покупки: ${buyButtons.length}`);
 }
 
 // Модальное окно покупки
@@ -1072,7 +890,6 @@ function initModals() {
     if (closeBtn) {
         closeBtn.addEventListener('click', () => {
             modal.classList.remove('active');
-            console.log('❌ Модальное окно закрыто');
         });
     }
 
@@ -1080,7 +897,6 @@ function initModals() {
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
                 modal.classList.remove('active');
-                console.log('❌ Модальное окно закрыто (клик по фону)');
             }
         });
     }
@@ -1094,14 +910,10 @@ function initModals() {
             document.querySelectorAll('.modal-overlay').forEach(modal => {
                 modal.classList.remove('active');
             });
-            console.log('❌ Модальное окно закрыто (Escape)');
         }
     });
-    
-    console.log('✅ Модальные окна инициализированы');
 }
 
-// Открытие модального окна покупки
 function openBuyModal(planId) {
     const plan = getPlanInfo(planId);
     const modal = document.querySelector('.modal-overlay');
@@ -1129,61 +941,62 @@ function openBuyModal(planId) {
     `;
 
     modal.classList.add('active');
-    console.log(`📋 Открыто модальное окно покупки: ${plan.name}`);
 }
 
-// Обработка оплаты
 async function processPayment() {
     const modal = document.querySelector('.modal-overlay');
     const confirmBtn = document.getElementById('confirmBuyBtn');
-    const modalBody = document.querySelector('.modal-body');
-    
-    if (!confirmBtn || !modalBody) return;
-    
-    console.log('💳 Начало процесса оплаты...');
-    
-    // Сохраняем оригинальное содержимое модалки
-    const originalContent = modalBody.innerHTML;
-    
+
+    if (!confirmBtn) return;
+
     confirmBtn.disabled = true;
     confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Обработка...';
-    
-    // Симуляция оплаты с более реалистичной задержкой
+
+    // Симуляция оплаты
     setTimeout(async () => {
         try {
+            // Здесь будет реальная интеграция с платежной системой
+            // Пока используем симуляцию
+
+            const planName = document.querySelector('#modalTitle')?.textContent?.replace('Оформление: ', '') || 'Про VPN';
+            const planId = getPlanIdByName(planName);
+
             // Закрываем модальное окно
             modal.classList.remove('active');
-            
-            // Сброс кнопки
             confirmBtn.disabled = false;
             confirmBtn.innerHTML = '<i class="fas fa-lock"></i> Перейти к оплате';
-            
-            console.log('✅ Оплата успешно обработана');
-            
+
             // Показываем сообщение об успехе
             setTimeout(() => {
-                // Восстанавливаем модалку в исходное состояние
-                modalBody.innerHTML = originalContent;
-                
-                // Показываем success модалку
-                showSuccessModal();
-            }, 300);
-            
+                const modalBody = document.querySelector('.modal-body');
+                if (modalBody) {
+                    modalBody.innerHTML = `
+                        <div style="text-align: center; padding: 2rem 1rem;">
+                            <div style="width: 90px; height: 90px; background: var(--primary-gradient); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; animation: pulse 2s infinite;">
+                                <i class="fas fa-check" style="font-size: 2.5rem; color: white;"></i>
+                            </div>
+                            <h3 style="color: var(--success-color); margin-bottom: 1rem; font-size: 1.5rem;">Оплата успешна!</h3>
+                            <p style="color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.5; font-size: 1rem;">
+                                Данные для подключения отправлены в личные сообщения Telegram.
+                            </p>
+                            <div style="background: rgba(0, 255, 136, 0.1); padding: 1.25rem; border-radius: 14px; margin: 1.5rem 0; border: 1px solid rgba(0, 255, 136, 0.3);">
+                                <p style="font-size: 0.95rem; color: var(--success-color); margin: 0;">
+                                    <i class="fas fa-info-circle"></i> Проверьте чат с ботом
+                                </p>
+                            </div>
+                        </div>
+                    `;
+                }
+            }, 100);
+
         } catch (error) {
-            console.error('❌ Ошибка оплаты:', error);
+            console.error('Ошибка оплаты:', error);
             confirmBtn.disabled = false;
             confirmBtn.innerHTML = '<i class="fas fa-lock"></i> Перейти к оплате';
-            
-            // Восстанавливаем содержимое
-            modalBody.innerHTML = originalContent;
-            
-            // Показываем ошибку
-            showNotification('Ошибка оплаты. Попробуйте еще раз', 'error');
         }
     }, 2000);
 }
 
-// Получение ID тарифа по имени
 function getPlanIdByName(name) {
     const plans = {
         'Лайт VPN': 'light',
@@ -1193,121 +1006,8 @@ function getPlanIdByName(name) {
     return plans[name] || 'light';
 }
 
-// ============================================
-// УВЕДОМЛЕНИЯ И СООБЩЕНИЯ
-// ============================================
-
-// Показ успешной оплаты
-function showSuccessModal() {
-    const modal = document.getElementById('buyModal');
-    const modalBody = document.querySelector('.modal-body');
-    
-    if (!modal || !modalBody) return;
-    
-    modalBody.innerHTML = `
-        <div class="modal-success">
-            <div class="success-icon">
-                <i class="fas fa-check"></i>
-            </div>
-            <h3>Оплата успешна!</h3>
-            <p>Данные для подключения VPN отправлены в личные сообщения Telegram.</p>
-            <div class="payment-info">
-                <p><i class="fas fa-info-circle"></i> Проверьте чат с ботом</p>
-            </div>
-            <button class="simple-btn btn-primary" id="closeSuccessBtn">
-                <i class="fas fa-check"></i> Отлично!
-            </button>
-        </div>
-    `;
-    
-    modal.classList.add('active');
-    console.log('🎉 Показано окно успешной оплаты');
-    
-    // Обработчик закрытия
-    document.getElementById('closeSuccessBtn')?.addEventListener('click', () => {
-        modal.classList.remove('active');
-        
-        // Восстанавливаем обычную модалку через 300мс
-        setTimeout(() => {
-            const originalContent = `
-                <div class="selected-plan" id="selectedPlanInfo"></div>
-                <div class="payment-section">
-                    <h4><i class="fas fa-credit-card"></i> Способ оплаты</h4>
-                    <div class="payment-methods">
-                        <label class="payment-method active">
-                            <input type="radio" name="payment" checked>
-                            <div class="payment-icon">
-                                <i class="fab fa-cc-visa"></i>
-                            </div>
-                            <span>Карта</span>
-                        </label>
-                    </div>
-                </div>
-                <button class="simple-btn btn-primary" id="confirmBuyBtn">
-                    <i class="fas fa-lock"></i> Перейти к оплате
-                </button>
-            `;
-            modalBody.innerHTML = originalContent;
-            
-            // Реинициализируем кнопку
-            const newConfirmBtn = document.getElementById('confirmBuyBtn');
-            if (newConfirmBtn) {
-                newConfirmBtn.addEventListener('click', processPayment);
-            }
-        }, 300);
-    });
-}
-
-// Показ уведомлений
-function showNotification(message, type = 'info') {
-    console.log(`📢 Уведомление (${type}): ${message}`);
-    
-    // Создаем элемент уведомления если его нет
-    let notification = document.getElementById('notification');
-    if (!notification) {
-        notification = document.createElement('div');
-        notification.id = 'notification';
-        document.body.appendChild(notification);
-    }
-    
-    // Устанавливаем иконку в зависимости от типа
-    let icon = 'info-circle';
-    if (type === 'success') icon = 'check-circle';
-    if (type === 'error') icon = 'exclamation-circle';
-    
-    // Обновляем содержимое
-    notification.innerHTML = `
-        <i class="fas fa-${icon}"></i>
-        <span>${message}</span>
-    `;
-    
-    // Устанавливаем классы
-    notification.className = '';
-    notification.classList.add(type);
-    
-    // Показываем уведомление
-    setTimeout(() => {
-        notification.classList.add('show');
-    }, 10);
-    
-    // Автоматическое скрытие
-    setTimeout(() => {
-        notification.classList.remove('show');
-        setTimeout(() => {
-            notification.className = '';
-        }, 300);
-    }, 3000);
-}
-
-// ============================================
-// ОПТИМИЗАЦИЯ ДЛЯ МОБИЛЬНЫХ
-// ============================================
-
 // Оптимизация для мобильных
 function optimizeMobileExperience() {
-    console.log('📱 Оптимизация для мобильных устройств...');
-    
-    // Автофокус на полях ввода
     document.addEventListener('touchstart', function (e) {
         if (e.target.matches('input, select, textarea')) {
             setTimeout(() => {
@@ -1316,7 +1016,6 @@ function optimizeMobileExperience() {
         }
     });
 
-    // Установка корректной высоты viewport
     function setVH() {
         let vh = window.innerHeight * 0.01;
         document.documentElement.style.setProperty('--vh', `${vh}px`);
@@ -1326,14 +1025,11 @@ function optimizeMobileExperience() {
     window.addEventListener('resize', setVH);
     window.addEventListener('orientationchange', setVH);
 
-    // Ripple эффект для кнопок
     document.addEventListener('click', function (e) {
         if (e.target.closest('.simple-btn')) {
             createRipple(e, e.target.closest('.simple-btn'));
         }
     });
-    
-    console.log('✅ Мобильная оптимизация завершена');
 }
 
 // Ripple эффект
@@ -1360,60 +1056,19 @@ function createRipple(event, button) {
     }, 600);
 }
 
-// ============================================
-// ДОПОЛНИТЕЛЬНЫЕ ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
-// ============================================
+// Функция для демо покупок
+function loadDemoPurchases() {
+    userPurchases = [
+        {
+            planId: 'pro',
+            price: 599,
+            status: 'active',
+            purchaseDate: { seconds: Date.now() / 1000 - 30 * 24 * 60 * 60 },
+            endDate: { seconds: Date.now() / 1000 + 30 * 24 * 60 * 60 }
+        }
+    ];
+    userActiveSubscription = userPurchases[0];
 
-// Функция для проверки мобильного устройства
-function isMobileDevice() {
-    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    updatePurchasesUI();
+    updateProfileSubscriptionUI();
 }
-
-// Функция для получения параметров из URL
-function getQueryParam(name) {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get(name);
-}
-
-// Функция для форматирования чисел (например, для цен)
-function formatNumber(num) {
-    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-}
-
-// Функция для копирования текста в буфер обмена
-function copyToClipboard(text) {
-    navigator.clipboard.writeText(text).then(() => {
-        showNotification('Скопировано в буфер обмена', 'success');
-    }).catch(err => {
-        console.error('Ошибка копирования:', err);
-        showNotification('Не удалось скопировать', 'error');
-    });
-}
-
-// Функция для генерации случайного цвета
-function getRandomColor() {
-    const colors = ['#00ff88', '#00ccff', '#9d4edd', '#ff6b6b', '#ffd166', '#06d6a0'];
-    return colors[Math.floor(Math.random() * colors.length)];
-}
-
-// ============================================
-// ЭКСПОРТ ФУНКЦИЙ ДЛЯ ДЕБАГА
-// ============================================
-
-// Для отладки в консоли браузера
-window.FLOWIE = {
-    checkPing: simulatePingCheck,
-    showNotification: showNotification,
-    openBuyModal: openBuyModal,
-    getUser: () => currentUser,
-    getTelegramUser: () => telegramUser,
-    getPurchases: () => userPurchases,
-    reloadDemoData: loadDemoData,
-    clearCache: () => {
-        localStorage.removeItem('telegram_avatar_cache');
-        console.log('🗑️ Кэш очищен');
-    }
-};
-
-console.log('🚀 FLOWIE VPN полностью загружен и готов к работе!');
-console.log('ℹ️ Для отладки используйте window.FLOWIE в консоли');

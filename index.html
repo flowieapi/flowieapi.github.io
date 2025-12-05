@@ -3,13 +3,12 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>ФЛОУИ VPN - PUBG Mobile</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 
 <body>
@@ -106,8 +105,7 @@
                     </div>
 
                     <!-- Про VPN -->
-                    <div class="tariff-card featured">
-                        <div class="tariff-badge">ПОПУЛЯРНЫЙ</div>
+                    <div class="tariff-card">
                         <div class="tariff-header">
                             <div class="tariff-icon">
                                 <i class="fas fa-rocket"></i>
@@ -139,13 +137,13 @@
                             </div>
                         </div>
                         <button class="simple-btn btn-primary buy-btn" data-plan="pro">
-                            Выбрать тариф
+                            <i class="fas fa-shopping-cart"></i>
+                            <span>Выбрать тариф</span>
                         </button>
                     </div>
 
                     <!-- Флоуи VPN -->
-                    <div class="tariff-card premium">
-                        <div class="tariff-badge vip">ПРЕМИУМ</div>
+                    <div class="tariff-card">
                         <div class="tariff-header">
                             <div class="tariff-icon">
                                 <i class="fas fa-gem"></i>
@@ -176,8 +174,9 @@
                                 <span>Персональный менеджер</span>
                             </div>
                         </div>
-                        <button class="simple-btn btn-premium buy-btn" data-plan="flowi">
-                            <i class="fas fa-gem"></i> Премиум доступ
+                        <button class="simple-btn btn-primary buy-btn" data-plan="flowi">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span>Выбрать тариф</span>
                         </button>
                     </div>
                 </div>
@@ -284,6 +283,9 @@
             </div>
         </div>
     </div>
+
+    <!-- Уведомление -->
+    <div id="notification" class="notification"></div>
 
     <script src="script.js"></script>
 </body>
