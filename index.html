@@ -23,7 +23,7 @@
                         <i class="fas fa-shield-alt"></i>
                     </div>
                     <div class="logo-text">
-                        <h1>ФЛОУИ VPN</h1>
+                        <h1 class="main-title">ФЛОУИ VPN</h1>
                         <p class="logo-subtitle">PUBG MOBILE</p>
                     </div>
                 </div>
@@ -39,7 +39,7 @@
             <!-- Виджет пинга -->
             <section class="ping-widget">
                 <div class="ping-header">
-                    <h2><i class="fas fa-signal"></i> Проверка пинга</h2>
+                    <h2 class="section-title"><i class="fas fa-signal"></i> Проверка пинга</h2>
                     <div class="ping-badge">LIVE</div>
                 </div>
                 <div class="ping-display">
@@ -50,7 +50,7 @@
                     </div>
                     <p class="ping-description">Текущая задержка в PUBG Mobile</p>
                 </div>
-                <button class="simple-btn btn-primary" id="checkPingBtn">
+                <button class="simple-btn btn-primary btn-ping" id="checkPingBtn">
                     <i class="fas fa-sync-alt"></i> Проверить сейчас
                 </button>
                 <div class="ping-status">
@@ -66,7 +66,7 @@
             <!-- Тарифы -->
             <section class="tariffs-section">
                 <div class="section-header">
-                    <h2><i class="fas fa-crown"></i> Выберите VPN</h2>
+                    <h2 class="section-title"><i class="fas fa-crown"></i> Выберите VPN</h2>
                     <p class="section-subtitle">Оптимизировано для PUBG Mobile</p>
                 </div>
 
@@ -78,7 +78,7 @@
                                 <i class="fas fa-bolt"></i>
                             </div>
                             <div class="tariff-info">
-                                <h3>Лайт VPN</h3>
+                                <h3 class="tariff-title">Лайт VPN</h3>
                                 <div class="tariff-price">
                                     <span class="price">299</span>
                                     <span class="currency">₽/мес</span>
@@ -99,7 +99,7 @@
                                 <span>Серверы в РФ и Европе</span>
                             </div>
                         </div>
-                        <button class="simple-btn btn-primary buy-btn" data-plan="pro">
+                        <button class="simple-btn btn-primary buy-btn" data-plan="light">
                             <i class="fas fa-shopping-cart"></i>
                             <span>Выбрать тариф</span>
                         </button>
@@ -113,7 +113,7 @@
                                 <i class="fas fa-rocket"></i>
                             </div>
                             <div class="tariff-info">
-                                <h3>Про VPN</h3>
+                                <h3 class="tariff-title">Про VPN</h3>
                                 <div class="tariff-price">
                                     <span class="price">599</span>
                                     <span class="currency">₽/мес</span>
@@ -151,7 +151,7 @@
                                 <i class="fas fa-gem"></i>
                             </div>
                             <div class="tariff-info">
-                                <h3>Флоуи VPN</h3>
+                                <h3 class="tariff-title">Флоуи VPN</h3>
                                 <div class="tariff-price">
                                     <span class="price">999</span>
                                     <span class="currency">₽/мес</span>
@@ -186,7 +186,7 @@
             <!-- Преимущества -->
             <section class="benefits-section">
                 <div class="section-header">
-                    <h2><i class="fas fa-star"></i> Преимущества</h2>
+                    <h2 class="section-title"><i class="fas fa-star"></i> Преимущества</h2>
                     <p class="section-subtitle">Почему выбирают нас</p>
                 </div>
 
@@ -275,22 +275,6 @@
                             </div>
                             <span>Карта</span>
                         </label>
-
-                        <label class="payment-method">
-                            <input type="radio" name="payment">
-                            <div class="payment-icon">
-                                <i class="fab fa-bitcoin"></i>
-                            </div>
-                            <span>Криптовалюта</span>
-                        </label>
-
-                        <label class="payment-method">
-                            <input type="radio" name="payment">
-                            <div class="payment-icon">
-                                <i class="fas fa-wallet"></i>
-                            </div>
-                            <span>QIWI / ЮMoney</span>
-                        </label>
                     </div>
                 </div>
 
@@ -300,9 +284,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Уведомление -->
-    <div id="notification" class="notification"></div>
 
     <script src="script.js"></script>
 </body>

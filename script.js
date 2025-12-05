@@ -941,32 +941,42 @@ function initNotifications() {
 
 function showNotification(message, type = 'info') {
     const notification = document.getElementById('notification');
-
+    
     if (!notification) return;
-
-    notification.className = 'notification';
-    if (type === 'success') {
-        notification.style.background = 'rgba(0, 255, 136, 0.15)';
-        notification.style.borderColor = 'rgba(0, 255, 136, 0.3)';
-    } else if (type === 'error') {
-        notification.style.background = 'rgba(255, 71, 87, 0.15)';
-        notification.style.borderColor = 'rgba(255, 71, 87, 0.3)';
-    }
-
-    notification.innerHTML = `
-        <div style="display: flex; align-items: center; gap: 0.75rem;">
-            <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}" 
-               style="color: ${type === 'success' ? 'var(--success-color)' : type === 'error' ? '#ff4757' : 'var(--info-color)'}">
-            </i>
-            <span>${message}</span>
-        </div>
-    `;
-
-    notification.classList.add('show');
-
+    
+    // Удаляем предыдущее уведомление
+    notification.classList.remove('show', 'success', 'error', 'info');
+    notification.style.display = 'none';
+    
+    // Даем время на удаление анимации
     setTimeout(() => {
-        notification.classList.remove('show');
-    }, 3000);
+        // Устанавливаем тип и сообщение
+        notification.className = 'notification';
+        notification.classList.add(type);
+        
+        notification.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}" 
+                   style="color: ${type === 'success' ? 'var(--success-color)' : type === 'error' ? '#ff4757' : 'var(--info-color)'}">
+                </i>
+                <span>${message}</span>
+            </div>
+        `;
+        
+        // Показываем уведомление
+        notification.style.display = 'flex';
+        setTimeout(() => {
+            notification.classList.add('show');
+        }, 10);
+        
+        // Автоматическое скрытие через 3 секунды
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 300);
+        }, 3000);
+    }, 50);
 }
 
 // Оптимизация для мобильных
