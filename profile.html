@@ -5,227 +5,132 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Профиль - ФЛОУИ VPN</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Фон -->
-    <div class="background"></div>
-    
     <div class="app-container">
-        <!-- Шапка -->
         <header class="glass-header">
             <div class="header-content">
                 <a href="index.html" class="back-btn">
                     <i class="fas fa-arrow-left"></i>
                 </a>
                 <div class="header-title">
-                    <h1>Мой профиль</h1>
-                    <p class="subtitle">Статистика и достижения</p>
+                    <h1>Профиль</h1>
+                    <p class="header-subtitle">Ваша статистика</p>
                 </div>
-                <div class="header-actions">
-                    <button class="icon-btn">
-                        <i class="fas fa-qrcode"></i>
-                    </button>
+                <div class="user-avatar">
+                    <img src="https://api.dicebear.com/7.x/thumbs/svg?seed=gamer&backgroundColor=00ff88,00ccff,9d4edd&backgroundType=gradientLinear" alt="Аватар">
                 </div>
             </div>
         </header>
 
-        <!-- Основной контент -->
         <main class="main-content">
-            <!-- Профиль пользователя -->
-            <section class="glass-card profile-header animate__animated animate__fadeIn">
-                <div class="profile-avatar">
-                    </button>
+            <div class="profile-header">
+                <div class="profile-avatar-large">
+                    <img src="https://api.dicebear.com/7.x/thumbs/svg?seed=gamer&backgroundColor=00ff88,00ccff,9d4edd&backgroundType=gradientLinear" alt="Аватар">
                 </div>
                 <div class="profile-info">
-                    <h2>User</h2>
-                    <p class="profile-username">@username</p>
-                    <div class="profile-level">
-                        <i class="fas fa-trophy"></i>
-                        Уровень 1
-                    </div>
+                    <h2>Демо Пользователь</h2>
+                    <p class="profile-username">@demo_user</p>
+                    <span class="profile-level">Уровень 3</span>
                 </div>
-            </section>
+            </div>
 
-            <!-- Статистика -->
-            <section class="profile-stats animate__animated animate__fadeInUp" style="animation-delay: 0.1s">
-                <div class="glass-card profile-stat">
-                    <div class="stat-number">0</div>
+            <div class="profile-stats">
+                <div class="profile-stat">
+                    <div class="stat-number">120</div>
                     <div class="stat-text">Дней с VPN</div>
                 </div>
-                <div class="glass-card profile-stat">
-                    <div class="stat-number">0</div>
+                <div class="profile-stat">
+                    <div class="stat-number">347</div>
                     <div class="stat-text">Игр сыграно</div>
                 </div>
-                <div class="glass-card profile-stat">
-                    <div class="stat-number">0</div>
+                <div class="profile-stat">
+                    <div class="stat-number">85%</div>
                     <div class="stat-text">Точность</div>
                 </div>
-            </section>
+            </div>
 
-            <!-- Активная подписка -->
-            <section class="subscription-card animate__animated animate__fadeInUp" style="animation-delay: 0.2s">
+            <div class="subscription-card">
                 <div class="subscription-info">
                     <div class="subscription-icon">
-                        <i class="fas fa-gem"></i>
+                        <i class="fas fa-rocket"></i>
                     </div>
                     <div class="subscription-details">
-                        <h4>Флоуи VPN</h4>
+                        <h4>Про VPN</h4>
                         <p>Активна до: 15.12.2024</p>
-                        <p><i class="fas fa-check-circle" style="color: #00ff88;"></i> Автопродление включено</p>
                     </div>
                 </div>
-                <button class="glass-btn btn-outline">
-                    <i class="fas fa-redo"></i> Продлить
-                </button>
-            </section>
+                <button class="simple-btn btn-primary">Продлить подписку</button>
+            </div>
 
-            <!-- Детальная статистика -->
-            <section class="glass-card animate__animated animate__fadeInUp" style="animation-delay: 0.3s">
-                <div class="section-header">
-                    <h2><i class="fas fa-chart-line"></i> Детальная статистика</h2>
-                </div>
-                
-                <div class="stats-details">
-                    <div class="stat-detail">
-                        <span>Средний пинг до VPN:</span>
-                        <span class="stat-value">85 мс</span>
-                    </div>
-                    <div class="stat-detail">
-                        <span>Средний пинг с VPN:</span>
-                        <span class="stat-value">18 мс</span>
-                    </div>
-                    <div class="stat-detail">
-                        <span>Экономия пинга:</span>
-                        <span class="stat-value" style="color: #00ff88;">-67 мс</span>
-                    </div>
-                    <div class="stat-detail">
-                        <span>Время сэкономлено:</span>
-                        <span class="stat-value">~47 часов</span>
-                    </div>
-                    <div class="stat-detail">
-                        <span>Лучший пинг:</span>
-                        <span class="stat-value">10 мс</span>
-                    </div>
-                </div>
-            </section>
+            <div class="section-header">
+                <h2><i class="fas fa-trophy"></i> Достижения</h2>
+                <p class="section-subtitle">Ваши игровые достижения</p>
+            </div>
 
-            <!-- Достижения -->
-            <section class="animate__animated animate__fadeInUp" style="animation-delay: 0.4s">
-                <div class="section-header">
-                    <h2><i class="fas fa-award"></i> Достижения</h2>
-                    <p class="section-subtitle">Разблокируйте все достижения</p>
-                </div>
-                
-                <div class="achievements-grid">
-                    <div class="glass-card achievement-card unlocked">
-                        <div class="achievement-icon">
-                            <i class="fas fa-bolt"></i>
-                        </div>
-                        <h4>Первая покупка</h4>
-                        <p>Купил VPN в первый раз</p>
+            <div class="achievements-grid">
+                <div class="achievement-card unlocked">
+                    <div class="achievement-icon">
+                        <i class="fas fa-shield-alt"></i>
                     </div>
-                    
-                    <div class="glass-card achievement-card unlocked">
-                        <div class="achievement-icon">
-                            <i class="fas fa-vip"></i>
-                        </div>
-                        <h4>Премиум игрок</h4>
-                        <p>30 дней с премиум VPN</p>
-                    </div>
-                    
-                    <div class="glass-card achievement-card locked">
-                        <div class="achievement-icon">
-                            <i class="fas fa-infinity"></i>
-                        </div>
-                        <h4>Ветеран</h4>
-                        <p>100 дней с VPN</p>
-                    </div>
-                    
-                    <div class="glass-card achievement-card locked">
-                        <div class="achievement-icon">
-                            <i class="fas fa-trophy"></i>
-                        </div>
-                        <h4>Чемпион</h4>
-                        <p>Выиграть 100 матчей</p>
-                    </div>
+                    <h4>Первая защита</h4>
+                    <p>Использовать VPN в 10 играх</p>
                 </div>
-            </section>
-
-            <!-- Быстрые действия -->
-            <section class="glass-card animate__animated animate__fadeInUp" style="animation-delay: 0.5s; margin-top: 2rem;">
-                <div class="section-header">
-                    <h2><i class="fas fa-bolt"></i> Быстрые действия</h2>
+                <div class="achievement-card unlocked">
+                    <div class="achievement-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h4>Скорость</h4>
+                    <p>Пинг ниже 20мс</p>
                 </div>
-                
-                <div class="quick-actions">
-                    <button class="glass-btn btn-outline" style="flex: 1;">
-                        <i class="fas fa-share-alt"></i> Пригласить друга
-                    </button>
-                    <button class="glass-btn btn-primary" style="flex: 1;">
-                        <i class="fas fa-gift"></i> Получить бонус
-                    </button>
+                <div class="achievement-card">
+                    <div class="achievement-icon">
+                        <i class="fas fa-crown"></i>
+                    </div>
+                    <h4>Ветеран</h4>
+                    <p>100 дней с VPN</p>
                 </div>
-            </section>
+                <div class="achievement-card">
+                    <div class="achievement-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <h4>Профессионал</h4>
+                    <p>500 игр с VPN</p>
+                </div>
+            </div>
         </main>
 
-        <!-- Навигация -->
-        <nav class="glass-nav">
+        <nav class="simple-nav">
             <a href="index.html" class="nav-item">
                 <div class="nav-icon">
                     <i class="fas fa-server"></i>
                 </div>
+                <div class="nav-label">VPN</div>
             </a>
             <a href="purchases.html" class="nav-item">
                 <div class="nav-icon">
                     <i class="fas fa-shopping-bag"></i>
                 </div>
+                <div class="nav-label">Покупки</div>
             </a>
             <a href="profile.html" class="nav-item active">
                 <div class="nav-icon">
-                    <i class="fas fa-user-circle"></i>
+                    <i class="fas fa-user"></i>
                 </div>
+                <div class="nav-label">Профиль</div>
             </a>
             <a href="settings.html" class="nav-item">
                 <div class="nav-icon">
-                    <i class="fas fa-sliders-h"></i>
+                    <i class="fas fa-cog"></i>
                 </div>
+                <div class="nav-label">Настройки</div>
             </a>
         </nav>
     </div>
 
     <script src="script.js"></script>
-    <style>
-        .stats-details {
-            margin-top: 1.5rem;
-        }
-        
-        .stat-detail {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.875rem 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        }
-        
-        .stat-detail:last-child {
-            border-bottom: none;
-        }
-        
-        .stat-value {
-            font-weight: 700;
-            font-size: 1.1rem;
-            color: var(--info-color);
-        }
-        
-        .quick-actions {
-            display: flex;
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-    </style>
 </body>
 </html>

@@ -6,15 +6,11 @@
     <title>Настройки - ФЛОУИ VPN</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Фон -->
-    <div class="background"></div>
-    
     <div class="app-container">
-        <!-- Шапка -->
         <header class="glass-header">
             <div class="header-content">
                 <a href="index.html" class="back-btn">
@@ -22,23 +18,18 @@
                 </a>
                 <div class="header-title">
                     <h1>Настройки</h1>
-                    <p class="subtitle">Персонализация и безопасность</p>
+                    <p class="header-subtitle">Управление приложением</p>
                 </div>
-                <div class="header-actions">
-                    <button class="icon-btn">
-                        <i class="fas fa-search"></i>
-                    </button>
+                <div class="user-avatar">
+                    <img src="https://api.dicebear.com/7.x/thumbs/svg?seed=gamer&backgroundColor=00ff88,00ccff,9d4edd&backgroundType=gradientLinear" alt="Аватар">
                 </div>
             </div>
         </header>
 
-        <!-- Основной контент -->
-        <main class="main-content settings-section">
-            <!-- Основные настройки -->
-            <section class="settings-group animate__animated animate__fadeIn">
-                <h3><i class="fas fa-sliders-h"></i> Основные настройки</h3>
-                
-                <div class="glass-card settings-list">
+        <main class="main-content">
+            <div class="settings-group">
+                <h3><i class="fas fa-sliders-h"></i> Основные</h3>
+                <div class="settings-list">
                     <div class="setting-item">
                         <div class="setting-info">
                             <div class="setting-icon">
@@ -46,7 +37,7 @@
                             </div>
                             <div class="setting-text">
                                 <h4>Уведомления</h4>
-                                <p>Получать уведомления о новых тарифах</p>
+                                <p>Получать уведомления о статусе</p>
                             </div>
                         </div>
                         <label class="toggle-switch">
@@ -58,310 +49,157 @@
                     <div class="setting-item">
                         <div class="setting-info">
                             <div class="setting-icon">
-                                <i class="fas fa-globe"></i>
+                                <i class="fas fa-moon"></i>
+                            </div>
+                            <div class="setting-text">
+                                <h4>Темная тема</h4>
+                                <p>Всегда использовать темную тему</p>
+                            </div>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-icon">
+                                <i class="fas fa-language"></i>
                             </div>
                             <div class="setting-text">
                                 <h4>Язык</h4>
-                                <p>Русский / English</p>
+                                <p>Язык интерфейса</p>
                             </div>
                         </div>
                         <div class="select-wrapper">
                             <select>
-                                <option selected>Русский</option>
-                                <option>English</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div class="setting-item">
-                        <div class="setting-info">
-                            <div class="setting-icon">
-                                <i class="fas fa-gamepad"></i>
-                            </div>
-                            <div class="setting-text">
-                                <h4>Игровой никнейм</h4>
-                                <p>Изменить никнейм PUBG Mobile</p>
-                            </div>
-                        </div>
-                        <button class="glass-btn btn-outline" onclick="changeNickname()">
-                            Изменить
-                        </button>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Настройки VPN -->
-            <section class="settings-group animate__animated animate__fadeIn" style="animation-delay: 0.1s">
-                <h3><i class="fas fa-server"></i> Настройки VPN</h3>
-                
-                <div class="glass-card settings-list">
-                    <div class="setting-item">
-                        <div class="setting-info">
-                            <div class="setting-icon">
-                                <i class="fas fa-bolt"></i>
-                            </div>
-                            <div class="setting-text">
-                                <h4>Авто-подключение</h4>
-                                <p>Автоматически подключать VPN при запуске PUBG</p>
-                            </div>
-                        </div>
-                        <label class="toggle-switch">
-                            <input type="checkbox" checked>
-                            <span class="toggle-slider"></span>
-                        </label>
-                    </div>
-                    
-                    <div class="setting-item">
-                        <div class="setting-info">
-                            <div class="setting-icon">
-                                <i class="fas fa-server"></i>
-                            </div>
-                            <div class="setting-text">
-                                <h4>Предпочитаемый сервер</h4>
-                                <p>Автоматический / Европа / Азия</p>
-                            </div>
-                        </div>
-                        <div class="select-wrapper">
-                            <select>
-                                <option selected>Автоматический</option>
-                                <option>Европа (Низкий пинг)</option>
-                                <option>Азия (Стабильность)</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div class="setting-item">
-                        <div class="setting-info">
-                            <div class="setting-icon">
-                                <i class="fas fa-shield-alt"></i>
-                            </div>
-                            <div class="setting-text">
-                                <h4>Уровень шифрования</h4>
-                                <p>Баланс скорости и безопасности</p>
-                            </div>
-                        </div>
-                        <div class="select-wrapper">
-                            <select>
-                                <option selected>Оптимальный</option>
-                                <option>Максимальный</option>
-                                <option>Минимальный</option>
+                                <option value="ru">Русский</option>
+                                <option value="en">English</option>
                             </select>
                         </div>
                     </div>
                 </div>
-            </section>
+            </div>
 
-            <!-- Поддержка -->
-            <section class="settings-group animate__animated animate__fadeIn" style="animation-delay: 0.2s">
+            <div class="settings-group">
                 <h3><i class="fas fa-headset"></i> Поддержка</h3>
-                
                 <div class="support-grid">
-                    <a href="#" class="glass-card support-card">
+                    <a href="#" class="support-card">
                         <div class="support-icon">
                             <i class="fas fa-question-circle"></i>
                         </div>
-                        <h4>FAQ & Помощь</h4>
-                        <p>Ответы на частые вопросы</p>
+                        <h4>Помощь</h4>
+                        <p>FAQ и инструкции</p>
                     </a>
                     
-                    <a href="#" class="glass-card support-card">
+                    <a href="#" class="support-card">
                         <div class="support-icon">
                             <i class="fas fa-comments"></i>
                         </div>
                         <h4>Чат поддержки</h4>
-                        <p>Онлайн чат с поддержкой</p>
+                        <p>Онлайн консультация</p>
                     </a>
                     
-                    <a href="#" class="glass-card support-card">
+                    <a href="#" class="support-card">
                         <div class="support-icon">
-                            <i class="fas fa-bug"></i>
+                            <i class="fas fa-envelope"></i>
                         </div>
-                        <h4>Сообщить о проблеме</h4>
-                        <p>Нашли баг? Сообщите нам</p>
+                        <h4>Email</h4>
+                        <p>Написать на почту</p>
                     </a>
                     
-                    <a href="#" class="glass-card support-card">
+                    <a href="#" class="support-card">
                         <div class="support-icon">
-                            <i class="fas fa-newspaper"></i>
+                            <i class="fab fa-telegram"></i>
                         </div>
-                        <h4>Новости</h4>
-                        <p>Обновления и анонсы</p>
+                        <h4>Telegram</h4>
+                        <p>Канал с новостями</p>
                     </a>
                 </div>
-            </section>
+            </div>
 
-            <!-- О приложении -->
-            <section class="glass-card about-section animate__animated animate__fadeIn" style="animation-delay: 0.3s">
-                <h3><i class="fas fa-info-circle"></i> О приложении</h3>
+            <div class="about-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-info-circle"></i> О приложении</h2>
+                </div>
                 
                 <div class="about-info">
                     <div class="info-item">
-                        <span>Версия приложения:</span>
-                        <span class="info-value">2.1.4</span>
-                    </div>
-                    <div class="info-item">
-                        <span>Дата сборки:</span>
-                        <span class="info-value">15.11.2024</span>
+                        <span>Версия:</span>
+                        <span class="info-value">1.0.0</span>
                     </div>
                     <div class="info-item">
                         <span>Разработчик:</span>
-                        <span class="info-value">FLOWI VPN Team</span>
+                        <span class="info-value">ФЛОУИ VPN</span>
+                    </div>
+                    <div class="info-item">
+                        <span>Обновлено:</span>
+                        <span class="info-value">15.11.2024</span>
                     </div>
                 </div>
                 
                 <div class="about-links">
                     <a href="#" class="about-link">
-                        <i class="fas fa-file-contract"></i> Пользовательское соглашение
+                        <i class="fas fa-file-contract"></i>
+                        <span>Политика конфиденциальности</span>
                     </a>
                     <a href="#" class="about-link">
-                        <i class="fas fa-lock"></i> Политика конфиденциальности
-                    </a>
-                    <a href="#" class="about-link">
-                        <i class="fas fa-star"></i> Оценить приложение
-                    </a>
-                    <a href="#" class="about-link">
-                        <i class="fab fa-telegram"></i> Telegram канал
+                        <i class="fas fa-file-alt"></i>
+                        <span>Пользовательское соглашение</span>
                     </a>
                 </div>
-            </section>
+            </div>
 
-            <!-- Опасная зона -->
-            <section class="danger-zone animate__animated animate__fadeIn" style="animation-delay: 0.4s">
-                <h3><i class="fas fa-exclamation-triangle"></i> Опасная зона</h3>
+            <div class="danger-zone">
+                <div class="section-header">
+                    <h2><i class="fas fa-exclamation-triangle"></i> Опасная зона</h2>
+                </div>
                 
                 <div class="danger-actions">
-                    <button class="glass-btn btn-danger" onclick="clearCache()">
-                        <i class="fas fa-trash"></i> Очистить кэш
-                    </button>
-                    
-                    <button class="glass-btn btn-danger" onclick="logout()">
+                    <button class="simple-btn btn-outline">
                         <i class="fas fa-sign-out-alt"></i> Выйти из аккаунта
                     </button>
-                    
-                    <button class="glass-btn btn-danger" onclick="deleteAccount()">
-                        <i class="fas fa-user-slash"></i> Удалить аккаунт
+                    <button class="simple-btn btn-danger">
+                        <i class="fas fa-trash"></i> Удалить аккаунт
                     </button>
                 </div>
                 
                 <div class="danger-warning">
                     <i class="fas fa-exclamation-circle"></i>
-                    Эти действия нельзя отменить. Будьте осторожны.
+                    <span>Внимание: эти действия необратимы</span>
                 </div>
-            </section>
+            </div>
         </main>
 
-        <!-- Навигация -->
-        <nav class="glass-nav">
+        <nav class="simple-nav">
             <a href="index.html" class="nav-item">
                 <div class="nav-icon">
                     <i class="fas fa-server"></i>
                 </div>
+                <div class="nav-label">VPN</div>
             </a>
             <a href="purchases.html" class="nav-item">
                 <div class="nav-icon">
                     <i class="fas fa-shopping-bag"></i>
                 </div>
+                <div class="nav-label">Покупки</div>
             </a>
             <a href="profile.html" class="nav-item">
                 <div class="nav-icon">
-                    <i class="fas fa-user-circle"></i>
+                    <i class="fas fa-user"></i>
                 </div>
+                <div class="nav-label">Профиль</div>
             </a>
             <a href="settings.html" class="nav-item active">
                 <div class="nav-icon">
-                    <i class="fas fa-sliders-h"></i>
+                    <i class="fas fa-cog"></i>
                 </div>
+                <div class="nav-label">Настройки</div>
             </a>
         </nav>
     </div>
 
-    <!-- Модальное окно изменения ника -->
-    <div id="nicknameModal" class="modal-overlay">
-        <div class="modal-container glass-card">
-            <div class="modal-header">
-                <h3>Изменение никнейма</h3>
-                <button class="modal-close" onclick="closeNicknameModal()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <input type="text" id="newNickname" placeholder="Введите новый никнейм" 
-                       class="glass-input" value="PUBG_MASTER">
-                <p style="margin: 1rem 0; font-size: 0.9rem; color: var(--text-secondary);">
-                    Никнейм будет отображаться в вашем профиле и при обращении в поддержку
-                </p>
-                <button class="glass-btn btn-primary btn-block" onclick="saveNickname()">
-                    <i class="fas fa-save"></i> Сохранить изменения
-                </button>
-            </div>
-        </div>
-    </div>
-
     <script src="script.js"></script>
-    <style>
-        .glass-input {
-            width: 100%;
-            padding: 0.875rem 1rem;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            color: var(--text-primary);
-            font-family: 'Poppins', sans-serif;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
-        
-        .glass-input:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            background: rgba(255, 255, 255, 0.15);
-            box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
-        }
-    </style>
-    <script>
-        // Функции для настроек
-        function changeNickname() {
-            document.getElementById('nicknameModal').classList.add('active');
-        }
-        
-        function closeNicknameModal() {
-            document.getElementById('nicknameModal').classList.remove('active');
-        }
-        
-        function saveNickname() {
-            const newNickname = document.getElementById('newNickname').value;
-            if (newNickname.trim()) {
-                alert(`Никнейм изменен на: ${newNickname}`);
-                closeNicknameModal();
-            }
-        }
-        
-        function clearCache() {
-            if (confirm('Очистить кэш приложения? Все временные данные будут удалены.')) {
-                showNotification('Кэш успешно очищен!', 'success');
-            }
-        }
-        
-        function logout() {
-            if (confirm('Вы уверены, что хотите выйти из аккаунта?')) {
-                showNotification('Вы вышли из аккаунта', 'info');
-                setTimeout(() => {
-                    window.location.href = 'index.html';
-                }, 1500);
-            }
-        }
-        
-        function deleteAccount() {
-            if (confirm('ВНИМАНИЕ! Это удалит ваш аккаунт и все данные. Действие нельзя отменить. Продолжить?')) {
-                showNotification('Аккаунт удален. Спасибо за использование ФЛОУИ VPN!', 'error');
-                setTimeout(() => {
-                    window.location.href = 'index.html';
-                }, 2000);
-            }
-        }
-        
-        function showNotification(message, type) {
-            // Эта функция уже есть в script.js
-            console.log(message, type);
-        }
-    </script>
 </body>
 </html>
