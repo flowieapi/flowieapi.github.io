@@ -102,17 +102,21 @@ small {
     position: relative;
 }
 
-/* ===== HEADER ===== */
-.header {
-    background: var(--dark-bg);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+/* ===== GLASS HEADER ===== */
+.glass-header {
+    background: rgba(10, 10, 15, 0.95);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     position: sticky;
     top: 0;
     z-index: 1000;
     padding: 12px 16px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     height: 60px;
     display: flex;
     align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
 .header-content {
@@ -120,6 +124,7 @@ small {
     align-items: center;
     justify-content: space-between;
     width: 100%;
+    max-width: 480px;
 }
 
 /* Logo styles */
@@ -146,6 +151,7 @@ small {
 
 .logo-text {
     display: flex;
+    padding-top: 20px;
     flex-direction: column;
     gap: 2px;
     min-width: 0;
@@ -154,6 +160,7 @@ small {
 .logo-text h1 {
     font-size: 1.1rem;
     font-weight: 700;
+    padding-top: 10px;
     background: var(--primary-gradient);
     -webkit-background-clip: text;
     background-clip: text;
@@ -168,7 +175,6 @@ small {
     font-size: 0.7rem;
     color: var(--text-tertiary);
     font-weight: 400;
-    letter-spacing: 0.3px;
 }
 
 /* Avatar styles */
@@ -217,6 +223,7 @@ small {
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     margin: 0 12px;
 }
 
@@ -1234,8 +1241,8 @@ small {
     background: rgba(157, 78, 221, 0.15);
 }
 
-/* ===== NAVIGATION ===== */
-.nav {
+/* ===== GLASS NAVIGATION ===== */
+.glass-nav {
     background: rgba(10, 10, 15, 0.9);
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     position: fixed;
@@ -1267,9 +1274,42 @@ small {
     -webkit-tap-highlight-color: transparent;
 }
 
+.nav-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.05) 0%,
+        rgba(255, 255, 255, 0.02) 100%
+    );
+    z-index: -1;
+    border-radius: var(--radius-md);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
 .nav-item.active {
     color: var(--accent-1);
     background: rgba(0, 255, 136, 0.15);
+}
+
+.nav-item.active::before {
+    opacity: 1;
+}
+
+.nav-item.active::after {
+    content: '';
+    position: absolute;
+    top: -3px;
+    width: 4px;
+    height: 4px;
+    background: var(--accent-1);
+    border-radius: 50%;
+    box-shadow: 0 0 6px rgba(0, 255, 136, 0.5);
 }
 
 .nav-icon {
@@ -1280,6 +1320,10 @@ small {
     align-items: center;
     justify-content: center;
     height: 24px;
+}
+
+.nav-item.active .nav-icon {
+    transform: translateY(-1px);
 }
 
 .nav-label {
@@ -1481,7 +1525,7 @@ small {
 
 /* ===== SAFE AREAS FOR iOS ===== */
 @supports (padding: max(0px)) {
-    .nav {
+    .glass-nav {
         padding-bottom: max(8px, env(safe-area-inset-bottom));
         padding-left: max(16px, env(safe-area-inset-left));
         padding-right: max(16px, env(safe-area-inset-right));
@@ -1492,7 +1536,7 @@ small {
         padding-bottom: max(80px, calc(80px + env(safe-area-inset-bottom)));
     }
     
-    .header {
+    .glass-header {
         padding-top: max(12px, env(safe-area-inset-top));
         padding-left: max(16px, env(safe-area-inset-left));
         padding-right: max(16px, env(safe-area-inset-right));
@@ -1514,7 +1558,7 @@ small {
         padding: 0 12px 70px;
     }
     
-    .header {
+    .glass-header {
         padding: 10px 12px;
         height: 56px;
     }
@@ -1554,7 +1598,7 @@ small {
         min-height: 130px;
     }
     
-    .nav {
+    .glass-nav {
         height: 60px;
         padding: 6px 12px;
     }
@@ -1576,12 +1620,12 @@ small {
             padding-bottom: max(70px, calc(70px + env(safe-area-inset-bottom)));
         }
         
-        .nav {
+        .glass-nav {
             padding-left: max(12px, env(safe-area-inset-left));
             padding-right: max(12px, env(safe-area-inset-right));
         }
         
-        .header {
+        .glass-header {
             padding-left: max(12px, env(safe-area-inset-left));
             padding-right: max(12px, env(safe-area-inset-right));
         }
@@ -1606,7 +1650,7 @@ small {
         grid-template-columns: 1fr;
     }
     
-    .nav {
+    .glass-nav {
         padding: 6px 10px;
     }
     
