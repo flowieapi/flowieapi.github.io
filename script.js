@@ -31,6 +31,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
             // Инициализируем аватар с seed из Telegram
             initTelegramAvatar(telegramUser);
+            updateTelegramAvatarOnPageLoad();
         }
     }
 
@@ -59,6 +60,75 @@ document.addEventListener('DOMContentLoaded', async function () {
 // Инициализация Telegram Web App
 const tg = window.Telegram?.WebApp;
 
+
+function syncTelegramAvatar(user) {
+    if (!user) return;
+    
+    // Ищем все элементы с аватарками
+    const avatars = document.querySelectorAll('.user-avatar, .profile-avatar-large');
+    
+    // Пытаемся получить аватар из Telegram
+    let telegramAvatarUrl = null;
+    
+    // Если у пользователя есть фото в Telegram
+    if (user.photo_url) {
+        telegramAvatarUrl = user.photo_url;
+    }
+    
+    // Или создаем аватар на основе данных Telegram
+    if (!telegramAvatarUrl) {
+        const userId = user.id.toString();
+        telegramAvatarUrl = `https://api.dicebear.com/7.x/thumbs/svg?seed=telegram_${userId}&backgroundColor=0088cc,34b7f1,00ff88&backgroundType=gradientLinear`;
+    }
+    
+    // Обновляем все аватары
+    avatars.forEach(avatar => {
+        const img = avatar.querySelector('img');
+        if (img) {
+            img.src = telegramAvatarUrl;
+            img.onerror = function() {
+                // Fallback если изображение не загрузилось
+                this.src = `https://api.dicebear.com/7.x/thumbs/svg?seed=user_${Date.now()}&backgroundColor=00ff88,00ccff,9d4edd&backgroundType=gradientLinear`;
+            };
+        }
+        
+        // Добавляем класс для стилей Telegram
+        avatar.classList.add('telegram-synced');
+    });
+    
+    // Сохраняем аватар в localStorage для кэширования
+    try {
+        localStorage.setItem('telegram_avatar_url', telegramAvatarUrl);
+        localStorage.setItem('telegram_user_id', user.id.toString());
+    } catch (e) {
+        console.log('Не удалось сохранить аватар в localStorage');
+    }
+}
+
+// Функция для загрузки сохраненного аватара
+function loadSavedAvatar() {
+    try {
+        const savedAvatarUrl = localStorage.getItem('telegram_avatar_url');
+        const savedUserId = localStorage.getItem('telegram_user_id');
+        
+        if (savedAvatarUrl && savedUserId) {
+            const avatars = document.querySelectorAll('.user-avatar, .profile-avatar-large');
+            avatars.forEach(avatar => {
+                const img = avatar.querySelector('img');
+                if (img) {
+                    img.src = savedAvatarUrl;
+                    avatar.classList.add('telegram-synced');
+                }
+            });
+            return true;
+        }
+    } catch (e) {
+        console.log('Не удалось загрузить сохраненный аватар');
+    }
+    return false;
+}
+
+
 function initTelegramWebApp() {
     if (!tg) return;
 
@@ -83,9 +153,51 @@ function initTelegramWebApp() {
     // Подписываемся на изменения темы
     tg.onEvent('themeChanged', applyTelegramTheme);
 
+    // Синхронизируем аватар Telegram
+    const telegramUser = window.Telegram.WebApp.initDataUnsafe?.user;
+    if (telegramUser) {
+        // Пробуем загрузить сохраненный аватар
+        const loadedFromCache = loadSavedAvatar();
+        
+        // Если не загрузили из кэша или прошло много времени, обновляем
+        if (!loadedFromCache) {
+            syncTelegramAvatar(telegramUser);
+        }
+        
+        // Сохраняем данные пользователя для обновления аватара при необходимости
+        currentUser = {
+            telegramUser: telegramUser,
+            lastAvatarUpdate: Date.now()
+        };
+    }
+
     // Готовим приложение
     if (tg.ready) {
         tg.ready();
+    }
+}
+
+// Функция для обновления аватара при переключении страниц
+function updateTelegramAvatarOnPageLoad() {
+    const telegramUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+    if (telegramUser) {
+        // Проверяем, не устарел ли кэш (больше 1 часа)
+        try {
+            const lastUpdate = localStorage.getItem('telegram_avatar_last_update');
+            const now = Date.now();
+            
+            if (!lastUpdate || (now - parseInt(lastUpdate)) > 3600000) {
+                // Обновляем аватар
+                syncTelegramAvatar(telegramUser);
+                localStorage.setItem('telegram_avatar_last_update', now.toString());
+            } else {
+                // Загружаем из кэша
+                loadSavedAvatar();
+            }
+        } catch (e) {
+            // В случае ошибки просто синхронизируем
+            syncTelegramAvatar(telegramUser);
+        }
     }
 }
 
