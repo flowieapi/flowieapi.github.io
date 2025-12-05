@@ -417,31 +417,19 @@ function updatePageHeaders() {
 
 // Анимации появления элементов
 function initAppearanceAnimations() {
-    // Показываем блок проверки пинга сразу
-    const pingWidget = document.querySelector('.ping-widget');
-    if (pingWidget) {
-        setTimeout(() => {
-            pingWidget.classList.add('visible');
-        }, 300);
-    }
+    // Показываем все заголовки сразу
+    const sectionHeaders = document.querySelectorAll('.section-header');
+    sectionHeaders.forEach(header => {
+        header.style.opacity = '1';
+        header.style.transform = 'none';
+    });
     
-    // Показываем заголовок "Выберите свой VPN" после анимации пинга
-    const tariffsSection = document.querySelector('.tariffs-section');
-    const tariffsHeader = document.querySelector('.tariffs-section .section-header');
+    // Запускаем первую проверку пинга
+    setTimeout(() => {
+        simulatePingCheck();
+    }, 1000);
     
-    if (tariffsHeader) {
-        setTimeout(() => {
-            tariffsHeader.classList.add('visible');
-        }, 800);
-    }
-    
-    if (tariffsSection) {
-        setTimeout(() => {
-            tariffsSection.classList.add('visible');
-        }, 900);
-    }
-    
-    // Постепенно показываем остальные элементы
+    // Добавляем анимации при скролле
     const observerOptions = {
         threshold: 0.1,
         rootMargin: '0px 0px -50px 0px'
@@ -450,16 +438,13 @@ function initAppearanceAnimations() {
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                if (!entry.target.classList.contains('ping-widget') && 
-                    !entry.target.classList.contains('tariffs-section')) {
-                    entry.target.classList.add('animate__animated', 'animate__fadeInUp');
-                }
+                entry.target.classList.add('animate__animated', 'animate__fadeInUp');
                 observer.unobserve(entry.target);
             }
         });
     }, observerOptions);
     
-    document.querySelectorAll('.glass-card:not(.ping-widget):not(.tariff-card)').forEach(card => {
+    document.querySelectorAll('.glass-card').forEach(card => {
         observer.observe(card);
     });
 }
@@ -494,10 +479,6 @@ function initPingCheck() {
     const pingValue = document.getElementById('pingValue');
     
     if (checkPingBtn && pingValue) {
-        setTimeout(() => {
-            simulatePingCheck();
-        }, 1500);
-        
         checkPingBtn.addEventListener('click', simulatePingCheck);
     }
 }
@@ -510,6 +491,10 @@ function simulatePingCheck() {
     
     if (!checkPingBtn || !pingValue) return;
     
+    // Если уже идет проверка, выходим
+    if (checkPingBtn.classList.contains('checking')) return;
+    
+    checkPingBtn.classList.add('checking');
     checkPingBtn.disabled = true;
     checkPingBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Проверяем...';
     checkPingBtn.style.opacity = '0.7';
@@ -530,12 +515,14 @@ function simulatePingCheck() {
         
         updatePingStatus(randomPing, statusText, indicators);
         
+        checkPingBtn.classList.remove('checking');
         checkPingBtn.disabled = false;
         checkPingBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Проверить сейчас';
         checkPingBtn.style.opacity = '1';
         
         showNotification(`Пинг проверен: ${randomPing} мс`, 'success');
         
+        // Анимация успешной проверки
         pingValue.style.transform = 'scale(1.1)';
         pingValue.style.transition = 'transform 0.3s ease';
         setTimeout(() => {
@@ -808,27 +795,19 @@ function createRipple(event, button) {
     }, 600);
 }
 
-// Добавляем стили для ripple эффекта
-const rippleStyles = document.createElement('style');
-rippleStyles.textContent = `
-    .ripple {
-        position: absolute;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.3);
-        transform: scale(0);
-        animation: ripple-animation 0.6s linear;
-    }
-    
-    @keyframes ripple-animation {
-        to {
-            transform: scale(4);
-            opacity: 0;
+// Функция для демо покупок
+function loadDemoPurchases() {
+    userPurchases = [
+        {
+            planId: 'pro',
+            price: 599,
+            status: 'active',
+            purchaseDate: { seconds: Date.now() / 1000 - 30 * 24 * 60 * 60 },
+            endDate: { seconds: Date.now() / 1000 + 30 * 24 * 60 * 60 }
         }
-    }
+    ];
+    userActiveSubscription = userPurchases[0];
     
-    .glass-btn {
-        position: relative;
-        overflow: hidden;
-    }
-`;
-document.head.appendChild(rippleStyles);
+    updatePurchasesUI();
+    updateProfileSubscriptionUI();
+}
