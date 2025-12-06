@@ -324,7 +324,7 @@ small {
 
 /* Адаптация основного контента под кастомный хедер */
 .app-container {
-    padding-top: 0px !important;
+    padding-top: 60px !important;
 }
 
 .glass-header {
