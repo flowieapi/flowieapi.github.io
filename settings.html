@@ -13,7 +13,7 @@
     <div class="app-container">
         <main class="main-content">
             <div class="settings-group">
-                <h3><i class="fas fa-sliders-h"></i> Основные</h3>
+                <h3><i class="fas fa-sliders-h"></i> <span data-translate="basicSettings">Основные</span></h3>
                 <div class="settings-list">
                     <div class="setting-item">
                         <div class="setting-info">
@@ -21,24 +21,8 @@
                                 <i class="fas fa-bell"></i>
                             </div>
                             <div class="setting-text">
-                                <h4>Уведомления</h4>
-                                <p>Получать уведомления о статусе</p>
-                            </div>
-                        </div>
-                        <label class="toggle-switch">
-                            <input type="checkbox" checked>
-                            <span class="toggle-slider"></span>
-                        </label>
-                    </div>
-                    
-                    <div class="setting-item">
-                        <div class="setting-info">
-                            <div class="setting-icon">
-                                <i class="fas fa-moon"></i>
-                            </div>
-                            <div class="setting-text">
-                                <h4>Темная тема</h4>
-                                <p>Всегда использовать темную тему</p>
+                                <h4 data-translate="notifications">Уведомления</h4>
+                                <p data-translate="notificationsDesc">Получать уведомления о статусе</p>
                             </div>
                         </div>
                         <label class="toggle-switch">
@@ -53,12 +37,12 @@
                                 <i class="fas fa-language"></i>
                             </div>
                             <div class="setting-text">
-                                <h4>Язык</h4>
-                                <p>Язык интерфейса</p>
+                                <h4 data-translate="language">Язык</h4>
+                                <p data-translate="languageDesc">Язык интерфейса</p>
                             </div>
                         </div>
                         <div class="select-wrapper">
-                            <select>
+                            <select data-language-selector>
                                 <option value="ru">Русский</option>
                                 <option value="en">English</option>
                             </select>
@@ -68,58 +52,58 @@
             </div>
 
             <div class="settings-group">
-                <h3><i class="fas fa-headset"></i> Поддержка</h3>
+                <h3><i class="fas fa-headset"></i> <span data-translate="support">Поддержка</span></h3>
                 <div class="support-grid">
                     <a href="#" class="support-card">
                         <div class="support-icon">
                             <i class="fas fa-question-circle"></i>
                         </div>
-                        <h4>Помощь</h4>
-                        <p>FAQ и инструкции</p>
+                        <h4 data-translate="help">Помощь</h4>
+                        <p data-translate="helpDesc">FAQ и инструкции</p>
                     </a>
                     
                     <a href="#" class="support-card">
                         <div class="support-icon">
                             <i class="fas fa-comments"></i>
                         </div>
-                        <h4>Чат поддержки</h4>
-                        <p>Онлайн консультация</p>
+                        <h4 data-translate="supportChat">Чат поддержки</h4>
+                        <p data-translate="supportChatDesc">Онлайн консультация</p>
                     </a>
                     
                     <a href="#" class="support-card">
                         <div class="support-icon">
                             <i class="fas fa-envelope"></i>
                         </div>
-                        <h4>Email</h4>
-                        <p>Написать на почту</p>
+                        <h4 data-translate="email">Email</h4>
+                        <p data-translate="emailDesc">Написать на почту</p>
                     </a>
                     
                     <a href="#" class="support-card">
                         <div class="support-icon">
                             <i class="fab fa-telegram"></i>
                         </div>
-                        <h4>Telegram</h4>
-                        <p>Канал с новостями</p>
+                        <h4 data-translate="telegram">Telegram</h4>
+                        <p data-translate="telegramDesc">Канал с новостями</p>
                     </a>
                 </div>
             </div>
 
             <div class="about-section">
                 <div class="section-header">
-                    <h2><i class="fas fa-info-circle"></i> О приложении</h2>
+                    <h2 data-translate="aboutApp"><i class="fas fa-info-circle"></i> О приложении</h2>
                 </div>
                 
                 <div class="about-info">
                     <div class="info-item">
-                        <span>Версия:</span>
+                        <span data-translate="version">Версия:</span>
                         <span class="info-value">1.0.0</span>
                     </div>
                     <div class="info-item">
-                        <span>Разработчик:</span>
+                        <span data-translate="developer">Разработчик:</span>
                         <span class="info-value">SALVADOR</span>
                     </div>
                     <div class="info-item">
-                        <span>Обновлено:</span>
+                        <span data-translate="updated">Обновлено:</span>
                         <span class="info-value">01.01.2001</span>
                     </div>
                 </div>
@@ -127,11 +111,11 @@
                 <div class="about-links">
                     <a href="#" class="about-link">
                         <i class="fas fa-file-contract"></i>
-                        <span>Политика конфиденциальности</span>
+                        <span data-translate="privacyPolicy">Политика конфиденциальности</span>
                     </a>
                     <a href="#" class="about-link">
                         <i class="fas fa-file-alt"></i>
-                        <span>Пользовательское соглашение</span>
+                        <span data-translate="termsOfUse">Пользовательское соглашение</span>
                     </a>
                 </div>
             </div>
@@ -143,23 +127,25 @@
                 <div class="nav-icon">
                     <i class="fas fa-server"></i>
                 </div>
-                <div class="nav-label">VPN</div>
+                <div class="nav-label" data-translate="vpn">VPN</div>
             </a>
             <a href="profile.html" class="nav-item">
                 <div class="nav-icon">
                     <i class="fas fa-user"></i>
                 </div>
-                <div class="nav-label">Профиль</div>
+                <div class="nav-label" data-translate="profile">Профиль</div>
             </a>
             <a href="settings.html" class="nav-item active">
                 <div class="nav-icon">
                     <i class="fas fa-cog"></i>
                 </div>
-                <div class="nav-label">Настройки</div>
+                <div class="nav-label" data-translate="settings">Настройки</div>
             </a>
         </nav>
     </div>
 
     <script src="script.js"></script>
+    <!-- Подключаем переводы -->
+    <script src="translations.js"></script>
 </body>
 </html>

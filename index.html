@@ -23,7 +23,7 @@
             <!-- Виджет пинга -->
             <section class="ping-widget">
                 <div class="ping-header">
-                    <h2 class="section-title"><i class="fas fa-signal"></i> Проверка пинга</h2>
+                    <h2 class="section-title" data-translate="pingCheck"><i class="fas fa-signal"></i> Проверка пинга</h2>
                     <div class="ping-badge">LIVE</div>
                 </div>
                 <div class="ping-display">
@@ -32,10 +32,11 @@
                         <div class="ping-label">мс</div>
                         <div class="ping-ring"></div>
                     </div>
-                    <p class="ping-description">Текущая задержка в PUBG Mobile</p>
+                    <p class="ping-description" data-translate="currentPing">Текущая задержка в PUBG Mobile</p>
                 </div>
                 <button class="simple-btn btn-primary btn-ping" id="checkPingBtn">
-                    <i class="fas fa-sync-alt"></i> Проверить сейчас
+                    <i class="fas fa-sync-alt"></i>
+                    <span data-translate="checkNow">Проверить сейчас</span>
                 </button>
                 <div class="ping-status">
                     <div class="status-indicators">
@@ -43,15 +44,15 @@
                         <div class="status-indicator good"></div>
                         <div class="status-indicator normal"></div>
                     </div>
-                    <span class="status-text">Идеальное соединение</span>
+                    <span class="status-text" data-translate="excellentConnection">Идеальное соединение</span>
                 </div>
             </section>
 
             <!-- Тарифы -->
             <section class="tariffs-section">
                 <div class="section-header">
-                    <h2 class="section-title"><i class="fas fa-crown"></i> Выберите VPN</h2>
-                    <p class="section-subtitle">Оптимизировано для PUBG Mobile</p>
+                    <h2 class="section-title" data-translate="chooseVPN"><i class="fas fa-crown"></i> Выберите VPN</h2>
+                    <p class="section-subtitle" data-translate="optimizedForPUBG">Оптимизировано для PUBG Mobile</p>
                 </div>
 
                 <div class="tariffs-container">
@@ -62,30 +63,30 @@
                                 <i class="fas fa-bolt"></i>
                             </div>
                             <div class="tariff-info">
-                                <h3 class="tariff-title">Лайт VPN</h3>
+                                <h3 class="tariff-title" data-translate="lightVPN">Лайт VPN</h3>
                                 <div class="tariff-price">
                                     <span class="price">299</span>
-                                    <span class="currency">₽/мес</span>
+                                    <span class="currency" data-translate="perMonth">₽/мес</span>
                                 </div>
                             </div>
                         </div>
                         <div class="tariff-features">
                             <div class="feature">
                                 <i class="fas fa-check"></i>
-                                <span>Пинг: -30-50мс</span>
+                                <span data-translate="pingReduction">Пинг: -30-50мс</span>
                             </div>
                             <div class="feature">
                                 <i class="fas fa-check"></i>
-                                <span>Лучшая регистрация урона</span>
+                                <span data-translate="damageRegistration">Лучшая регистрация урона</span>
                             </div>
                             <div class="feature">
                                 <i class="fas fa-check"></i>
-                                <span>Серверы в РФ и Европе</span>
+                                <span data-translate="serversRU">Серверы в РФ и Европе</span>
                             </div>
                         </div>
                         <button class="simple-btn btn-primary buy-btn" data-plan="light" data-price="299" data-name="Лайт VPN">
                             <i class="fas fa-shopping-cart"></i>
-                            <span>Выбрать тариф</span>
+                            <span data-translate="choosePlan">Выбрать тариф</span>
                         </button>
                     </div>
 
@@ -96,34 +97,34 @@
                                 <i class="fas fa-rocket"></i>
                             </div>
                             <div class="tariff-info">
-                                <h3 class="tariff-title">Про VPN</h3>
+                                <h3 class="tariff-title" data-translate="proVPN">Про VPN</h3>
                                 <div class="tariff-price">
                                     <span class="price">599</span>
-                                    <span class="currency">₽/мес</span>
+                                    <span class="currency" data-translate="perMonth">₽/мес</span>
                                 </div>
                             </div>
                         </div>
                         <div class="tariff-features">
                             <div class="feature">
                                 <i class="fas fa-check"></i>
-                                <span>Высокая скорость</span>
+                                <span data-translate="highSpeed">Высокая скорость</span>
                             </div>
                             <div class="feature">
                                 <i class="fas fa-check"></i>
-                                <span>Больше хедшотов</span>
+                                <span data-translate="moreHeadshots">Больше хедшотов</span>
                             </div>
                             <div class="feature">
                                 <i class="fas fa-check"></i>
-                                <span>Приоритет на серверах</span>
+                                <span data-translate="serverPriority">Приоритет на серверах</span>
                             </div>
                             <div class="feature">
                                 <i class="fas fa-check"></i>
-                                <span>Безлимитный трафик</span>
+                                <span data-translate="unlimitedTraffic">Безлимитный трафик</span>
                             </div>
                         </div>
                         <button class="simple-btn btn-primary buy-btn" data-plan="pro" data-price="599" data-name="Про VPN">
                             <i class="fas fa-shopping-cart"></i>
-                            <span>Выбрать тариф</span>
+                            <span data-translate="choosePlan">Выбрать тариф</span>
                         </button>
                     </div>
 
@@ -134,51 +135,44 @@
                                 <i class="fas fa-gem"></i>
                             </div>
                             <div class="tariff-info">
-                                <h3 class="tariff-title">Флоуи VPN</h3>
+                                <h3 class="tariff-title" data-translate="flowiVPN">Флоуи VPN</h3>
                                 <div class="tariff-price">
                                     <span class="price">999</span>
-                                    <span class="currency">₽/мес</span>
+                                    <span class="currency" data-translate="perMonth">₽/мес</span>
                                 </div>
                             </div>
                         </div>
                         <div class="tariff-features">
                             <div class="feature">
                                 <i class="fas fa-check"></i>
-                                <span>Максимальный пинг</span>
+                                <span data-translate="maxPing">Максимальный пинг</span>
                             </div>
                             <div class="feature">
                                 <i class="fas fa-check"></i>
-                                <span>Эксклюзивные серверы</span>
+                                <span data-translate="exclusiveServers">Эксклюзивные серверы</span>
                             </div>
                             <div class="feature">
                                 <i class="fas fa-check"></i>
-                                <span>Приоритетная поддержка</span>
+                                <span data-translate="prioritySupport">Приоритетная поддержка</span>
                             </div>
                             <div class="feature">
                                 <i class="fas fa-check"></i>
-                                <span>Персональный менеджер</span>
+                                <span data-translate="personalManager">Персональный менеджер</span>
                             </div>
                         </div>
                         <button class="simple-btn btn-primary buy-btn" data-plan="flowi" data-price="999" data-name="Флоуи VPN">
                             <i class="fas fa-shopping-cart"></i>
-                            <span>Выбрать тариф</span>
+                            <span data-translate="choosePlan">Выбрать тариф</span>
                         </button>
                     </div>
-                </div>
-                
-                <!-- Кнопка для тестирования оплаты -->
-                <div style="margin-top: 30px; text-align: center;">
-                    <button class="simple-btn btn-secondary" id="testPaymentBtn">
-                        <i class="fas fa-credit-card"></i> Протестировать оплату
-                    </button>
                 </div>
             </section>
 
             <!-- Преимущества -->
             <section class="benefits-section">
                 <div class="section-header">
-                    <h2 class="section-title"><i class="fas fa-star"></i> Преимущества</h2>
-                    <p class="section-subtitle">Почему выбирают нас</p>
+                    <h2 class="section-title" data-translate="advantages"><i class="fas fa-star"></i> Преимущества</h2>
+                    <p class="section-subtitle" data-translate="whyChooseUs">Почему выбирают нас</p>
                 </div>
 
                 <div class="benefits-grid">
@@ -186,32 +180,32 @@
                         <div class="benefit-icon">
                             <i class="fas fa-shield-alt"></i>
                         </div>
-                        <h4>Защита от DDoS</h4>
-                        <p>Полная защита от атак</p>
+                        <h4 data-translate="ddosProtection">Защита от DDoS</h4>
+                        <p data-translate="ddosDesc">Полная защита от атак</p>
                     </div>
 
                     <div class="benefit-card">
                         <div class="benefit-icon">
                             <i class="fas fa-tachometer-alt"></i>
                         </div>
-                        <h4>Стабильность 99.9%</h4>
-                        <p>Минимальные потери пакетов</p>
+                        <h4 data-translate="stability">Стабильность 99.9%</h4>
+                        <p data-translate="stabilityDesc">Минимальные потери пакетов</p>
                     </div>
 
                     <div class="benefit-card">
                         <div class="benefit-icon">
                             <i class="fas fa-headset"></i>
                         </div>
-                        <h4>Поддержка 24/7</h4>
-                        <p>Круглосуточная помощь</p>
+                        <h4 data-translate="support247">Поддержка 24/7</h4>
+                        <p data-translate="supportDesc">Круглосуточная помощь</p>
                     </div>
 
                     <div class="benefit-card">
                         <div class="benefit-icon">
                             <i class="fas fa-gamepad"></i>
                         </div>
-                        <h4>Оптимизация</h4>
-                        <p>Настроено для PUBG Mobile</p>
+                        <h4 data-translate="optimization">Оптимизация</h4>
+                        <p data-translate="optimizationDesc">Настроено для PUBG Mobile</p>
                     </div>
                 </div>
             </section>
@@ -223,19 +217,19 @@
                 <div class="nav-icon">
                     <i class="fas fa-server"></i>
                 </div>
-                <div class="nav-label">VPN</div>
+                <div class="nav-label" data-translate="vpn">VPN</div>
             </a>
             <a href="profile.html" class="nav-item">
                 <div class="nav-icon">
                     <i class="fas fa-user"></i>
                 </div>
-                <div class="nav-label">Профиль</div>
+                <div class="nav-label" data-translate="profile">Профиль</div>
             </a>
             <a href="settings.html" class="nav-item">
                 <div class="nav-icon">
                     <i class="fas fa-cog"></i>
                 </div>
-                <div class="nav-label">Настройки</div>
+                <div class="nav-label" data-translate="settings">Настройки</div>
             </a>
         </nav>
     </div>
@@ -244,14 +238,14 @@
     <div id="buyModal" class="modal-overlay">
         <div class="modal-container">
             <div class="modal-header">
-                <h3 id="modalTitle">Оформление заказа</h3>
+                <h3 id="modalTitle" data-translate="checkout">Оформление заказа</h3>
                 <button class="modal-close">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="selected-plan" id="selectedPlanInfo"></div>
 
                 <div class="payment-section">
-                    <h4><i class="fas fa-credit-card"></i> Способ оплаты</h4>
+                    <h4><i class="fas fa-credit-card"></i> <span data-translate="paymentMethod">Способ оплаты</span></h4>
                     <div class="payment-methods">
                         <label class="payment-method active">
                             <input type="radio" name="payment" checked>
@@ -264,7 +258,7 @@
                 </div>
 
                 <button class="simple-btn btn-primary" id="confirmBuyBtn">
-                    <i class="fas fa-lock"></i> Перейти к оплате
+                    <i class="fas fa-lock"></i> <span data-translate="proceedToPayment">Перейти к оплате</span>
                 </button>
             </div>
         </div>
@@ -274,17 +268,17 @@
     <div id="paymentModal" class="modal-overlay">
         <div class="modal-container payment-modal">
             <div class="modal-header">
-                <h3><i class="fas fa-credit-card"></i> Оплата тарифа</h3>
+                <h3><i class="fas fa-credit-card"></i> <span data-translate="payment">Оплата тарифа</span></h3>
                 <button class="modal-close" onclick="closePaymentModal()">&times;</button>
             </div>
             <div class="modal-body">
                 <div id="paymentPlanInfo" class="payment-plan-info"></div>
                 
                 <div class="payment-section">
-                    <h4><i class="fas fa-wallet"></i> Реквизиты для перевода</h4>
+                    <h4><i class="fas fa-wallet"></i> <span data-translate="paymentDetails">Реквизиты для перевода</span></h4>
                     <div class="payment-details-card">
                         <div class="payment-detail-item">
-                            <div class="payment-detail-label">Номер карты:</div>
+                            <div class="payment-detail-label" data-translate="cardNumber">Номер карты:</div>
                             <div class="payment-detail-value">2200 7013 3827 9851</div>
                             <button class="copy-btn-small" data-text="2200 7013 3827 9851">
                                 <i class="fas fa-copy"></i>
@@ -292,7 +286,7 @@
                         </div>
                         
                         <div class="payment-detail-item">
-                            <div class="payment-detail-label">Получатель:</div>
+                            <div class="payment-detail-label" data-translate="recipient">Получатель:</div>
                             <div class="payment-detail-value">Исбагиев И.</div>
                             <button class="copy-btn-small" data-text="Исбагиев Имам Ахмедович">
                                 <i class="fas fa-copy"></i>
@@ -300,7 +294,7 @@
                         </div>
                         
                         <div class="payment-detail-item">
-                            <div class="payment-detail-label">Банк:</div>
+                            <div class="payment-detail-label" data-translate="bank">Банк:</div>
                             <div class="payment-detail-value">Т-Банк</div>
                             <button class="copy-btn-small" data-text="Т-Банк">
                                 <i class="fas fa-copy"></i>
@@ -309,36 +303,36 @@
                     </div>
                     
                     <div class="payment-instructions">
-                        <h5><i class="fas fa-list-ol"></i> Инструкция:</h5>
+                        <h5><i class="fas fa-list-ol"></i> <span data-translate="instructions">Инструкция:</span></h5>
                         <ol>
-                            <li>Скопируйте реквизиты карты</li>
-                            <li>Совершите перевод на указанную карту</li>
-                            <li>Сохраните скриншот или фото чека</li>
-                            <li>Загрузите чек в форму ниже</li>
+                            <li data-translate="copyDetails">Скопируйте реквизиты карты</li>
+                            <li data-translate="makeTransfer">Совершите перевод на указанную карту</li>
+                            <li data-translate="saveScreenshot">Сохраните скриншот или фото чека</li>
+                            <li data-translate="uploadReceiptForm">Загрузите чек в форму ниже</li>
                         </ol>
                     </div>
                 </div>
                 
                 <div class="payment-section">
-                    <h4><i class="fas fa-receipt"></i> Загрузите чек об оплате</h4>
+                    <h4><i class="fas fa-receipt"></i> <span data-translate="uploadReceipt">Загрузите чек об оплате</span></h4>
                     
                     <form id="receiptUploadForm">
                         <div class="form-group">
-                            <label for="payerName">Ваше имя (необязательно)</label>
-                            <input type="text" id="payerName" placeholder="Введите ваше имя" class="form-input">
+                            <label for="payerName" data-translate="yourNameOptional">Ваше имя (необязательно)</label>
+                            <input type="text" id="payerName" placeholder="" class="form-input" data-translate-placeholder="yourNameOptional">
                         </div>
                         
                         <div class="form-group">
-                            <label for="payerEmail">Email для связи (необязательно)</label>
-                            <input type="email" id="payerEmail" placeholder="Введите ваш email" class="form-input">
+                            <label for="payerEmail" data-translate="emailOptional">Email для связи (необязательно)</label>
+                            <input type="email" id="payerEmail" placeholder="" class="form-input" data-translate-placeholder="emailOptional">
                         </div>
                         
                         <div class="file-upload-area" id="fileUploadArea">
                             <input type="file" id="receiptFile" accept="image/*" class="file-input-hidden">
                             <div class="upload-placeholder">
                                 <i class="fas fa-cloud-upload-alt"></i>
-                                <p>Нажмите для загрузки чека</p>
-                                <small>JPG, PNG, GIF (макс. 5MB)</small>
+                                <p data-translate="uploadClick">Нажмите для загрузки чека</p>
+                                <small data-translate="uploadFormats">JPG, PNG, GIF (макс. 5MB)</small>
                             </div>
                             <div id="filePreview" class="file-preview" style="display: none;">
                                 <img id="previewImage" src="" alt="Предпросмотр">
@@ -349,7 +343,7 @@
                         </div>
                         
                         <button type="submit" class="simple-btn btn-primary btn-block" id="submitReceiptBtn" disabled>
-                            <i class="fas fa-paper-plane"></i> Отправить чек на проверку
+                            <i class="fas fa-paper-plane"></i> <span data-translate="submitReceipt">Отправить чек на проверку</span>
                         </button>
                     </form>
                 </div>
@@ -363,7 +357,7 @@
     <div id="confirmationModal" class="confirmation-modal">
         <div class="modal-container">
             <div class="confirmation-header">
-                <h3><i class="fas fa-shield-check"></i> Оплата успешно завершена!</h3>
+                <h3><i class="fas fa-shield-check"></i> <span data-translate="paymentSuccess">Оплата успешно завершена!</span></h3>
             </div>
             
             <div class="confirmation-body">
@@ -372,63 +366,63 @@
                 </div>
                 
                 <div class="success-message">
-                    <h4>Ваш VPN активирован!</h4>
-                    <p>Перед продолжением, пожалуйста, сохраните файл конфигурации и ознакомьтесь с инструкцией по установке.</p>
+                    <h4 data-translate="vpnActivated">Ваш VPN активирован!</h4>
+                    <p data-translate="vpnActivated">Перед продолжением, пожалуйста, сохраните файл конфигурации и ознакомьтесь с инструкцией по установке.</p>
                 </div>
                 
                 <!-- Секция с ссылкой для скачивания -->
                 <div class="download-section">
-                    <h5><i class="fas fa-download"></i> Скачайте файл конфигурации</h5>
+                    <h5><i class="fas fa-download"></i> <span data-translate="downloadConfig">Скачайте файл конфигурации</span></h5>
                     
                     <a href="#" class="download-link" id="configDownloadLink" download="flowi-vpn.conf">
                         <i class="fas fa-file-code"></i>
                         <div class="download-info">
                             <h6>flowi-vpn.conf</h6>
-                            <small>WireGuard конфигурационный файл (2.5 KB)</small>
+                            <small data-translate="wireguardConfig">WireGuard конфигурационный файл (2.5 KB)</small>
                         </div>
                     </a>
                     
                     <div class="instruction-note">
                         <p style="font-size: 0.85rem; color: var(--warning-color); margin: 0;">
-                            <i class="fas fa-exclamation-triangle"></i> Сохраните этот файл в безопасном месте!
+                            <i class="fas fa-exclamation-triangle"></i> <span data-translate="saveFileWarning">Сохраните этот файл в безопасном месте!</span>
                         </p>
                     </div>
                 </div>
                 
                 <!-- Секция с инструкцией -->
                 <div class="instructions-section">
-                    <h5><i class="fas fa-graduation-cap"></i> Инструкция по установке в WireGuard</h5>
+                    <h5><i class="fas fa-graduation-cap"></i> <span data-translate="installInstructions">Инструкция по установке в WireGuard</span></h5>
                     
                     <ul class="instructions-list">
                         <li class="instruction-step">
                             <div class="step-number">1</div>
                             <div class="step-content">
-                                <strong>Установите WireGuard</strong>
-                                <p>Скачайте и установите WireGuard с официального сайта или из магазина приложений вашего устройства</p>
+                                <strong data-translate="installWireGuard">Установите WireGuard</strong>
+                                <p data-translate="installWireGuardDesc">Скачайте и установите WireGuard с официального сайта или из магазина приложений вашего устройства</p>
                             </div>
                         </li>
                         
                         <li class="instruction-step">
                             <div class="step-number">2</div>
                             <div class="step-content">
-                                <strong>Импортируйте конфигурацию</strong>
-                                <p>В приложении WireGuard нажмите "Добавить туннель" → "Импорт из файла" и выберите скачанный файл flowi-vpn.conf</p>
+                                <strong data-translate="importConfig">Импортируйте конфигурацию</strong>
+                                <p data-translate="importConfigDesc">В приложении WireGuard нажмите "Добавить туннель" → "Импорт из файла" и выберите скачанный файл flowi-vpn.conf</p>
                             </div>
                         </li>
                         
                         <li class="instruction-step">
                             <div class="step-number">3</div>
                             <div class="step-content">
-                                <strong>Активируйте подключение</strong>
-                                <p>Нажмите на переключатель рядом с вашим туннелем в списке для активации VPN подключения</p>
+                                <strong data-translate="activateConnection">Активируйте подключение</strong>
+                                <p data-translate="activateConnectionDesc">Нажмите на переключатель рядом с вашим туннелем в списке для активации VPN подключения</p>
                             </div>
                         </li>
                         
                         <li class="instruction-step">
                             <div class="step-number">4</div>
                             <div class="step-content">
-                                <strong>Проверьте подключение</strong>
-                                <p>Убедитесь, что статус подключения изменился на "Active" и появился значок VPN в статус-баре</p>
+                                <strong data-translate="checkConnection">Проверьте подключение</strong>
+                                <p data-translate="checkConnectionDesc">Убедитесь, что статус подключения изменился на "Active" и появился значок VPN в статус-баре</p>
                             </div>
                         </li>
                     </ul>
@@ -443,14 +437,14 @@
                         </span>
                     </div>
                     <div class="checkbox-label">
-                        <h6>Я сохранил файл конфигурации и прочитал инструкцию</h6>
-                        <p>Я понимаю, что без файла конфигурации я не смогу подключиться к VPN</p>
+                        <h6 data-translate="confirmation">Я сохранил файл конфигурации и прочитал инструкцию</h6>
+                        <p data-translate="confirmationDesc">Я понимаю, что без файла конфигурации я не смогу подключиться к VPN</p>
                     </div>
                 </label>
                 
                 <!-- Кнопка подтверждения -->
                 <button class="simple-btn confirm-button" id="finalConfirmBtn" disabled>
-                    <i class="fas fa-unlock"></i> Продолжить
+                    <i class="fas fa-unlock"></i> <span data-translate="continue">Продолжить</span>
                 </button>
             </div>
         </div>
@@ -458,6 +452,8 @@
 
     <script src="script.js"></script>
     <script src="payment-system.js"></script>
+    <!-- Подключаем переводы -->
+    <script src="translations.js"></script>
 </body>
 
 </html>

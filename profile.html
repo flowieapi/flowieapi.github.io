@@ -19,28 +19,13 @@
                 <div class="profile-info">
                     <h2>Демо Пользователь</h2>
                     <p class="profile-username">@demo_user</p>
-                    <span class="profile-level">Уровень 3</span>
-                </div>
-            </div>
-
-            <div class="profile-stats">
-                <div class="profile-stat">
-                    <div class="stat-number">0</div>
-                    <div class="stat-text">Дней с VPN</div>
-                </div>
-                <div class="profile-stat">
-                    <div class="stat-number">0</div>
-                    <div class="stat-text">Игр сыграно</div>
-                </div>
-                <div class="profile-stat">
-                    <div class="stat-number">0%</div>
-                    <div class="stat-text">Точность</div>
+                    <span class="profile-level">Уровень 1</span>
                 </div>
             </div>
 
             <div class="section-header">
-                <h2><i class="fas fa-trophy"></i> Достижения</h2>
-                <p class="section-subtitle">Ваши игровые достижения</p>
+                <h2 data-translate="achievements"><i class="fas fa-trophy"></i> Достижения</h2>
+                <p class="section-subtitle" data-translate="gameAchievements">Ваши игровые достижения</p>
             </div>
 
             <div class="achievements-grid">
@@ -48,29 +33,29 @@
                     <div class="achievement-icon">
                         <i class="fas fa-shield-alt"></i>
                     </div>
-                    <h4>Первая защита</h4>
-                    <p>Использовать VPN в 10 играх</p>
+                    <h4 data-translate="firstProtection">Первая защита</h4>
+                    <p data-translate="firstProtectionDesc">Использовать VPN в 10 играх</p>
                 </div>
                 <div class="achievement-card unlocked">
                     <div class="achievement-icon">
                         <i class="fas fa-bolt"></i>
                     </div>
-                    <h4>Скорость</h4>
-                    <p>Пинг ниже 20мс</p>
+                    <h4 data-translate="speed">Скорость</h4>
+                    <p data-translate="speedDesc">Пинг ниже 20мс</p>
                 </div>
                 <div class="achievement-card">
                     <div class="achievement-icon">
                         <i class="fas fa-crown"></i>
                     </div>
-                    <h4>Ветеран</h4>
-                    <p>100 дней с VPN</p>
+                    <h4 data-translate="veteran">Ветеран</h4>
+                    <p data-translate="veteranDesc">100 дней с VPN</p>
                 </div>
                 <div class="achievement-card">
                     <div class="achievement-icon">
                         <i class="fas fa-star"></i>
                     </div>
-                    <h4>Профессионал</h4>
-                    <p>500 игр с VPN</p>
+                    <h4 data-translate="professional">Профессионал</h4>
+                    <p data-translate="professionalDesc">500 игр с VPN</p>
                 </div>
             </div>
         </main>
@@ -80,23 +65,25 @@
                 <div class="nav-icon">
                     <i class="fas fa-server"></i>
                 </div>
-                <div class="nav-label">VPN</div>
+                <div class="nav-label" data-translate="vpn">VPN</div>
             </a>
             <a href="profile.html" class="nav-item active">
                 <div class="nav-icon">
                     <i class="fas fa-user"></i>
                 </div>
-                <div class="nav-label">Профиль</div>
+                <div class="nav-label" data-translate="profile">Профиль</div>
             </a>
             <a href="settings.html" class="nav-item">
                 <div class="nav-icon">
                     <i class="fas fa-cog"></i>
                 </div>
-                <div class="nav-label">Настройки</div>
+                <div class="nav-label" data-translate="settings">Настройки</div>
             </a>
         </nav>
     </div>
 
     <script src="script.js"></script>
+    <!-- Подключаем переводы -->
+    <script src="translations.js"></script>
 </body>
 </html>

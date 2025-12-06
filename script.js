@@ -10,6 +10,8 @@ const firebaseConfig = {
     measurementId: "G-P8YJD4HCJ2"
 };
 
+import './translations.js';
+
 // Инициализация приложения
 let app, db, auth;
 let currentUser = null;
@@ -90,40 +92,40 @@ document.head.insertAdjacentHTML('beforeend', fullscreenStyles);
 // Функция для принудительного полноэкранного режима
 async function forceTelegramFullscreen() {
     if (!window.Telegram?.WebApp) return false;
-    
+
     const tg = window.Telegram.WebApp;
-    
+
     try {
         console.log('Применяем принудительный полноэкранный режим...');
-        
+
         // 1. Добавляем класс для стилей
         document.documentElement.classList.add('telegram-webapp');
         document.body.classList.add('telegram-webapp');
-        
+
         // 2. Расширяем на весь экран (основной метод)
         if (typeof tg.expand === 'function') {
             tg.expand();
             console.log('tg.expand() вызван');
         }
-        
+
         // 3. Скрываем ВСЕ элементы интерфейса Telegram
         if (typeof tg.setHeaderColor === 'function') {
             tg.setHeaderColor('secondary_bg_color');
         }
-        
+
         if (tg.BackButton && typeof tg.BackButton.hide === 'function') {
             tg.BackButton.hide();
         }
-        
+
         if (tg.MainButton && typeof tg.MainButton.hide === 'function') {
             tg.MainButton.hide();
         }
-        
+
         // 4. Отключаем свайпы
         if (typeof tg.enableVerticalSwipes === 'function') {
             tg.enableVerticalSwipes(false);
         }
-        
+
         // 5. Скрываем кнопку настроек (три точки)
         if (typeof tg.showSettings === 'function') {
             try {
@@ -132,12 +134,12 @@ async function forceTelegramFullscreen() {
                 console.log('showSettings не поддерживается');
             }
         }
-        
+
         // 6. Устанавливаем подтверждение закрытия
         if (typeof tg.enableClosingConfirmation === 'function') {
             tg.enableClosingConfirmation();
         }
-        
+
         // 7. Фиксируем размеры
         setTimeout(() => {
             if (tg.viewportHeight) {
@@ -146,7 +148,7 @@ async function forceTelegramFullscreen() {
                 document.documentElement.style.height = `${tg.viewportHeight}px`;
             }
         }, 100);
-        
+
         // 8. Для iOS дополнительные настройки
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
         if (isIOS) {
@@ -158,30 +160,30 @@ async function forceTelegramFullscreen() {
                 document.head.appendChild(meta);
             }
             meta.content = 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover';
-            
+
             // Устанавливаем CSS переменные для safe areas
             document.documentElement.style.setProperty('--safe-area-top', 'env(safe-area-inset-top, 0px)');
             document.documentElement.style.setProperty('--safe-area-bottom', 'env(safe-area-inset-bottom, 0px)');
-            
+
             // Фиксируем высоту
             setTimeout(() => {
                 const height = window.innerHeight;
                 document.body.style.height = `${height}px`;
                 document.documentElement.style.height = `${height}px`;
             }, 200);
-            
+
             // Предотвращаем bounce эффект
-            document.body.addEventListener('touchmove', function(e) {
+            document.body.addEventListener('touchmove', function (e) {
                 const isScrollable = e.target.closest('.scrollable-content');
                 if (!isScrollable) {
                     e.preventDefault();
                 }
             }, { passive: false });
         }
-        
+
         console.log('Принудительный полноэкранный режим применен');
         return true;
-        
+
     } catch (error) {
         console.error('Ошибка при применении полноэкранного режима:', error);
         return false;
@@ -191,43 +193,43 @@ async function forceTelegramFullscreen() {
 // Функция для многократных попыток применения fullscreen
 function applyFullscreenWithRetry() {
     if (!window.Telegram?.WebApp) return;
-    
+
     const tg = window.Telegram.WebApp;
     let attempts = 0;
     const maxAttempts = 10;
-    
+
     const tryFullscreen = () => {
         attempts++;
-        
+
         try {
             // Основные методы
             if (typeof tg.expand === 'function') {
                 tg.expand();
             }
-            
+
             if (typeof tg.requestFullscreen === 'function') {
                 tg.requestFullscreen();
             }
-            
+
             // Скрываем элементы интерфейса
             if (tg.BackButton) tg.BackButton.hide();
             if (tg.MainButton) tg.MainButton.hide();
-            
+
             // Устанавливаем цвет хедера
             tg.setHeaderColor('secondary_bg_color');
-            
+
             console.log(`Попытка fullscreen #${attempts} выполнена`);
-            
+
         } catch (error) {
             console.warn(`Попытка fullscreen #${attempts} не удалась:`, error);
         }
-        
+
         // Продолжаем попытки
         if (attempts < maxAttempts) {
             setTimeout(tryFullscreen, 300 + (attempts * 100));
         }
     };
-    
+
     // Начинаем попытки
     tryFullscreen();
 }
@@ -238,44 +240,44 @@ function initTelegramWebApp() {
         console.log('Telegram WebApp не найден');
         return;
     }
-    
+
     tg = window.Telegram.WebApp;
     console.log('Telegram WebApp инициализирован:', tg);
-    
+
     // 1. Сразу применяем принудительный fullscreen
     forceTelegramFullscreen();
-    
+
     // 2. Запускаем повторные попытки
     applyFullscreenWithRetry();
-    
+
     // 3. Настраиваем тему
     applyTelegramTheme();
-    
+
     // 4. Подписываемся на изменения темы
     tg.onEvent('themeChanged', applyTelegramTheme);
-    
+
     // 5. Получаем данные пользователя
     telegramUser = tg.initDataUnsafe?.user;
     if (telegramUser) {
         updateUserProfileFromTelegram(telegramUser);
         initTelegramAvatar(telegramUser);
-        
+
         currentUser = {
             telegramUser: telegramUser,
             lastAvatarUpdate: Date.now()
         };
     }
-    
+
     // 6. Кастомизируем UI
     setTimeout(() => {
         customizeTelegramUI();
     }, 200);
-    
+
     // 7. Готовим приложение
     if (tg.ready) {
         tg.ready();
     }
-    
+
     // 8. Обработчик изменения размера окна
     let lastHeight = 0;
     const handleResize = () => {
@@ -286,19 +288,19 @@ function initTelegramWebApp() {
             lastHeight = currentHeight;
         }
     };
-    
+
     window.addEventListener('resize', handleResize);
     window.addEventListener('orientationchange', () => {
         setTimeout(() => {
             forceTelegramFullscreen();
         }, 300);
     });
-    
+
     // 9. Обработчик скролла для предотвращения появления нативного UI
     let lastScrollTop = 0;
     window.addEventListener('scroll', () => {
         const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        
+
         // Если начался сильный скролл вверх - возможно показывается нативный UI
         if (scrollTop < lastScrollTop - 100) {
             console.log('Обнаружен скролл вверх - проверяем fullscreen');
@@ -306,7 +308,7 @@ function initTelegramWebApp() {
                 if (tg.expand) tg.expand();
             }, 50);
         }
-        
+
         lastScrollTop = scrollTop;
     });
 }
@@ -314,42 +316,42 @@ function initTelegramWebApp() {
 // Функция для проверки, запущено ли из чата
 function isLaunchedFromChat() {
     if (!window.Telegram?.WebApp) return false;
-    
+
     const tg = window.Telegram.WebApp;
     const initData = tg.initData || '';
     const startParam = tg.initDataUnsafe?.start_param;
-    
+
     // Если есть start_param, значит запуск из inline режима
     // Если start_param нет, но есть данные пользователя - возможно из чата
     const hasUserData = !!tg.initDataUnsafe?.user;
     const hasStartParam = !!startParam;
-    
+
     return hasUserData && !hasStartParam;
 }
 
 // Обновленная функция customizeTelegramUI
 function customizeTelegramUI() {
     if (!window.Telegram?.WebApp) return;
-    
+
     const tg = window.Telegram.WebApp;
-    
+
     // Применяем fullscreen еще раз для надежности
     if (tg.expand) {
         tg.expand();
     }
-    
+
     // Скрываем стандартные кнопки
     tg.BackButton?.hide();
     tg.MainButton?.hide();
-    
+
     // Устанавливаем цвет хедера под фон
     tg.setHeaderColor('secondary_bg_color');
-    
+
     // Отключаем свайпы
     if (tg.enableVerticalSwipes) {
         tg.enableVerticalSwipes(false);
     }
-    
+
     // Скрываем кнопку настроек если доступно
     if (tg.showSettings) {
         try {
@@ -358,16 +360,16 @@ function customizeTelegramUI() {
             console.log('showSettings не доступен');
         }
     }
-    
+
     // Добавляем кастомный хедер
     addCustomHeader();
-    
+
     // Добавляем плавающую кнопку закрытия
     addFloatingCloseButton();
-    
+
     // Добавляем меню действий
     addCustomActionButtons();
-    
+
     console.log('Telegram UI кастомизирован');
 }
 
@@ -375,7 +377,7 @@ function customizeTelegramUI() {
 function addCustomActionButtons() {
     const existingMenu = document.querySelector('.custom-action-menu');
     if (existingMenu) return;
-    
+
     const actionMenuHTML = `
         <div class="custom-action-menu" id="actionMenu">
             <button class="action-menu-item" onclick="showSettings()">
@@ -396,7 +398,7 @@ function addCustomActionButtons() {
             </button>
         </div>
     `;
-    
+
     document.body.insertAdjacentHTML('beforeend', actionMenuHTML);
 }
 
@@ -462,7 +464,7 @@ function showAbout() {
             </div>
         </div>
     `;
-    
+
     document.body.insertAdjacentHTML('beforeend', modalHTML);
     toggleMoreMenu();
 }
@@ -478,9 +480,9 @@ function closeModal(modalId) {
 // Применение темы Telegram
 function applyTelegramTheme() {
     if (!window.Telegram?.WebApp) return;
-    
+
     const themeParams = window.Telegram.WebApp.themeParams;
-    
+
     if (themeParams) {
         document.documentElement.style.setProperty('--text-primary', themeParams.text_color || '#ffffff');
         document.documentElement.style.setProperty('--text-secondary', themeParams.hint_color || '#a0a0c0');
@@ -493,19 +495,19 @@ function applyTelegramTheme() {
 // Остальные функции (без изменений)
 function syncTelegramAvatar(user) {
     if (!user) return;
-    
+
     const avatars = document.querySelectorAll('.user-avatar, .profile-avatar-large');
     let telegramAvatarUrl = null;
-    
+
     if (user.photo_url) {
         telegramAvatarUrl = user.photo_url;
     }
-    
+
     if (!telegramAvatarUrl) {
         const userId = user.id.toString();
         telegramAvatarUrl = `https://api.dicebear.com/7.x/thumbs/svg?seed=telegram_${userId}&backgroundColor=0088cc,34b7f1,00ff88&backgroundType=gradientLinear`;
     }
-    
+
     avatars.forEach(avatar => {
         const img = avatar.querySelector('img');
         if (img) {
@@ -516,7 +518,7 @@ function syncTelegramAvatar(user) {
         }
         avatar.classList.add('telegram-synced');
     });
-    
+
     try {
         localStorage.setItem('telegram_avatar_url', telegramAvatarUrl);
         localStorage.setItem('telegram_user_id', user.id.toString());
@@ -529,7 +531,7 @@ function loadSavedAvatar() {
     try {
         const savedAvatarUrl = localStorage.getItem('telegram_avatar_url');
         const savedUserId = localStorage.getItem('telegram_user_id');
-        
+
         if (savedAvatarUrl && savedUserId) {
             const avatars = document.querySelectorAll('.user-avatar, .profile-avatar-large');
             avatars.forEach(avatar => {
@@ -549,11 +551,11 @@ function loadSavedAvatar() {
 
 function updateUserProfileFromTelegram(user) {
     if (!user) return;
-    
+
     console.log('Данные пользователя Telegram:', user);
     updateAllAvatars(user);
     updateProfileInfo(user);
-    
+
     currentUser = {
         id: user.id.toString(),
         username: user.username || `user_${user.id}`,
@@ -567,10 +569,10 @@ function updateUserProfileFromTelegram(user) {
 
 function initTelegramAvatar(user) {
     if (!user) return;
-    
+
     const userId = user.id.toString();
     const avatarUrl = `https://api.dicebear.com/7.x/thumbs/svg?seed=${userId}&backgroundColor=00ff88,00ccff,9d4edd&backgroundType=gradientLinear`;
-    
+
     const avatars = document.querySelectorAll('.user-avatar img, .profile-avatar-large img');
     avatars.forEach(avatar => {
         avatar.src = avatarUrl;
@@ -582,9 +584,9 @@ function initTelegramAvatar(user) {
 
 function updateAllAvatars(user) {
     if (!user) return;
-    
+
     const avatarElements = document.querySelectorAll('.user-avatar, .profile-avatar-large');
-    
+
     avatarElements.forEach(avatarElement => {
         const img = avatarElement.querySelector('img');
         if (img) {
@@ -596,7 +598,7 @@ function updateAllAvatars(user) {
 
 function updateProfileInfo(user) {
     if (!window.location.pathname.includes('profile.html')) return;
-    
+
     const profileName = document.querySelector('.profile-info h2');
     if (profileName) {
         let fullName = '';
@@ -605,7 +607,7 @@ function updateProfileInfo(user) {
         if (!fullName.trim()) fullName = 'Пользователь Telegram';
         profileName.textContent = fullName.trim();
     }
-    
+
     const profileUsername = document.querySelector('.profile-username');
     if (profileUsername) {
         if (user.username) {
@@ -614,7 +616,7 @@ function updateProfileInfo(user) {
             profileUsername.textContent = 'Без username';
         }
     }
-    
+
     const profileLevel = document.querySelector('.profile-level');
     if (profileLevel && user.is_premium) {
         profileLevel.innerHTML = '<i class="fas fa-crown"></i> Telegram Premium';
@@ -622,7 +624,7 @@ function updateProfileInfo(user) {
         profileLevel.style.color = '#ffd700';
         profileLevel.style.borderColor = 'rgba(255, 215, 0, 0.3)';
     }
-    
+
     updateTelegramStats(user);
 }
 
@@ -631,7 +633,7 @@ function updateTelegramStats(user) {
     if (stats.length >= 3) {
         const userId = user.id.toString();
         const seed = parseInt(userId.slice(-4)) || 1234;
-        
+
         stats[0].textContent = Math.floor((seed % 335) + 30);
         stats[1].textContent = Math.floor(((seed * 13) % 1900) + 100);
         stats[2].textContent = Math.floor(((seed * 7) % 25) + 70) + '%';
@@ -640,7 +642,7 @@ function updateTelegramStats(user) {
 
 function updatePageHeaders() {
     if (!currentUser) return;
-    
+
     const logoText = document.querySelector('.logo-text h1');
     if (logoText) {
         logoText.style.width = '100%';
@@ -648,7 +650,7 @@ function updatePageHeaders() {
         logoText.style.overflow = 'hidden';
         logoText.style.textOverflow = 'ellipsis';
     }
-    
+
     const headerTitles = document.querySelectorAll('.header-title h1');
     headerTitles.forEach(title => {
         title.style.width = '100%';
@@ -656,7 +658,7 @@ function updatePageHeaders() {
         title.style.overflow = 'hidden';
         title.style.textOverflow = 'ellipsis';
     });
-    
+
     if (telegramUser) {
         const headerAvatar = document.querySelector('.header-content .user-avatar img');
         if (headerAvatar) {
@@ -669,75 +671,79 @@ function updatePageHeaders() {
 // Основная инициализация при загрузке DOM
 document.addEventListener('DOMContentLoaded', async function () {
     console.log('DOM загружен, инициализируем приложение...');
-    
+
     // Шаг 1: Инициализация Telegram WebApp с приоритетом на fullscreen
     if (window.Telegram?.WebApp) {
         console.log('Telegram WebApp обнаружен, применяем fullscreen...');
-        
+
         // Сразу добавляем CSS классы
         document.documentElement.classList.add('telegram-webapp');
         document.body.classList.add('telegram-webapp');
-        
+
+        if (window.languageManager) {
+            window.languageManager.init();
+        }
+
         // Инициализируем с задержкой для надежности
         setTimeout(() => {
             initTelegramWebApp();
         }, 100);
-        
+
         // Множественные попытки для разных случаев запуска
         setTimeout(() => {
             if (window.Telegram?.WebApp?.expand) {
                 window.Telegram.WebApp.expand();
             }
         }, 200);
-        
+
         setTimeout(() => {
             if (window.Telegram?.WebApp?.expand) {
                 window.Telegram.WebApp.expand();
             }
         }, 500);
-        
+
         setTimeout(() => {
             if (window.Telegram?.WebApp?.expand) {
                 window.Telegram.WebApp.expand();
             }
         }, 1000);
-        
+
         // Получаем данные пользователя
         telegramUser = window.Telegram.WebApp.initDataUnsafe?.user;
-        
+
         if (telegramUser) {
             updateUserProfileFromTelegram(telegramUser);
             initTelegramAvatar(telegramUser);
         }
     }
-    
+
     // Шаг 2: Инициализация Firebase (раскомментируйте когда добавите свои ключи)
     // initFirebase();
-    
+
     // Шаг 3: Загрузка демо данных пока нет Firebase
     loadDemoData();
-    
+
     // Шаг 4: Запуск анимаций появления
     initAppearanceAnimations();
-    
+
     // Шаг 5: Остальная инициализация
     initPingCheck();
     initBuyButtons();
     initModals();
-    
+
     // Шаг 6: Оптимизации для мобильных
     optimizeMobileExperience();
-    
+
     // Шаг 7: Обновление UI с данными пользователя
     updateUserInterface();
-    
+
     // Шаг 8: Финальная проверка fullscreen через 2 секунды
     setTimeout(() => {
         if (window.Telegram?.WebApp?.expand) {
             window.Telegram.WebApp.expand();
         }
     }, 2000);
-    
+
     console.log('Инициализация завершена');
 });
 
@@ -761,14 +767,14 @@ async function setupTelegramAuth() {
         console.log('Пользователь Telegram не найден');
         return;
     }
-    
+
     const telegramUser = tg.initDataUnsafe.user;
     const userId = telegramUser.id.toString();
-    
+
     try {
         const userRef = db.collection('users').doc(userId);
         const userDoc = await userRef.get();
-        
+
         if (!userDoc.exists) {
             await userRef.set({
                 telegramId: userId,
@@ -795,9 +801,9 @@ async function setupTelegramAuth() {
                 lastSeen: new Date().toISOString()
             });
         }
-        
+
         await loadUserData(userId);
-        
+
     } catch (error) {
         console.error('Ошибка авторизации:', error);
         loadDemoData();
@@ -824,23 +830,23 @@ async function loadUserPurchases(userId) {
             .where('userId', '==', userId)
             .orderBy('purchaseDate', 'desc')
             .get();
-        
+
         userPurchases = [];
         userActiveSubscription = null;
-        
+
         purchasesSnapshot.forEach(doc => {
             const purchase = { id: doc.id, ...doc.data() };
             userPurchases.push(purchase);
-            
+
             if (purchase.status === 'active' && (!userActiveSubscription ||
                 new Date(purchase.endDate) > new Date(userActiveSubscription.endDate))) {
                 userActiveSubscription = purchase;
             }
         });
-        
+
         updatePurchasesUI();
         updateProfileSubscriptionUI();
-        
+
     } catch (error) {
         console.error('Ошибка загрузки покупок:', error);
         loadDemoPurchases();
@@ -850,11 +856,11 @@ async function loadUserPurchases(userId) {
 function updatePurchasesUI() {
     const purchasesList = document.querySelector('.purchases-list');
     const summaryStats = document.querySelector('.purchases-summary');
-    
+
     if (!purchasesList || !summaryStats) return;
-    
+
     purchasesList.innerHTML = '';
-    
+
     if (userPurchases.length === 0) {
         purchasesList.innerHTML = `
             <div class="simple-card" style="text-align: center; padding: 2rem;">
@@ -863,21 +869,21 @@ function updatePurchasesUI() {
                 <p style="color: var(--text-secondary);">Выберите подходящий тариф VPN</p>
             </div>
         `;
-        
+
         summaryStats.style.display = 'none';
         return;
     }
-    
+
     summaryStats.style.display = 'block';
-    
+
     let totalSpent = 0;
     let activePurchases = 0;
     let totalDays = 0;
-    
+
     userPurchases.forEach(purchase => {
         if (purchase.price) totalSpent += purchase.price;
         if (purchase.status === 'active') activePurchases++;
-        
+
         if (purchase.purchaseDate && purchase.endDate) {
             const start = new Date(purchase.purchaseDate.seconds * 1000);
             const end = new Date(purchase.endDate.seconds * 1000);
@@ -885,20 +891,20 @@ function updatePurchasesUI() {
             totalDays += days;
         }
     });
-    
+
     const summaryItems = summaryStats.querySelectorAll('.summary-item');
     if (summaryItems[0]) summaryItems[0].querySelector('.summary-value').textContent = `${totalSpent} ₽`;
     if (summaryItems[1]) summaryItems[1].querySelector('.summary-value').textContent = `~${Math.floor(totalDays * 0.5)} часов`;
     if (summaryItems[2]) summaryItems[2].querySelector('.summary-value').textContent = '85 мс';
     if (summaryItems[3]) summaryItems[3].querySelector('.summary-value').textContent = '18 мс';
-    
+
     userPurchases.forEach(purchase => {
         const plan = getPlanInfo(purchase.planId);
         const purchaseDate = purchase.purchaseDate ?
             formatDate(purchase.purchaseDate.seconds * 1000) : 'N/A';
         const endDate = purchase.endDate ?
             formatDate(purchase.endDate.seconds * 1000) : 'N/A';
-        
+
         const purchaseItem = document.createElement('div');
         purchaseItem.className = `purchase-item ${purchase.status === 'active' ? 'active' : ''}`;
         purchaseItem.innerHTML = `
@@ -916,7 +922,7 @@ function updatePurchasesUI() {
                 ${purchase.price || plan.price} ₽
             </div>
         `;
-        
+
         purchasesList.appendChild(purchaseItem);
     });
 }
@@ -924,27 +930,27 @@ function updatePurchasesUI() {
 function updateProfileSubscriptionUI() {
     const subscriptionCard = document.querySelector('.subscription-card');
     const subscriptionPlaceholder = document.querySelector('.no-subscription-card');
-    
+
     if (!subscriptionCard) return;
-    
+
     if (userActiveSubscription) {
         const plan = getPlanInfo(userActiveSubscription.planId);
         const endDate = userActiveSubscription.endDate ?
             formatDate(userActiveSubscription.endDate.seconds * 1000) : 'N/A';
-        
+
         subscriptionCard.classList.remove('hidden');
         if (subscriptionPlaceholder) subscriptionPlaceholder.style.display = 'none';
-        
+
         subscriptionCard.querySelector('.subscription-details h4').textContent = plan.name;
         subscriptionCard.querySelector('.subscription-details p:nth-child(2)').textContent = `Активна до: ${endDate}`;
         subscriptionCard.querySelector('.subscription-icon i').className = `fas fa-${plan.icon}`;
         subscriptionCard.querySelector('.subscription-icon').style.color = plan.color;
-        
+
         const renewBtn = subscriptionCard.querySelector('.simple-btn');
         if (renewBtn) renewBtn.style.display = 'none';
     } else {
         subscriptionCard.classList.add('hidden');
-        
+
         if (!subscriptionPlaceholder) {
             const placeholder = document.createElement('div');
             placeholder.className = 'simple-card no-subscription-card';
@@ -958,7 +964,7 @@ function updateProfileSubscriptionUI() {
                     <i class="fas fa-shopping-cart"></i> Выбрать тариф
                 </a>
             `;
-            
+
             subscriptionCard.parentNode.insertBefore(placeholder, subscriptionCard.nextSibling);
         } else {
             subscriptionPlaceholder.style.display = 'block';
@@ -987,7 +993,7 @@ function getPlanInfo(planId) {
             icon: 'gem'
         }
     };
-    
+
     return plans[planId] || plans.light;
 }
 
@@ -1002,7 +1008,7 @@ function formatDate(timestamp) {
 
 function loadDemoData() {
     console.log('Загружаем демо данные');
-    
+
     if (telegramUser) {
         currentUser = {
             id: telegramUser.id.toString(),
@@ -1034,28 +1040,28 @@ function loadDemoData() {
             }
         };
     }
-    
+
     loadDemoPurchases();
     updateUserInterface();
 }
 
 function updateUserInterface() {
     if (!currentUser) return;
-    
+
     updateProfileStats();
     updatePageHeaders();
 }
 
 function updateProfileStats() {
     if (!currentUser?.stats) return;
-    
+
     const statNumbers = document.querySelectorAll('.stat-number');
     if (statNumbers.length >= 3) {
         statNumbers[0].textContent = currentUser.stats.totalDays || 0;
         statNumbers[1].textContent = currentUser.stats.gamesPlayed || 0;
         statNumbers[2].textContent = currentUser.stats.accuracy ? `${currentUser.stats.accuracy}%` : '0%';
     }
-    
+
     const statDetails = document.querySelector('.stats-details');
     if (statDetails) {
         const detailItems = statDetails.querySelectorAll('.stat-detail');
@@ -1075,16 +1081,16 @@ function initAppearanceAnimations() {
         header.style.opacity = '1';
         header.style.transform = 'none';
     });
-    
+
     setTimeout(() => {
         simulatePingCheck();
     }, 1000);
-    
+
     const observerOptions = {
         threshold: 0.1,
         rootMargin: '0px 0px -50px 0px'
     };
-    
+
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -1093,7 +1099,7 @@ function initAppearanceAnimations() {
             }
         });
     }, observerOptions);
-    
+
     document.querySelectorAll('.simple-card, .tariff-card, .benefit-card').forEach(card => {
         observer.observe(card);
     });
@@ -1102,7 +1108,7 @@ function initAppearanceAnimations() {
 function initPingCheck() {
     const checkPingBtn = document.getElementById('checkPingBtn');
     const pingValue = document.getElementById('pingValue');
-    
+
     if (checkPingBtn && pingValue) {
         checkPingBtn.addEventListener('click', simulatePingCheck);
     }
@@ -1113,61 +1119,61 @@ function simulatePingCheck() {
     const pingValue = document.getElementById('pingValue');
     const statusText = document.querySelector('.status-text');
     const indicators = document.querySelectorAll('.status-indicator');
-    
+
     if (!checkPingBtn || !pingValue) return;
-    
+
     if (checkPingBtn.classList.contains('checking')) return;
-    
+
     checkPingBtn.classList.add('checking');
     checkPingBtn.disabled = true;
-    
+
     const originalHeight = checkPingBtn.offsetHeight;
     checkPingBtn.style.height = originalHeight + 'px';
     checkPingBtn.style.minHeight = originalHeight + 'px';
-    
+
     const originalContent = checkPingBtn.innerHTML;
     checkPingBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Проверяем...</span>';
-    
+
     const spinner = checkPingBtn.querySelector('.fa-spinner');
     const textSpan = checkPingBtn.querySelector('span');
-    
+
     if (spinner) {
         spinner.style.fontSize = '1em';
         spinner.style.lineHeight = '1';
     }
-    
+
     if (textSpan) {
         textSpan.style.fontSize = '0.95rem';
         textSpan.style.lineHeight = '1';
     }
-    
+
     checkPingBtn.style.opacity = '0.7';
-    
+
     let dots = 0;
     const interval = setInterval(() => {
         pingValue.textContent = '•'.repeat(dots + 1);
         dots = (dots + 1) % 3;
     }, 200);
-    
+
     const delay = 2000 + Math.random() * 1000;
-    
+
     setTimeout(() => {
         clearInterval(interval);
-        
+
         const randomPing = Math.floor(Math.random() * (28 - 8 + 1)) + 8;
         pingValue.textContent = randomPing;
-        
+
         updatePingStatus(randomPing, statusText, indicators);
-        
+
         checkPingBtn.classList.remove('checking');
         checkPingBtn.disabled = false;
         checkPingBtn.innerHTML = '<i class="fas fa-sync-alt"></i><span>Проверить сейчас</span>';
-        
+
         checkPingBtn.style.height = '';
         checkPingBtn.style.minHeight = '';
-        
+
         checkPingBtn.style.opacity = '1';
-        
+
         pingValue.style.transform = 'scale(1.1)';
         pingValue.style.transition = 'transform 0.3s ease';
         setTimeout(() => {
@@ -1178,12 +1184,12 @@ function simulatePingCheck() {
 
 function updatePingStatus(ping, statusText, indicators) {
     if (!statusText || !indicators) return;
-    
+
     indicators.forEach(indicator => {
         indicator.classList.remove('active');
         indicator.style.height = '20px';
     });
-    
+
     if (ping <= 15) {
         statusText.textContent = 'Идеальное соединение!';
         statusText.style.color = 'var(--success-color)';
@@ -1204,7 +1210,7 @@ function updatePingStatus(ping, statusText, indicators) {
 
 function initBuyButtons() {
     const buyButtons = document.querySelectorAll('.buy-btn');
-    
+
     buyButtons.forEach(button => {
         button.addEventListener('click', function (e) {
             e.preventDefault();
@@ -1212,7 +1218,7 @@ function initBuyButtons() {
             const planId = this.getAttribute('data-plan');
             const price = this.getAttribute('data-price');
             const name = this.getAttribute('data-name');
-            
+
             if (planId && window.paymentSystem) {
                 // Используем новую систему оплаты
                 window.paymentSystem.openPaymentModal({
@@ -1232,13 +1238,13 @@ function initModals() {
     const modal = document.querySelector('.modal-overlay');
     const closeBtn = document.querySelector('.modal-close');
     const confirmBtn = document.getElementById('confirmBuyBtn');
-    
+
     if (closeBtn) {
         closeBtn.addEventListener('click', () => {
             modal.classList.remove('active');
         });
     }
-    
+
     if (modal) {
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
@@ -1246,11 +1252,11 @@ function initModals() {
             }
         });
     }
-    
+
     if (confirmBtn) {
         confirmBtn.addEventListener('click', processPayment);
     }
-    
+
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             document.querySelectorAll('.modal-overlay').forEach(modal => {
@@ -1265,11 +1271,11 @@ function openBuyModal(planId) {
     const modal = document.querySelector('.modal-overlay');
     const modalTitle = document.getElementById('modalTitle');
     const selectedPlanInfo = document.getElementById('selectedPlanInfo');
-    
+
     if (!plan || !modal) return;
-    
+
     modalTitle.textContent = `Оформление: ${plan.name}`;
-    
+
     selectedPlanInfo.innerHTML = `
         <div class="selected-plan-info">
             <div style="border-left: 4px solid ${plan.color}; padding-left: 1rem; margin-bottom: 1.5rem;">
@@ -1285,28 +1291,28 @@ function openBuyModal(planId) {
             </div>
         </div>
     `;
-    
+
     modal.classList.add('active');
 }
 
 async function processPayment() {
     const modal = document.querySelector('.modal-overlay');
     const confirmBtn = document.getElementById('confirmBuyBtn');
-    
+
     if (!confirmBtn) return;
-    
+
     confirmBtn.disabled = true;
     confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Обработка...';
-    
+
     setTimeout(async () => {
         try {
             const planName = document.querySelector('#modalTitle')?.textContent?.replace('Оформление: ', '') || 'Про VPN';
             const planId = getPlanIdByName(planName);
-            
+
             modal.classList.remove('active');
             confirmBtn.disabled = false;
             confirmBtn.innerHTML = '<i class="fas fa-lock"></i> Перейти к оплате';
-            
+
             setTimeout(() => {
                 const modalBody = document.querySelector('.modal-body');
                 if (modalBody) {
@@ -1328,7 +1334,7 @@ async function processPayment() {
                     `;
                 }
             }, 100);
-            
+
         } catch (error) {
             console.error('Ошибка оплаты:', error);
             confirmBtn.disabled = false;
@@ -1354,16 +1360,16 @@ function optimizeMobileExperience() {
             }, 100);
         }
     });
-    
+
     function setVH() {
         let vh = window.innerHeight * 0.01;
         document.documentElement.style.setProperty('--vh', `${vh}px`);
     }
-    
+
     setVH();
     window.addEventListener('resize', setVH);
     window.addEventListener('orientationchange', setVH);
-    
+
     document.addEventListener('click', function (e) {
         if (e.target.closest('.simple-btn')) {
             createRipple(e, e.target.closest('.simple-btn'));
@@ -1375,20 +1381,20 @@ function createRipple(event, button) {
     const circle = document.createElement("span");
     const diameter = Math.max(button.clientWidth, button.clientHeight);
     const radius = diameter / 2;
-    
+
     circle.style.width = circle.style.height = `${diameter}px`;
     circle.style.left = `${event.clientX - button.getBoundingClientRect().left - radius}px`;
     circle.style.top = `${event.clientY - button.getBoundingClientRect().top - radius}px`;
     circle.classList.add("ripple");
-    
+
     const ripple = button.getElementsByClassName("ripple")[0];
-    
+
     if (ripple) {
         ripple.remove();
     }
-    
+
     button.appendChild(circle);
-    
+
     setTimeout(() => {
         circle.remove();
     }, 600);
@@ -1405,7 +1411,7 @@ function loadDemoPurchases() {
         }
     ];
     userActiveSubscription = userPurchases[0];
-    
+
     updatePurchasesUI();
     updateProfileSubscriptionUI();
 }
