@@ -2048,7 +2048,7 @@ body:not(.telegram-webapp) .settings-menu {
 /* Стили для модального окна оплаты */
 .payment-modal {
     max-width: 500px;
-    max-height: 90vh;
+    max-height: auto;
     overflow-y: auto;
 }
 
