@@ -102,25 +102,6 @@ small {
     position: relative;
 }
 
-/* ===== КАСТОМНЫЙ TELEGRAM UI ===== */
-.custom-telegram-header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 56px;
-    background: rgba(19, 19, 26, 0.85);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 16px;
-    z-index: 2000;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-}
-
 .custom-header-left,
 .custom-header-right {
     flex: 0 0 auto;
@@ -392,10 +373,6 @@ small {
 
 /* Адаптация для мобильных */
 @media (max-width: 380px) {
-    .custom-telegram-header {
-        height: 52px;
-        padding: 0 12px;
-    }
     
     .custom-back-btn,
     .custom-minimize-btn,
@@ -437,9 +414,6 @@ small {
 }
 
 @media (max-width: 320px) {
-    .custom-telegram-header {
-        padding: 0 10px;
-    }
     
     .custom-minimize-btn {
         margin-right: 6px;
@@ -456,13 +430,10 @@ small {
 }
 
 /* Показываем кнопки только в Telegram Mini App */
-.telegram-webapp .custom-telegram-header,
 .telegram-webapp .floating-close-btn,
 .telegram-webapp .custom-action-menu {
     display: flex !important;
 }
-
-body:not(.telegram-webapp) .custom-telegram-header,
 body:not(.telegram-webapp) .floating-close-btn,
 body:not(.telegram-webapp) .custom-action-menu,
 body:not(.telegram-webapp) .settings-menu {

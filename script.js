@@ -83,40 +83,6 @@ function customizeTelegramUI() {
     addCustomActionButtons();
 }
 
-// Создаем кастомный хедер
-function addCustomHeader() {
-    const existingHeader = document.querySelector('.custom-telegram-header');
-    if (existingHeader) return;
-    
-    const headerHTML = `
-        <div class="custom-telegram-header">
-            <div class="custom-header-left">
-                <button class="custom-back-btn" onclick="window.history.back()">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-            </div>
-            <div class="custom-header-center">
-                <div class="app-logo">
-                    <div class="logo-icon-small">
-                        <i class="fas fa-shield-alt"></i>
-                    </div>
-                    <span class="app-name">ФЛОУИ VPN</span>
-                </div>
-            </div>
-            <div class="custom-header-right">
-                <button class="custom-minimize-btn" onclick="minimizeApp()">
-                    <i class="fas fa-window-minimize"></i>
-                </button>
-                <button class="custom-more-btn" onclick="toggleMoreMenu()">
-                    <i class="fas fa-ellipsis-v"></i>
-                </button>
-            </div>
-        </div>
-    `;
-    
-    document.body.insertAdjacentHTML('afterbegin', headerHTML);
-}
-
 // Добавляем плавающую кнопку закрытия
 function addFloatingCloseButton() {
     const existingCloseBtn = document.querySelector('.floating-close-btn');
