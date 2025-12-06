@@ -1550,13 +1550,13 @@ body:not(.telegram-webapp) .settings-menu {
     right: 0;
     display: flex;
     justify-content: space-around;
-    padding: 16px 16px 20px; /* Увеличили верхний padding */
+    padding: 16px 16px 20px;
     z-index: 1000;
-    height: 80px; /* Увеличили высоту */
+    height: 80px;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(20px);
     box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.3);
-    min-height: 80px; /* Добавили минимальную высоту */
+    min-height: 80px;
 }
 
 .nav-item {
@@ -1601,27 +1601,27 @@ body:not(.telegram-webapp) .settings-menu {
 }
 
 .nav-icon {
-    font-size: 1.1rem; /* Увеличили иконки */
-    margin-bottom: 0px; /* Увеличили отступ */
+    font-size: 1.1rem;
+    margin-bottom: 0px;
     transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 26px; /* Увеличили высоту */
+    height: 26px;
 }
 
 .nav-label {
-    font-size: 0.6rem; /* Чуть увеличили текст */
+    font-size: 0.6rem;
     font-weight: 500;
     letter-spacing: 0.2px;
     line-height: 1.1;
-    min-height: 14px; /* Минимальная высота для текста */
+    min-height: 14px;
 }
 
 /* Для мобильных устройств - адаптация */
 @media (max-width: 380px) {
     .glass-nav {
-        height: 76px; /* Чуть меньше на маленьких экранах */
+        height: 76px;
         min-height: 76px;
         padding: 14px 12px 18px;
     }
@@ -2380,3 +2380,464 @@ body:not(.telegram-webapp) .settings-menu {
         font-size: 1rem;
     }
 }
+
+/* ===== BLUR EFFECT FOR MODAL BACKGROUND ===== */
+body.modal-open {
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+}
+
+body.modal-open .app-container {
+    filter: blur(5px);
+    transition: filter 0.3s ease;
+}
+
+body.modal-open .glass-nav {
+    filter: blur(5px);
+    transition: filter 0.3s ease;
+}
+
+/* Modern browsers with backdrop-filter support */
+@supports ((-webkit-backdrop-filter: blur(10px)) or (backdrop-filter: blur(10px))) {
+    .modal-overlay {
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(10px);
+    }
+    
+    body.modal-open .app-container,
+    body.modal-open .glass-nav {
+        filter: blur(0);
+    }
+}
+
+/* Для iOS Safari и старых браузеров */
+.modal-overlay.active {
+    background: rgba(0, 0, 0, 0.85);
+}
+
+/* Убираем размытие с самого модального окна */
+.modal-overlay .modal-container {
+    filter: none !important;
+}
+
+/* Анимация для фона при открытии модального окна */
+@keyframes modalBackgroundBlur {
+    from {
+        backdrop-filter: blur(0);
+        -webkit-backdrop-filter: blur(0);
+        background: rgba(0, 0, 0, 0);
+    }
+    to {
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        background: rgba(0, 0, 0, 0.7);
+    }
+}
+
+.modal-overlay.active {
+    animation: modalBackgroundBlur 0.3s ease;
+}
+
+/* ===== СТИЛИ ДЛЯ МОДАЛЬНОГО ОКНА ПОДТВЕРЖДЕНИЯ ПОСЛЕ ОПЛАТЫ ===== */
+.confirmation-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(10, 10, 15, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 4000;
+    padding: 20px;
+    animation: fadeIn 0.3s ease;
+}
+
+.confirmation-modal.show {
+    display: flex;
+}
+
+.confirmation-modal .modal-container {
+    background: var(--card-bg);
+    border: 2px solid var(--accent-1);
+    border-radius: var(--radius-xl);
+    width: 100%;
+    max-width: 480px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 255, 136, 0.2);
+    animation: slideUp 0.4s ease;
+}
+
+.confirmation-header {
+    background: linear-gradient(135deg, rgba(0, 255, 136, 0.1) 0%, rgba(0, 204, 255, 0.1) 100%);
+    padding: 20px;
+    text-align: center;
+    border-bottom: 2px solid var(--accent-1);
+    position: relative;
+}
+
+.confirmation-header h3 {
+    color: var(--accent-1);
+    font-size: 1.4rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.confirmation-body {
+    padding: 25px;
+}
+
+.success-icon {
+    width: 80px;
+    height: 80px;
+    background: var(--primary-gradient);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 2.5rem;
+    color: white;
+    animation: bounceIn 0.6s ease;
+}
+
+.success-message {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.success-message h4 {
+    color: var(--accent-1);
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+}
+
+.success-message p {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+/* Блок со ссылкой для скачивания */
+.download-section {
+    background: rgba(0, 255, 136, 0.08);
+    border: 1px solid rgba(0, 255, 136, 0.2);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    margin: 25px 0;
+}
+
+.download-section h5 {
+    color: var(--accent-1);
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.download-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: all 0.2s ease;
+    margin-bottom: 15px;
+}
+
+.download-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--accent-1);
+    transform: translateY(-2px);
+}
+
+.download-link i {
+    color: var(--accent-1);
+    font-size: 1.5rem;
+}
+
+.download-info h6 {
+    font-size: 1rem;
+    margin-bottom: 4px;
+}
+
+.download-info small {
+    color: var(--text-tertiary);
+    font-size: 0.8rem;
+}
+
+/* Блок с инструкцией */
+.instructions-section {
+    background: rgba(0, 204, 255, 0.08);
+    border: 1px solid rgba(0, 204, 255, 0.2);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    margin-bottom: 25px;
+}
+
+.instructions-section h5 {
+    color: var(--accent-2);
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.instructions-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.instruction-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.instruction-step:last-child {
+    border-bottom: none;
+}
+
+.step-number {
+    width: 28px;
+    height: 28px;
+    background: var(--primary-gradient);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: white;
+    flex-shrink: 0;
+}
+
+.step-content {
+    flex: 1;
+}
+
+.step-content strong {
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.step-content p {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    line-height: 1.4;
+    margin: 0;
+}
+
+/* Чекбокс подтверждения */
+.confirmation-checkbox {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-md);
+    margin-bottom: 25px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.confirmation-checkbox:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--accent-1);
+}
+
+.checkbox-container {
+    position: relative;
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.checkbox-container input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.checkbox-custom {
+    width: 22px;
+    height: 22px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.checkbox-container input:checked + .checkbox-custom {
+    background: var(--accent-1);
+    border-color: var(--accent-1);
+}
+
+.checkbox-custom i {
+    color: white;
+    font-size: 0.8rem;
+    opacity: 0;
+    transform: scale(0);
+    transition: all 0.2s ease;
+}
+
+.checkbox-container input:checked + .checkbox-custom i {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.checkbox-label {
+    flex: 1;
+}
+
+.checkbox-label h6 {
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    margin-bottom: 4px;
+}
+
+.checkbox-label p {
+    color: var(--text-tertiary);
+    font-size: 0.85rem;
+    line-height: 1.4;
+    margin: 0;
+}
+
+/* Кнопка подтверждения */
+.confirm-button {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--text-tertiary);
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.confirm-button.enabled {
+    background: var(--primary-gradient);
+    border-color: var(--accent-1);
+    color: white;
+    cursor: pointer;
+    opacity: 1;
+}
+
+.confirm-button.enabled:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 255, 136, 0.3);
+}
+
+/* Блокировка кликов на другие элементы */
+body.confirmation-active .glass-nav,
+body.confirmation-active .modal-overlay:not(.confirmation-modal),
+body.confirmation-active .notification {
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+/* Анимации */
+@keyframes bounceIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.3);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+    70% {
+        transform: scale(0.9);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(0, 255, 136, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(0, 255, 136, 0);
+    }
+}
+
+.pulse-animation {
+    animation: pulse 2s infinite;
+}
+
+/* Анимация тряски */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-5px); }
+    40%, 80% { transform: translateX(5px); }
+}
+
+.shake {
+    animation: shake 0.3s ease-in-out;
+}
+
+/* Адаптивность */
+@media (max-width: 480px) {
+    .confirmation-modal .modal-container {
+        max-height: 95vh;
+    }
+    
+    .confirmation-body {
+        padding: 20px 15px;
+    }
+    
+    .success-icon {
+        width: 70px;
+        height: 70px;
+        font-size: 2rem;
+    }
+    
+    .confirmation-header h3 {
+        font-size: 1.2rem;
+    }
+    
+    .success-message h4 {
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-height: 700px) {
+    .confirmation-modal .modal-container {
+        max-height: 95vh;
+    }
+    
+    .confirmation-body {
+        padding: 20px;
+    }
+}
+
+/* ===== КОНЕЦ СТИЛЕЙ ДЛЯ МОДАЛЬНОГО ОКНА ===== */

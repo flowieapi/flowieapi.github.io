@@ -285,24 +285,24 @@
                     <div class="payment-details-card">
                         <div class="payment-detail-item">
                             <div class="payment-detail-label">Номер карты:</div>
-                            <div class="payment-detail-value">5536 9138 2377 1845</div>
-                            <button class="copy-btn-small" data-text="5536 9138 2377 1845">
+                            <div class="payment-detail-value">2200 7013 3827 9851</div>
+                            <button class="copy-btn-small" data-text="2200 7013 3827 9851">
                                 <i class="fas fa-copy"></i>
                             </button>
                         </div>
                         
                         <div class="payment-detail-item">
                             <div class="payment-detail-label">Получатель:</div>
-                            <div class="payment-detail-value">Иванов Иван Иванович</div>
-                            <button class="copy-btn-small" data-text="Иванов Иван Иванович">
+                            <div class="payment-detail-value">Исбагиев И.</div>
+                            <button class="copy-btn-small" data-text="Исбагиев Имам Ахмедович">
                                 <i class="fas fa-copy"></i>
                             </button>
                         </div>
                         
                         <div class="payment-detail-item">
                             <div class="payment-detail-label">Банк:</div>
-                            <div class="payment-detail-value">Тинькофф Банк</div>
-                            <button class="copy-btn-small" data-text="Тинькофф Банк">
+                            <div class="payment-detail-value">Т-Банк</div>
+                            <button class="copy-btn-small" data-text="Т-Банк">
                                 <i class="fas fa-copy"></i>
                             </button>
                         </div>
@@ -355,6 +355,103 @@
                 </div>
                 
                 <div id="paymentStatus" class="payment-status" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно подтверждения после оплаты -->
+    <div id="confirmationModal" class="confirmation-modal">
+        <div class="modal-container">
+            <div class="confirmation-header">
+                <h3><i class="fas fa-shield-check"></i> Оплата успешно завершена!</h3>
+            </div>
+            
+            <div class="confirmation-body">
+                <div class="success-icon pulse-animation">
+                    <i class="fas fa-check"></i>
+                </div>
+                
+                <div class="success-message">
+                    <h4>Ваш VPN активирован!</h4>
+                    <p>Перед продолжением, пожалуйста, сохраните файл конфигурации и ознакомьтесь с инструкцией по установке.</p>
+                </div>
+                
+                <!-- Секция с ссылкой для скачивания -->
+                <div class="download-section">
+                    <h5><i class="fas fa-download"></i> Скачайте файл конфигурации</h5>
+                    
+                    <a href="#" class="download-link" id="configDownloadLink" download="flowi-vpn.conf">
+                        <i class="fas fa-file-code"></i>
+                        <div class="download-info">
+                            <h6>flowi-vpn.conf</h6>
+                            <small>WireGuard конфигурационный файл (2.5 KB)</small>
+                        </div>
+                    </a>
+                    
+                    <div class="instruction-note">
+                        <p style="font-size: 0.85rem; color: var(--warning-color); margin: 0;">
+                            <i class="fas fa-exclamation-triangle"></i> Сохраните этот файл в безопасном месте!
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Секция с инструкцией -->
+                <div class="instructions-section">
+                    <h5><i class="fas fa-graduation-cap"></i> Инструкция по установке в WireGuard</h5>
+                    
+                    <ul class="instructions-list">
+                        <li class="instruction-step">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <strong>Установите WireGuard</strong>
+                                <p>Скачайте и установите WireGuard с официального сайта или из магазина приложений вашего устройства</p>
+                            </div>
+                        </li>
+                        
+                        <li class="instruction-step">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <strong>Импортируйте конфигурацию</strong>
+                                <p>В приложении WireGuard нажмите "Добавить туннель" → "Импорт из файла" и выберите скачанный файл flowi-vpn.conf</p>
+                            </div>
+                        </li>
+                        
+                        <li class="instruction-step">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <strong>Активируйте подключение</strong>
+                                <p>Нажмите на переключатель рядом с вашим туннелем в списке для активации VPN подключения</p>
+                            </div>
+                        </li>
+                        
+                        <li class="instruction-step">
+                            <div class="step-number">4</div>
+                            <div class="step-content">
+                                <strong>Проверьте подключение</strong>
+                                <p>Убедитесь, что статус подключения изменился на "Active" и появился значок VPN в статус-баре</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Чекбокс подтверждения -->
+                <label class="confirmation-checkbox">
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="confirmationCheckbox">
+                        <span class="checkbox-custom">
+                            <i class="fas fa-check"></i>
+                        </span>
+                    </div>
+                    <div class="checkbox-label">
+                        <h6>Я сохранил файл конфигурации и прочитал инструкцию</h6>
+                        <p>Я понимаю, что без файла конфигурации я не смогу подключиться к VPN</p>
+                    </div>
+                </label>
+                
+                <!-- Кнопка подтверждения -->
+                <button class="simple-btn confirm-button" id="finalConfirmBtn" disabled>
+                    <i class="fas fa-unlock"></i> Продолжить
+                </button>
             </div>
         </div>
     </div>
