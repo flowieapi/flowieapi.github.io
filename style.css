@@ -1701,6 +1701,48 @@ body:not(.telegram-webapp) .settings-menu {
     animation: slideUp 0.2s ease;
 }
 
+/* ===== MOBILE MODAL HEIGHT FIX ===== */
+@media (max-width: 768px) {
+    .modal-container {
+        max-height: 70vh !important; /* Уменьшаем высоту на мобильных */
+    }
+}
+
+@media (max-height: 700px) {
+    .modal-container {
+        max-height: 65vh !important; /* Для устройств с низким экраном */
+    }
+}
+
+@media (max-width: 480px) and (max-height: 800px) {
+    .modal-container {
+        max-height: 60vh !important; /* Для маленьких телефонов */
+    }
+}
+
+/* Для очень высоких телефонов (iPhone 12/13/14 Pro Max и подобные) */
+@media (min-height: 900px) and (max-width: 480px) {
+    .modal-container {
+        max-height: 50vh !important; /* Еще меньше для высоких экранов */
+    }
+}
+
+.modal-container {
+    overflow-y: auto;
+    max-height: 80vh;
+    scrollbar-width: thin;
+}
+
+/* Кастомный скроллбар для модального окна */
+.modal-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modal-container::-webkit-scrollbar-thumb {
+    background: rgba(0, 255, 136, 0.3);
+    border-radius: 3px;
+}
+
 @keyframes slideUp {
     from { 
         opacity: 0;
