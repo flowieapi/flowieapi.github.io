@@ -17,14 +17,6 @@ let userPurchases = [];
 let userActiveSubscription = null;
 let telegramUser = null;
 
-// Настройки UI
-let uiSettings = {
-    closeButtonColor: '#ff4757',
-    showCloseButton: true,
-    showMinimizeButton: true,
-    showMenuButton: true
-};
-
 document.addEventListener('DOMContentLoaded', async function () {
     // Инициализация Telegram Web App
     if (window.Telegram?.WebApp) {
@@ -41,9 +33,6 @@ document.addEventListener('DOMContentLoaded', async function () {
             initTelegramAvatar(telegramUser);
         }
     }
-
-    // Загружаем настройки UI
-    loadUISettings();
 
     // Инициализация Firebase (раскомментируйте когда добавите свои ключи)
     // initFirebase();
@@ -67,90 +56,38 @@ document.addEventListener('DOMContentLoaded', async function () {
 });
 
 // Инициализация Telegram Web App
-function initTelegramWebApp() {
-    if (!window.Telegram?.WebApp) return;
+const tg = window.Telegram?.WebApp;
 
-    const tg = window.Telegram.WebApp;
-
-    // Добавляем класс для стилей
-    document.body.classList.add('telegram-webapp');
-
-    console.log('Telegram Web App инициализирован');
-
-    tg.MainButton.hide();
-    tg.BackButton.hide();
-
-    // Настраиваем тему
-    applyTelegramTheme();
-
-    // Подписываемся на изменения темы
-    tg.onEvent('themeChanged', applyTelegramTheme);
-
-    // Синхронизируем данные пользователя
-    const telegramUser = tg.initDataUnsafe?.user;
-    if (telegramUser) {
-        // Пробуем загрузить сохраненный аватар
-        const loadedFromCache = loadSavedAvatar();
-
-        if (!loadedFromCache) {
-            syncTelegramAvatar(telegramUser);
-        }
-
-        currentUser = {
-            telegramUser: telegramUser,
-            lastAvatarUpdate: Date.now()
-        };
-    }
-
-    // Готовим приложение
-    if (tg.ready) {
-        tg.ready();
-    }
-
-    // Добавляем подтверждение закрытия
-    tg.enableClosingConfirmation();
-
-    // Кастомизируем UI
-    setTimeout(() => {
-        customizeTelegramUI();
-    }, 100);
-}
-
-// Кастомизация UI Telegram Mini App
+// Убираем заголовок Telegram и добавляем кастомные кнопки
 function customizeTelegramUI() {
     if (!window.Telegram?.WebApp) return;
-
+    
     const tg = window.Telegram.WebApp;
-
+    
     // Скрываем заголовок Telegram
     tg.setHeaderColor('bg_color');
-
-    // Убираем стандартные кнопки
+    tg.enableClosingConfirmation();
+    
+    // Убираем стандартные кнопки если они есть
     if (tg.BackButton) {
         tg.BackButton.hide();
     }
-
+    
     // Добавляем кастомный хедер
     addCustomHeader();
-
+    
     // Добавляем плавающую кнопку закрытия
     addFloatingCloseButton();
-
+    
     // Добавляем кнопки "свернуть" и "три точки"
     addCustomActionButtons();
-
-    // Добавляем меню настроек
-    addSettingsMenu();
-
-    // Применяем сохраненные настройки
-    applyUISettings();
 }
 
 // Создаем кастомный хедер
 function addCustomHeader() {
     const existingHeader = document.querySelector('.custom-telegram-header');
     if (existingHeader) return;
-
+    
     const headerHTML = `
         <div class="custom-telegram-header">
             <div class="custom-header-left">
@@ -176,7 +113,7 @@ function addCustomHeader() {
             </div>
         </div>
     `;
-
+    
     document.body.insertAdjacentHTML('afterbegin', headerHTML);
 }
 
@@ -184,14 +121,14 @@ function addCustomHeader() {
 function addFloatingCloseButton() {
     const existingCloseBtn = document.querySelector('.floating-close-btn');
     if (existingCloseBtn) return;
-
+    
     const closeBtnHTML = `
         <button class="floating-close-btn" onclick="closeApp()">
             <i class="fas fa-times"></i>
             <span class="btn-text">Close</span>
         </button>
     `;
-
+    
     document.body.insertAdjacentHTML('beforeend', closeBtnHTML);
 }
 
@@ -199,11 +136,11 @@ function addFloatingCloseButton() {
 function addCustomActionButtons() {
     const actionMenuHTML = `
         <div class="custom-action-menu" id="actionMenu">
-            <button class="action-menu-item" onclick="showSettingsPage()">
+            <button class="action-menu-item" onclick="showSettings()">
                 <i class="fas fa-cog"></i>
                 <span>Настройки</span>
             </button>
-            <button class="action-menu-item" onclick="showProfilePage()">
+            <button class="action-menu-item" onclick="showProfile()">
                 <i class="fas fa-user"></i>
                 <span>Профиль</span>
             </button>
@@ -215,76 +152,10 @@ function addCustomActionButtons() {
                 <i class="fas fa-info-circle"></i>
                 <span>О приложении</span>
             </button>
-            <button class="action-menu-item" onclick="openUISettings()">
-                <i class="fas fa-palette"></i>
-                <span>Настроить кнопки</span>
-            </button>
         </div>
     `;
-
+    
     document.body.insertAdjacentHTML('beforeend', actionMenuHTML);
-}
-
-// Добавляем меню настроек UI
-function addSettingsMenu() {
-    const settingsMenuHTML = `
-        <div class="settings-menu" id="settingsMenu">
-            <h4><i class="fas fa-palette"></i> Настройка кнопок</h4>
-            
-            <div class="color-options">
-                <div class="color-option active" style="background: #ff4757;" data-color="#ff4757"></div>
-                <div class="color-option" style="background: #00ff88;" data-color="#00ff88"></div>
-                <div class="color-option" style="background: #00ccff;" data-color="#00ccff"></div>
-                <div class="color-option" style="background: #9d4edd;" data-color="#9d4edd"></div>
-                <div class="color-option" style="background: #ffaa00;" data-color="#ffaa00"></div>
-                <div class="color-option" style="background: #ff6b81;" data-color="#ff6b81"></div>
-            </div>
-            
-            <div class="toggle-options">
-                <div class="toggle-option">
-                    <span>Показывать кнопку "Close"</span>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="toggleCloseButton" checked>
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-                <div class="toggle-option">
-                    <span>Показывать кнопку "Свернуть"</span>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="toggleMinimizeButton" checked>
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-                <div class="toggle-option">
-                    <span>Показывать меню (три точки)</span>
-                    <label class="checkbox">
-                        <input type="checkbox" id="toggleMenuButton" checked>
-                        <span class="checkmark"></span>
-                    </label>
-                </div>
-            </div>
-            
-            <button class="simple-btn btn-primary" onclick="applySettings()" style="margin-top: 16px; width: 100%;">
-                <i class="fas fa-check"></i> Применить
-            </button>
-        </div>
-    `;
-
-    document.body.insertAdjacentHTML('beforeend', settingsMenuHTML);
-
-    // Инициализируем выбор цвета
-    const colorOptions = document.querySelectorAll('.color-option');
-    colorOptions.forEach(option => {
-        option.addEventListener('click', function () {
-            colorOptions.forEach(opt => opt.classList.remove('active'));
-            this.classList.add('active');
-        });
-    });
-
-    // Инициализируем переключатели
-    document.getElementById('toggleCloseButton').addEventListener('change', updateToggle);
-    document.getElementById('toggleMinimizeButton').addEventListener('change', updateToggle);
-    document.getElementById('toggleMenuButton').addEventListener('change', updateToggle);
 }
 
 // Функции для кнопок
@@ -297,51 +168,34 @@ function closeApp() {
 }
 
 function minimizeApp() {
-    showNotification('Приложение свернуто', 'info');
-    // Можно добавить другую логику минимизации
+    if (window.Telegram?.WebApp?.switchInlineQuery) {
+        // Альтернативное действие если минимизация не доступна
+        showNotification('Приложение минимизировано', 'info');
+    }
 }
 
 function toggleMoreMenu() {
     const menu = document.getElementById('actionMenu');
-    const settingsMenu = document.getElementById('settingsMenu');
-
-    if (settingsMenu && settingsMenu.classList.contains('show')) {
-        settingsMenu.classList.remove('show');
-    }
-
     if (menu) {
         menu.classList.toggle('show');
     }
 }
 
-function openUISettings() {
-    const settingsMenu = document.getElementById('settingsMenu');
-    const actionMenu = document.getElementById('actionMenu');
-
-    if (actionMenu) {
-        actionMenu.classList.remove('show');
-    }
-
-    if (settingsMenu) {
-        settingsMenu.classList.toggle('show');
-    }
-}
-
-function showSettingsPage() {
+// Вспомогательные функции
+function showSettings() {
     window.location.href = 'settings.html';
     toggleMoreMenu();
 }
 
-function showProfilePage() {
+function showProfile() {
     window.location.href = 'profile.html';
     toggleMoreMenu();
 }
 
 function showSupport() {
+    // Открываем поддержку в Telegram
     if (window.Telegram?.WebApp?.openTelegramLink) {
         window.Telegram.WebApp.openTelegramLink('https://t.me/flowivpn_support');
-    } else {
-        window.open('https://t.me/flowivpn_support', '_blank');
     }
     toggleMoreMenu();
 }
@@ -360,29 +214,20 @@ function showAbout() {
                             <i class="fas fa-shield-alt" style="font-size: 2rem;"></i>
                         </div>
                     </div>
-                    <h4 style="text-align: center; margin-bottom: 10px; color: var(--accent-1);">ФЛОУИ VPN</h4>
+                    <h4 style="text-align: center; margin-bottom: 10px;">ФЛОУИ VPN</h4>
                     <p style="text-align: center; color: var(--text-secondary); margin-bottom: 20px;">
-                        Версия 1.0.0 • Для PUBG Mobile
+                        Версия 1.0.0
                     </p>
                     <div style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 12px; margin-bottom: 15px;">
-                        <p style="margin: 0; color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5;">
-                            Оптимизированный VPN сервис для геймеров PUBG Mobile. 
-                            Снижаем пинг, улучшаем стабильность соединения и повышаем точность регистрации попаданий.
+                        <p style="margin: 0; color: var(--text-secondary); font-size: 0.9rem;">
+                            Оптимизированный VPN для PUBG Mobile с низким пингом и стабильным соединением.
                         </p>
-                    </div>
-                    <div style="display: flex; justify-content: center; gap: 10px; margin-top: 20px;">
-                        <button class="simple-btn btn-outline" onclick="showSupport()" style="flex: 1;">
-                            <i class="fas fa-headset"></i> Поддержка
-                        </button>
-                        <button class="simple-btn btn-primary" onclick="closeModal('aboutModal')" style="flex: 1;">
-                            <i class="fas fa-check"></i> Закрыть
-                        </button>
                     </div>
                 </div>
             </div>
         </div>
     `;
-
+    
     document.body.insertAdjacentHTML('beforeend', modalHTML);
     toggleMoreMenu();
 }
@@ -394,157 +239,102 @@ function closeModal(modalId) {
     }
 }
 
-// Обновление переключателей
-function updateToggle() {
-    uiSettings.showCloseButton = document.getElementById('toggleCloseButton').checked;
-    uiSettings.showMinimizeButton = document.getElementById('toggleMinimizeButton').checked;
-    uiSettings.showMenuButton = document.getElementById('toggleMenuButton').checked;
-}
-
-// Применение настроек
-function applySettings() {
-    const selectedColor = document.querySelector('.color-option.active').getAttribute('data-color');
-    uiSettings.closeButtonColor = selectedColor;
-
-    updateToggle();
-    applyUISettings();
-    saveUISettings();
-
-    const settingsMenu = document.getElementById('settingsMenu');
-    if (settingsMenu) {
-        settingsMenu.classList.remove('show');
-    }
-
-    showNotification('Настройки сохранены', 'success');
-}
-
-// Применение настроек UI
-function applyUISettings() {
-    // Цвет кнопки закрытия
-    const closeBtn = document.querySelector('.floating-close-btn');
-    if (closeBtn) {
-        closeBtn.style.background = `rgba(${hexToRgb(uiSettings.closeButtonColor)}, 0.15)`;
-        closeBtn.style.borderColor = `rgba(${hexToRgb(uiSettings.closeButtonColor)}, 0.3)`;
-        closeBtn.style.color = uiSettings.closeButtonColor;
-    }
-
-    // Показ/скрытие кнопок
-    const closeButton = document.querySelector('.floating-close-btn');
-    const minimizeButton = document.querySelector('.custom-minimize-btn');
-    const menuButton = document.querySelector('.custom-more-btn');
-
-    if (closeButton) {
-        closeButton.classList.toggle('hidden-element', !uiSettings.showCloseButton);
-    }
-
-    if (minimizeButton) {
-        minimizeButton.classList.toggle('hidden-element', !uiSettings.showMinimizeButton);
-    }
-
-    if (menuButton) {
-        menuButton.classList.toggle('hidden-element', !uiSettings.showMenuButton);
-    }
-}
-
-// Сохранение настроек
-function saveUISettings() {
-    try {
-        localStorage.setItem('flowi_ui_settings', JSON.stringify(uiSettings));
-    } catch (e) {
-        console.log('Не удалось сохранить настройки');
-    }
-}
-
-// Загрузка настроек
-function loadUISettings() {
-    try {
-        const savedSettings = localStorage.getItem('flowi_ui_settings');
-        if (savedSettings) {
-            uiSettings = JSON.parse(savedSettings);
-        }
-    } catch (e) {
-        console.log('Не удалось загрузить настройки');
-    }
-}
-
-// Вспомогательная функция для преобразования цвета
-function hexToRgb(hex) {
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ?
-        `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}`
-        : '255, 71, 87';
-}
-
-// Функция для показа уведомлений
-function showNotification(message, type = 'info') {
-    // Проверяем есть ли уже уведомление
-    const existingNotification = document.querySelector('.notification.show');
-    if (existingNotification) {
-        existingNotification.remove();
-    }
-
-    const notification = document.createElement('div');
-    notification.className = `notification ${type}`;
-    notification.innerHTML = `
-        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
-        <span>${message}</span>
-    `;
-
-    document.body.appendChild(notification);
-
-    // Показываем
+// Инициализация при загрузке
+document.addEventListener('DOMContentLoaded', function() {
+    // Вызываем после инициализации Telegram
     setTimeout(() => {
-        notification.classList.add('show');
+        customizeTelegramUI();
     }, 100);
+});
 
-    // Скрываем через 3 секунды
-    setTimeout(() => {
-        notification.classList.remove('show');
-        setTimeout(() => {
-            if (notification.parentNode) {
-                notification.remove();
-            }
-        }, 300);
-    }, 3000);
+function initTelegramWebApp() {
+    if (!window.Telegram?.WebApp) return;
+
+    const tg = window.Telegram.WebApp;
+    
+    // Добавляем класс для стилей
+    document.body.classList.add('telegram-webapp');
+
+    console.log('Telegram Web App инициализирован');
+
+    tg.MainButton.hide();
+    tg.BackButton.hide();
+
+    // Отключаем стандартные кнопки
+    if (tg.BackButton) {
+        tg.BackButton.hide();
+    }
+    
+    // Настраиваем тему
+    applyTelegramTheme();
+
+    // Подписываемся на изменения темы
+    tg.onEvent('themeChanged', applyTelegramTheme);
+
+    // Синхронизируем данные пользователя
+    const telegramUser = tg.initDataUnsafe?.user;
+    if (telegramUser) {
+        // Пробуем загрузить сохраненный аватар
+        const loadedFromCache = loadSavedAvatar();
+        
+        if (!loadedFromCache) {
+            syncTelegramAvatar(telegramUser);
+        }
+        
+        currentUser = {
+            telegramUser: telegramUser,
+            lastAvatarUpdate: Date.now()
+        };
+    }
+
+    // Кастомизируем UI
+    customizeTelegramUI();
+
+    // Готовим приложение
+    if (tg.ready) {
+        tg.ready();
+    }
+    
+    // Добавляем подтверждение закрытия
+    tg.enableClosingConfirmation();
 }
 
-// ===== ОСТАЛЬНЫЕ ФУНКЦИИ (из предыдущего кода) =====
 
 function syncTelegramAvatar(user) {
     if (!user) return;
-
+    
     // Ищем все элементы с аватарками
     const avatars = document.querySelectorAll('.user-avatar, .profile-avatar-large');
-
+    
     // Пытаемся получить аватар из Telegram
     let telegramAvatarUrl = null;
-
+    
     // Если у пользователя есть фото в Telegram
     if (user.photo_url) {
         telegramAvatarUrl = user.photo_url;
     }
-
+    
     // Или создаем аватар на основе данных Telegram
     if (!telegramAvatarUrl) {
         const userId = user.id.toString();
         telegramAvatarUrl = `https://api.dicebear.com/7.x/thumbs/svg?seed=telegram_${userId}&backgroundColor=0088cc,34b7f1,00ff88&backgroundType=gradientLinear`;
     }
-
+    
     // Обновляем все аватары
     avatars.forEach(avatar => {
         const img = avatar.querySelector('img');
         if (img) {
             img.src = telegramAvatarUrl;
-            img.onerror = function () {
+            img.onerror = function() {
                 // Fallback если изображение не загрузилось
                 this.src = `https://api.dicebear.com/7.x/thumbs/svg?seed=user_${Date.now()}&backgroundColor=00ff88,00ccff,9d4edd&backgroundType=gradientLinear`;
             };
         }
-
+        
         // Добавляем класс для стилей Telegram
         avatar.classList.add('telegram-synced');
     });
-
+    
     // Сохраняем аватар в localStorage для кэширования
     try {
         localStorage.setItem('telegram_avatar_url', telegramAvatarUrl);
@@ -559,7 +349,7 @@ function loadSavedAvatar() {
     try {
         const savedAvatarUrl = localStorage.getItem('telegram_avatar_url');
         const savedUserId = localStorage.getItem('telegram_user_id');
-
+        
         if (savedAvatarUrl && savedUserId) {
             const avatars = document.querySelectorAll('.user-avatar, .profile-avatar-large');
             avatars.forEach(avatar => {
@@ -577,14 +367,63 @@ function loadSavedAvatar() {
     return false;
 }
 
+
+function initTelegramWebApp() {
+    if (!tg) return;
+
+    console.log('Telegram Web App инициализирован');
+
+    // Расширяем приложение на весь экран
+    if (tg.expand) {
+        tg.expand();
+    }
+
+    // Настраиваем кнопку "Назад" для страниц кроме главной
+    if (tg.BackButton && !window.location.pathname.includes('index.html') && !window.location.pathname.endsWith('/')) {
+        tg.BackButton.show();
+        tg.BackButton.onClick(() => {
+            window.history.back();
+        });
+    }
+
+    // Устанавливаем тему Telegram
+    applyTelegramTheme();
+
+    // Подписываемся на изменения темы
+    tg.onEvent('themeChanged', applyTelegramTheme);
+
+    // Синхронизируем аватар Telegram
+    const telegramUser = window.Telegram.WebApp.initDataUnsafe?.user;
+    if (telegramUser) {
+        // Пробуем загрузить сохраненный аватар
+        const loadedFromCache = loadSavedAvatar();
+        
+        // Если не загрузили из кэша или прошло много времени, обновляем
+        if (!loadedFromCache) {
+            syncTelegramAvatar(telegramUser);
+        }
+        
+        // Сохраняем данные пользователя для обновления аватара при необходимости
+        currentUser = {
+            telegramUser: telegramUser,
+            lastAvatarUpdate: Date.now()
+        };
+    }
+
+    // Готовим приложение
+    if (tg.ready) {
+        tg.ready();
+    }
+}
+
 // Применение темы Telegram
 function applyTelegramTheme() {
-    if (!window.Telegram?.WebApp) return;
+    if (!tg) return;
 
-    const tg = window.Telegram.WebApp;
     const themeParams = tg.themeParams;
 
     if (themeParams) {
+        // Применяем цвета из темы Telegram
         document.documentElement.style.setProperty('--text-primary', themeParams.text_color || '#ffffff');
         document.documentElement.style.setProperty('--text-secondary', themeParams.hint_color || '#a0a0c0');
         document.documentElement.style.setProperty('--card-bg', themeParams.secondary_bg_color || '#13131a');
@@ -750,7 +589,297 @@ function updatePageHeaders() {
 
 // Инициализация Firebase
 async function initFirebase() {
-    // Реализация Firebase
+    try {
+        // Импорт Firebase (добавьте в HTML)
+        // <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
+        // <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js"></script>
+        // <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js"></script>
+
+        if (!firebase.apps.length) {
+            app = firebase.initializeApp(firebaseConfig);
+            auth = firebase.auth();
+            db = firebase.firestore();
+
+            // Настройка авторизации через Telegram
+            await setupTelegramAuth();
+        }
+    } catch (error) {
+        console.error('Ошибка инициализации Firebase:', error);
+        loadDemoData();
+    }
+}
+
+// Настройка авторизации через Telegram
+async function setupTelegramAuth() {
+    if (!tg?.initDataUnsafe?.user) {
+        console.log('Пользователь Telegram не найден');
+        return;
+    }
+
+    const telegramUser = tg.initDataUnsafe.user;
+    const userId = telegramUser.id.toString();
+
+    try {
+        // Проверяем существование пользователя в Firebase
+        const userRef = db.collection('users').doc(userId);
+        const userDoc = await userRef.get();
+
+        if (!userDoc.exists) {
+            // Создаем нового пользователя
+            await userRef.set({
+                telegramId: userId,
+                username: telegramUser.username || `user_${userId}`,
+                firstName: telegramUser.first_name || '',
+                lastName: telegramUser.last_name || '',
+                languageCode: telegramUser.language_code || 'ru',
+                isPremium: telegramUser.is_premium || false,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
+                stats: {
+                    totalSpent: 0,
+                    totalDays: 0,
+                    gamesPlayed: 0,
+                    accuracy: 0,
+                    pingSaved: 0,
+                    timeSaved: 0
+                }
+            });
+
+            console.log('Новый пользователь создан');
+        } else {
+            // Обновляем время последнего входа
+            await userRef.update({
+                lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
+                lastSeen: new Date().toISOString()
+            });
+        }
+
+        // Загружаем данные пользователя
+        await loadUserData(userId);
+
+    } catch (error) {
+        console.error('Ошибка авторизации:', error);
+        loadDemoData();
+    }
+}
+
+// Загрузка данных пользователя из Firebase
+async function loadUserData(userId) {
+    try {
+        // Загружаем пользователя
+        const userDoc = await db.collection('users').doc(userId).get();
+        if (userDoc.exists) {
+            currentUser = { id: userId, ...userDoc.data() };
+
+            // Загружаем покупки пользователя
+            await loadUserPurchases(userId);
+
+            // Обновляем интерфейс
+            updateUserInterface();
+        }
+    } catch (error) {
+        console.error('Ошибка загрузки данных пользователя:', error);
+        loadDemoData();
+    }
+}
+
+// Загрузка покупок пользователя
+async function loadUserPurchases(userId) {
+    try {
+        const purchasesSnapshot = await db.collection('purchases')
+            .where('userId', '==', userId)
+            .orderBy('purchaseDate', 'desc')
+            .get();
+
+        userPurchases = [];
+        userActiveSubscription = null;
+
+        purchasesSnapshot.forEach(doc => {
+            const purchase = { id: doc.id, ...doc.data() };
+            userPurchases.push(purchase);
+
+            // Проверяем активную подписку
+            if (purchase.status === 'active' && (!userActiveSubscription ||
+                new Date(purchase.endDate) > new Date(userActiveSubscription.endDate))) {
+                userActiveSubscription = purchase;
+            }
+        });
+
+        // Обновляем UI покупок
+        updatePurchasesUI();
+        updateProfileSubscriptionUI();
+
+    } catch (error) {
+        console.error('Ошибка загрузки покупок:', error);
+        // Используем демо данные
+        loadDemoPurchases();
+    }
+}
+
+// Обновление UI покупок
+function updatePurchasesUI() {
+    const purchasesList = document.querySelector('.purchases-list');
+    const summaryStats = document.querySelector('.purchases-summary');
+
+    if (!purchasesList || !summaryStats) return;
+
+    // Очищаем список
+    purchasesList.innerHTML = '';
+
+    if (userPurchases.length === 0) {
+        purchasesList.innerHTML = `
+            <div class="simple-card" style="text-align: center; padding: 2rem;">
+                <i class="fas fa-shopping-cart" style="font-size: 3rem; color: var(--text-tertiary); margin-bottom: 1rem;"></i>
+                <h3 style="color: var(--text-primary); margin-bottom: 0.5rem;">Покупок пока нет</h3>
+                <p style="color: var(--text-secondary);">Выберите подходящий тариф VPN</p>
+            </div>
+        `;
+
+        // Скрываем статистику если нет покупок
+        summaryStats.style.display = 'none';
+        return;
+    }
+
+    // Показываем статистику
+    summaryStats.style.display = 'block';
+
+    // Рассчитываем статистику
+    let totalSpent = 0;
+    let activePurchases = 0;
+    let totalDays = 0;
+
+    userPurchases.forEach(purchase => {
+        if (purchase.price) totalSpent += purchase.price;
+        if (purchase.status === 'active') activePurchases++;
+
+        // Расчет дней использования
+        if (purchase.purchaseDate && purchase.endDate) {
+            const start = new Date(purchase.purchaseDate.seconds * 1000);
+            const end = new Date(purchase.endDate.seconds * 1000);
+            const days = Math.floor((end - start) / (1000 * 60 * 60 * 24));
+            totalDays += days;
+        }
+    });
+
+    // Обновляем статистику
+    const summaryItems = summaryStats.querySelectorAll('.summary-item');
+    if (summaryItems[0]) summaryItems[0].querySelector('.summary-value').textContent = `${totalSpent} ₽`;
+    if (summaryItems[1]) summaryItems[1].querySelector('.summary-value').textContent = `~${Math.floor(totalDays * 0.5)} часов`;
+    if (summaryItems[2]) summaryItems[2].querySelector('.summary-value').textContent = '85 мс';
+    if (summaryItems[3]) summaryItems[3].querySelector('.summary-value').textContent = '18 мс';
+
+    // Добавляем покупки в список
+    userPurchases.forEach(purchase => {
+        const plan = getPlanInfo(purchase.planId);
+        const purchaseDate = purchase.purchaseDate ?
+            formatDate(purchase.purchaseDate.seconds * 1000) : 'N/A';
+        const endDate = purchase.endDate ?
+            formatDate(purchase.endDate.seconds * 1000) : 'N/A';
+
+        const purchaseItem = document.createElement('div');
+        purchaseItem.className = `purchase-item ${purchase.status === 'active' ? 'active' : ''}`;
+        purchaseItem.innerHTML = `
+            <div class="purchase-icon" style="color: ${plan.color};">
+                <i class="fas fa-${plan.icon}"></i>
+            </div>
+            <div class="purchase-info">
+                <h4>${plan.name}</h4>
+                <p>${purchaseDate} - ${endDate}</p>
+                <span class="status-badge ${purchase.status === 'active' ? 'active' : 'expired'}">
+                    ${purchase.status === 'active' ? 'Активна' : 'Истекла'}
+                </span>
+            </div>
+            <div class="purchase-price">
+                ${purchase.price || plan.price} ₽
+            </div>
+        `;
+
+        purchasesList.appendChild(purchaseItem);
+    });
+}
+
+// Обновление UI подписки в профиле
+function updateProfileSubscriptionUI() {
+    const subscriptionCard = document.querySelector('.subscription-card');
+    const subscriptionPlaceholder = document.querySelector('.no-subscription-card');
+
+    if (!subscriptionCard) return;
+
+    if (userActiveSubscription) {
+        const plan = getPlanInfo(userActiveSubscription.planId);
+        const endDate = userActiveSubscription.endDate ?
+            formatDate(userActiveSubscription.endDate.seconds * 1000) : 'N/A';
+
+        subscriptionCard.classList.remove('hidden');
+        if (subscriptionPlaceholder) subscriptionPlaceholder.style.display = 'none';
+
+        subscriptionCard.querySelector('.subscription-details h4').textContent = plan.name;
+        subscriptionCard.querySelector('.subscription-details p:nth-child(2)').textContent = `Активна до: ${endDate}`;
+        subscriptionCard.querySelector('.subscription-icon i').className = `fas fa-${plan.icon}`;
+        subscriptionCard.querySelector('.subscription-icon').style.color = plan.color;
+
+        // Убираем кнопку продления
+        const renewBtn = subscriptionCard.querySelector('.simple-btn');
+        if (renewBtn) renewBtn.style.display = 'none';
+    } else {
+        subscriptionCard.classList.add('hidden');
+
+        // Показываем заглушку если нет подписки
+        if (!subscriptionPlaceholder) {
+            const placeholder = document.createElement('div');
+            placeholder.className = 'simple-card no-subscription-card';
+            placeholder.style.textAlign = 'center';
+            placeholder.style.padding = '2rem';
+            placeholder.innerHTML = `
+                <i class="fas fa-shield-alt" style="font-size: 3rem; color: var(--text-tertiary); margin-bottom: 1rem;"></i>
+                <h3 style="color: var(--text-primary); margin-bottom: 0.5rem;">Нет активной подписки</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Выберите тариф VPN для максимальной производительности</p>
+                <a href="index.html" class="simple-btn btn-primary">
+                    <i class="fas fa-shopping-cart"></i> Выбрать тариф
+                </a>
+            `;
+
+            subscriptionCard.parentNode.insertBefore(placeholder, subscriptionCard.nextSibling);
+        } else {
+            subscriptionPlaceholder.style.display = 'block';
+        }
+    }
+}
+
+// Получение информации о тарифе
+function getPlanInfo(planId) {
+    const plans = {
+        light: {
+            name: 'Лайт VPN',
+            price: 299,
+            color: '#00ff88',
+            icon: 'bolt'
+        },
+        pro: {
+            name: 'Про VPN',
+            price: 599,
+            color: '#00ccff',
+            icon: 'rocket'
+        },
+        flowi: {
+            name: 'Флоуи VPN',
+            price: 999,
+            color: '#9d4edd',
+            icon: 'gem'
+        }
+    };
+
+    return plans[planId] || plans.light;
+}
+
+// Форматирование даты
+function formatDate(timestamp) {
+    const date = new Date(timestamp);
+    return date.toLocaleDateString('ru-RU', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+    });
 }
 
 // Демо данные (используются если нет Telegram или Firebase)
@@ -816,6 +945,19 @@ function updateProfileStats() {
         statNumbers[1].textContent = currentUser.stats.gamesPlayed || 0;
         statNumbers[2].textContent = currentUser.stats.accuracy ? `${currentUser.stats.accuracy}%` : '0%';
     }
+
+    // Обновляем детальную статистику если есть
+    const statDetails = document.querySelector('.stats-details');
+    if (statDetails) {
+        const detailItems = statDetails.querySelectorAll('.stat-detail');
+        if (detailItems.length >= 5) {
+            if (currentUser.stats.pingBefore) detailItems[0].querySelector('.stat-value').textContent = `${currentUser.stats.pingBefore} мс`;
+            if (currentUser.stats.pingAfter) detailItems[1].querySelector('.stat-value').textContent = `${currentUser.stats.pingAfter} мс`;
+            if (currentUser.stats.pingSaved) detailItems[2].querySelector('.stat-value').textContent = `-${currentUser.stats.pingSaved} мс`;
+            if (currentUser.stats.timeSaved) detailItems[3].querySelector('.stat-value').textContent = `~${currentUser.stats.timeSaved} часов`;
+            if (currentUser.stats.bestPing) detailItems[4].querySelector('.stat-value').textContent = `${currentUser.stats.bestPing} мс`;
+        }
+    }
 }
 
 // Анимации появления элементов
@@ -862,72 +1004,72 @@ function initPingCheck() {
     }
 }
 
-// Симуляция проверки пинга
+// В функции simulatePingCheck заменим этот код:
 function simulatePingCheck() {
     const checkPingBtn = document.getElementById('checkPingBtn');
     const pingValue = document.getElementById('pingValue');
     const statusText = document.querySelector('.status-text');
     const indicators = document.querySelectorAll('.status-indicator');
-
+    
     if (!checkPingBtn || !pingValue) return;
-
+    
     // Если уже идет проверка, выходим
     if (checkPingBtn.classList.contains('checking')) return;
-
+    
     checkPingBtn.classList.add('checking');
     checkPingBtn.disabled = true;
-
+    
     // Сохраняем оригинальную высоту кнопки
     const originalHeight = checkPingBtn.offsetHeight;
     checkPingBtn.style.height = originalHeight + 'px';
     checkPingBtn.style.minHeight = originalHeight + 'px';
-
+    
     // Обновляем контент без изменения высоты
     const originalContent = checkPingBtn.innerHTML;
     checkPingBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Проверяем...</span>';
-
+    
     // Устанавливаем фиксированную ширину для спиннера и текста
     const spinner = checkPingBtn.querySelector('.fa-spinner');
     const textSpan = checkPingBtn.querySelector('span');
-
+    
     if (spinner) {
         spinner.style.fontSize = '1em';
         spinner.style.lineHeight = '1';
     }
-
+    
     if (textSpan) {
         textSpan.style.fontSize = '0.95rem';
         textSpan.style.lineHeight = '1';
     }
-
+    
     checkPingBtn.style.opacity = '0.7';
-
+    
     let dots = 0;
     const interval = setInterval(() => {
         pingValue.textContent = '•'.repeat(dots + 1);
         dots = (dots + 1) % 3;
     }, 200);
-
+    
     const delay = 2000 + Math.random() * 1000;
-
+    
     setTimeout(() => {
         clearInterval(interval);
-
+        
         const randomPing = Math.floor(Math.random() * (28 - 8 + 1)) + 8;
         pingValue.textContent = randomPing;
-
+        
         updatePingStatus(randomPing, statusText, indicators);
-
+        
         checkPingBtn.classList.remove('checking');
         checkPingBtn.disabled = false;
         checkPingBtn.innerHTML = '<i class="fas fa-sync-alt"></i><span>Проверить сейчас</span>';
-
+        
         // Восстанавливаем оригинальную высоту
         checkPingBtn.style.height = '';
         checkPingBtn.style.minHeight = '';
-
+        
         checkPingBtn.style.opacity = '1';
-
+        
         // Анимация успешной проверки
         pingValue.style.transform = 'scale(1.1)';
         pingValue.style.transition = 'transform 0.3s ease';
@@ -1170,30 +1312,4 @@ function loadDemoPurchases() {
 
     updatePurchasesUI();
     updateProfileSubscriptionUI();
-}
-
-// Получение информации о тарифе
-function getPlanInfo(planId) {
-    const plans = {
-        light: {
-            name: 'Лайт VPN',
-            price: 299,
-            color: '#00ff88',
-            icon: 'bolt'
-        },
-        pro: {
-            name: 'Про VPN',
-            price: 599,
-            color: '#00ccff',
-            icon: 'rocket'
-        },
-        flowi: {
-            name: 'Флоуи VPN',
-            price: 999,
-            color: '#9d4edd',
-            icon: 'gem'
-        }
-    };
-
-    return plans[planId] || plans.light;
 }
