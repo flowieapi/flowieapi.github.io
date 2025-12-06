@@ -71,16 +71,14 @@ function initTelegramWebApp() {
     if (!window.Telegram?.WebApp) return;
 
     const tg = window.Telegram.WebApp;
-    
+
     // Добавляем класс для стилей
     document.body.classList.add('telegram-webapp');
 
     console.log('Telegram Web App инициализирован');
 
-    // Расширяем приложение на весь экран
-    if (tg.expand) {
-        tg.expand();
-    }
+    tg.MainButton.hide();
+    tg.BackButton.hide();
 
     // Настраиваем тему
     applyTelegramTheme();
@@ -93,11 +91,11 @@ function initTelegramWebApp() {
     if (telegramUser) {
         // Пробуем загрузить сохраненный аватар
         const loadedFromCache = loadSavedAvatar();
-        
+
         if (!loadedFromCache) {
             syncTelegramAvatar(telegramUser);
         }
-        
+
         currentUser = {
             telegramUser: telegramUser,
             lastAvatarUpdate: Date.now()
@@ -108,10 +106,10 @@ function initTelegramWebApp() {
     if (tg.ready) {
         tg.ready();
     }
-    
+
     // Добавляем подтверждение закрытия
     tg.enableClosingConfirmation();
-    
+
     // Кастомизируем UI
     setTimeout(() => {
         customizeTelegramUI();
@@ -121,29 +119,29 @@ function initTelegramWebApp() {
 // Кастомизация UI Telegram Mini App
 function customizeTelegramUI() {
     if (!window.Telegram?.WebApp) return;
-    
+
     const tg = window.Telegram.WebApp;
-    
+
     // Скрываем заголовок Telegram
     tg.setHeaderColor('bg_color');
-    
+
     // Убираем стандартные кнопки
     if (tg.BackButton) {
         tg.BackButton.hide();
     }
-    
+
     // Добавляем кастомный хедер
     addCustomHeader();
-    
+
     // Добавляем плавающую кнопку закрытия
     addFloatingCloseButton();
-    
+
     // Добавляем кнопки "свернуть" и "три точки"
     addCustomActionButtons();
-    
+
     // Добавляем меню настроек
     addSettingsMenu();
-    
+
     // Применяем сохраненные настройки
     applyUISettings();
 }
@@ -152,7 +150,7 @@ function customizeTelegramUI() {
 function addCustomHeader() {
     const existingHeader = document.querySelector('.custom-telegram-header');
     if (existingHeader) return;
-    
+
     const headerHTML = `
         <div class="custom-telegram-header">
             <div class="custom-header-left">
@@ -178,7 +176,7 @@ function addCustomHeader() {
             </div>
         </div>
     `;
-    
+
     document.body.insertAdjacentHTML('afterbegin', headerHTML);
 }
 
@@ -186,14 +184,14 @@ function addCustomHeader() {
 function addFloatingCloseButton() {
     const existingCloseBtn = document.querySelector('.floating-close-btn');
     if (existingCloseBtn) return;
-    
+
     const closeBtnHTML = `
         <button class="floating-close-btn" onclick="closeApp()">
             <i class="fas fa-times"></i>
             <span class="btn-text">Close</span>
         </button>
     `;
-    
+
     document.body.insertAdjacentHTML('beforeend', closeBtnHTML);
 }
 
@@ -223,7 +221,7 @@ function addCustomActionButtons() {
             </button>
         </div>
     `;
-    
+
     document.body.insertAdjacentHTML('beforeend', actionMenuHTML);
 }
 
@@ -271,18 +269,18 @@ function addSettingsMenu() {
             </button>
         </div>
     `;
-    
+
     document.body.insertAdjacentHTML('beforeend', settingsMenuHTML);
-    
+
     // Инициализируем выбор цвета
     const colorOptions = document.querySelectorAll('.color-option');
     colorOptions.forEach(option => {
-        option.addEventListener('click', function() {
+        option.addEventListener('click', function () {
             colorOptions.forEach(opt => opt.classList.remove('active'));
             this.classList.add('active');
         });
     });
-    
+
     // Инициализируем переключатели
     document.getElementById('toggleCloseButton').addEventListener('change', updateToggle);
     document.getElementById('toggleMinimizeButton').addEventListener('change', updateToggle);
@@ -306,11 +304,11 @@ function minimizeApp() {
 function toggleMoreMenu() {
     const menu = document.getElementById('actionMenu');
     const settingsMenu = document.getElementById('settingsMenu');
-    
+
     if (settingsMenu && settingsMenu.classList.contains('show')) {
         settingsMenu.classList.remove('show');
     }
-    
+
     if (menu) {
         menu.classList.toggle('show');
     }
@@ -319,11 +317,11 @@ function toggleMoreMenu() {
 function openUISettings() {
     const settingsMenu = document.getElementById('settingsMenu');
     const actionMenu = document.getElementById('actionMenu');
-    
+
     if (actionMenu) {
         actionMenu.classList.remove('show');
     }
-    
+
     if (settingsMenu) {
         settingsMenu.classList.toggle('show');
     }
@@ -384,7 +382,7 @@ function showAbout() {
             </div>
         </div>
     `;
-    
+
     document.body.insertAdjacentHTML('beforeend', modalHTML);
     toggleMoreMenu();
 }
@@ -407,16 +405,16 @@ function updateToggle() {
 function applySettings() {
     const selectedColor = document.querySelector('.color-option.active').getAttribute('data-color');
     uiSettings.closeButtonColor = selectedColor;
-    
+
     updateToggle();
     applyUISettings();
     saveUISettings();
-    
+
     const settingsMenu = document.getElementById('settingsMenu');
     if (settingsMenu) {
         settingsMenu.classList.remove('show');
     }
-    
+
     showNotification('Настройки сохранены', 'success');
 }
 
@@ -429,20 +427,20 @@ function applyUISettings() {
         closeBtn.style.borderColor = `rgba(${hexToRgb(uiSettings.closeButtonColor)}, 0.3)`;
         closeBtn.style.color = uiSettings.closeButtonColor;
     }
-    
+
     // Показ/скрытие кнопок
     const closeButton = document.querySelector('.floating-close-btn');
     const minimizeButton = document.querySelector('.custom-minimize-btn');
     const menuButton = document.querySelector('.custom-more-btn');
-    
+
     if (closeButton) {
         closeButton.classList.toggle('hidden-element', !uiSettings.showCloseButton);
     }
-    
+
     if (minimizeButton) {
         minimizeButton.classList.toggle('hidden-element', !uiSettings.showMinimizeButton);
     }
-    
+
     if (menuButton) {
         menuButton.classList.toggle('hidden-element', !uiSettings.showMenuButton);
     }
@@ -472,8 +470,8 @@ function loadUISettings() {
 // Вспомогательная функция для преобразования цвета
 function hexToRgb(hex) {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? 
-        `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` 
+    return result ?
+        `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}`
         : '255, 71, 87';
 }
 
@@ -484,21 +482,21 @@ function showNotification(message, type = 'info') {
     if (existingNotification) {
         existingNotification.remove();
     }
-    
+
     const notification = document.createElement('div');
     notification.className = `notification ${type}`;
     notification.innerHTML = `
         <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
         <span>${message}</span>
     `;
-    
+
     document.body.appendChild(notification);
-    
+
     // Показываем
     setTimeout(() => {
         notification.classList.add('show');
     }, 100);
-    
+
     // Скрываем через 3 секунды
     setTimeout(() => {
         notification.classList.remove('show');
@@ -514,39 +512,39 @@ function showNotification(message, type = 'info') {
 
 function syncTelegramAvatar(user) {
     if (!user) return;
-    
+
     // Ищем все элементы с аватарками
     const avatars = document.querySelectorAll('.user-avatar, .profile-avatar-large');
-    
+
     // Пытаемся получить аватар из Telegram
     let telegramAvatarUrl = null;
-    
+
     // Если у пользователя есть фото в Telegram
     if (user.photo_url) {
         telegramAvatarUrl = user.photo_url;
     }
-    
+
     // Или создаем аватар на основе данных Telegram
     if (!telegramAvatarUrl) {
         const userId = user.id.toString();
         telegramAvatarUrl = `https://api.dicebear.com/7.x/thumbs/svg?seed=telegram_${userId}&backgroundColor=0088cc,34b7f1,00ff88&backgroundType=gradientLinear`;
     }
-    
+
     // Обновляем все аватары
     avatars.forEach(avatar => {
         const img = avatar.querySelector('img');
         if (img) {
             img.src = telegramAvatarUrl;
-            img.onerror = function() {
+            img.onerror = function () {
                 // Fallback если изображение не загрузилось
                 this.src = `https://api.dicebear.com/7.x/thumbs/svg?seed=user_${Date.now()}&backgroundColor=00ff88,00ccff,9d4edd&backgroundType=gradientLinear`;
             };
         }
-        
+
         // Добавляем класс для стилей Telegram
         avatar.classList.add('telegram-synced');
     });
-    
+
     // Сохраняем аватар в localStorage для кэширования
     try {
         localStorage.setItem('telegram_avatar_url', telegramAvatarUrl);
@@ -561,7 +559,7 @@ function loadSavedAvatar() {
     try {
         const savedAvatarUrl = localStorage.getItem('telegram_avatar_url');
         const savedUserId = localStorage.getItem('telegram_user_id');
-        
+
         if (savedAvatarUrl && savedUserId) {
             const avatars = document.querySelectorAll('.user-avatar, .profile-avatar-large');
             avatars.forEach(avatar => {
@@ -870,66 +868,66 @@ function simulatePingCheck() {
     const pingValue = document.getElementById('pingValue');
     const statusText = document.querySelector('.status-text');
     const indicators = document.querySelectorAll('.status-indicator');
-    
+
     if (!checkPingBtn || !pingValue) return;
-    
+
     // Если уже идет проверка, выходим
     if (checkPingBtn.classList.contains('checking')) return;
-    
+
     checkPingBtn.classList.add('checking');
     checkPingBtn.disabled = true;
-    
+
     // Сохраняем оригинальную высоту кнопки
     const originalHeight = checkPingBtn.offsetHeight;
     checkPingBtn.style.height = originalHeight + 'px';
     checkPingBtn.style.minHeight = originalHeight + 'px';
-    
+
     // Обновляем контент без изменения высоты
     const originalContent = checkPingBtn.innerHTML;
     checkPingBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Проверяем...</span>';
-    
+
     // Устанавливаем фиксированную ширину для спиннера и текста
     const spinner = checkPingBtn.querySelector('.fa-spinner');
     const textSpan = checkPingBtn.querySelector('span');
-    
+
     if (spinner) {
         spinner.style.fontSize = '1em';
         spinner.style.lineHeight = '1';
     }
-    
+
     if (textSpan) {
         textSpan.style.fontSize = '0.95rem';
         textSpan.style.lineHeight = '1';
     }
-    
+
     checkPingBtn.style.opacity = '0.7';
-    
+
     let dots = 0;
     const interval = setInterval(() => {
         pingValue.textContent = '•'.repeat(dots + 1);
         dots = (dots + 1) % 3;
     }, 200);
-    
+
     const delay = 2000 + Math.random() * 1000;
-    
+
     setTimeout(() => {
         clearInterval(interval);
-        
+
         const randomPing = Math.floor(Math.random() * (28 - 8 + 1)) + 8;
         pingValue.textContent = randomPing;
-        
+
         updatePingStatus(randomPing, statusText, indicators);
-        
+
         checkPingBtn.classList.remove('checking');
         checkPingBtn.disabled = false;
         checkPingBtn.innerHTML = '<i class="fas fa-sync-alt"></i><span>Проверить сейчас</span>';
-        
+
         // Восстанавливаем оригинальную высоту
         checkPingBtn.style.height = '';
         checkPingBtn.style.minHeight = '';
-        
+
         checkPingBtn.style.opacity = '1';
-        
+
         // Анимация успешной проверки
         pingValue.style.transform = 'scale(1.1)';
         pingValue.style.transition = 'transform 0.3s ease';
