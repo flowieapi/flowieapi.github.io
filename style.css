@@ -324,7 +324,7 @@ small {
 
 /* Адаптация основного контента под кастомный хедер */
 .app-container {
-    padding-top: 60px !important;
+    padding-top: 40px !important;
 }
 
 .glass-header {
@@ -2040,5 +2040,343 @@ body:not(.telegram-webapp) .settings-menu {
     
     .nav-item.active:hover {
         background: rgba(0, 255, 136, 0.2);
+    }
+}
+
+/* Добавьте эти стили в конец файла style.css */
+
+/* Стили для модального окна оплаты */
+.payment-modal {
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.payment-plan-info {
+    margin-bottom: 1.5rem;
+}
+
+.selected-plan-display {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.plan-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid;
+    flex-shrink: 0;
+}
+
+.plan-icon i {
+    font-size: 1.8rem;
+}
+
+.plan-details {
+    flex: 1;
+}
+
+.plan-details small {
+    color: var(--text-tertiary);
+    font-size: 0.85rem;
+}
+
+.payment-details-card {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin: 1rem 0;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.payment-detail-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.payment-detail-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.payment-detail-label {
+    color: var(--text-tertiary);
+    font-size: 0.9rem;
+    min-width: 120px;
+}
+
+.payment-detail-value {
+    flex: 1;
+    font-family: monospace;
+    font-size: 1rem;
+    color: var(--text-primary);
+    word-break: break-all;
+}
+
+.copy-btn-small {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--text-primary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.copy-btn-small:hover {
+    background: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+.payment-instructions {
+    background: rgba(0, 136, 255, 0.1);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin: 1.5rem 0;
+    border: 1px solid rgba(0, 136, 255, 0.2);
+}
+
+.payment-instructions h5 {
+    color: var(--info-color);
+    margin: 0 0 0.75rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.payment-instructions ol {
+    margin: 0;
+    padding-left: 1.25rem;
+    color: var(--text-secondary);
+}
+
+.payment-instructions li {
+    margin-bottom: 0.5rem;
+}
+
+.payment-instructions li:last-child {
+    margin-bottom: 0;
+}
+
+/* Стили для загрузки файла */
+.file-upload-area {
+    border: 2px dashed rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin: 1rem 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.file-upload-area:hover {
+    border-color: var(--primary-color);
+    background: rgba(157, 78, 221, 0.05);
+}
+
+.file-upload-area.has-file {
+    border-style: solid;
+    border-color: var(--success-color);
+    background: rgba(0, 255, 136, 0.05);
+}
+
+.upload-placeholder i {
+    font-size: 3rem;
+    color: var(--text-tertiary);
+    margin-bottom: 1rem;
+    opacity: 0.7;
+}
+
+.upload-placeholder p {
+    color: var(--text-primary);
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+}
+
+.upload-placeholder small {
+    color: var(--text-tertiary);
+    font-size: 0.85rem;
+}
+
+.file-input-hidden {
+    display: none;
+}
+
+.file-preview {
+    position: relative;
+    margin-top: 1rem;
+}
+
+.file-preview img {
+    max-width: 100%;
+    max-height: 200px;
+    border-radius: 8px;
+    display: block;
+    margin: 0 auto;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.remove-file-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255, 59, 48, 0.9);
+    border: none;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.remove-file-btn:hover {
+    background: rgba(255, 59, 48, 1);
+    transform: scale(1.1);
+}
+
+/* Стили для формы */
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.form-input {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    color: var(--text-primary);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 0 3px rgba(157, 78, 221, 0.1);
+}
+
+.btn-block {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1.1rem;
+}
+
+/* Статус платежа */
+.payment-status {
+    padding: 1rem 1.25rem;
+    border-radius: 10px;
+    margin-top: 1.5rem;
+    text-align: center;
+    font-weight: 500;
+    animation: fadeIn 0.3s ease;
+}
+
+.payment-status.success {
+    background: rgba(0, 255, 136, 0.1);
+    color: var(--success-color);
+    border: 1px solid rgba(0, 255, 136, 0.3);
+}
+
+.payment-status.error {
+    background: rgba(255, 59, 48, 0.1);
+    color: #ff3b30;
+    border: 1px solid rgba(255, 59, 48, 0.3);
+}
+
+.payment-status.pending {
+    background: rgba(255, 204, 0, 0.1);
+    color: #ffcc00;
+    border: 1px solid rgba(255, 204, 0, 0.3);
+}
+
+/* Анимации */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .payment-modal {
+        max-width: 95%;
+        margin: 1rem;
+    }
+    
+    .selected-plan-display {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+    
+    .plan-details {
+        text-align: center;
+    }
+    
+    .payment-detail-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+    }
+    
+    .payment-detail-label {
+        min-width: auto;
+    }
+    
+    .copy-btn-small {
+        align-self: flex-end;
+        margin-top: 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .file-upload-area {
+        padding: 1.5rem 1rem;
+    }
+    
+    .upload-placeholder i {
+        font-size: 2.5rem;
+    }
+    
+    .upload-placeholder p {
+        font-size: 1rem;
     }
 }

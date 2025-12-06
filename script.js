@@ -1210,8 +1210,18 @@ function initBuyButtons() {
             e.preventDefault();
             e.stopPropagation();
             const planId = this.getAttribute('data-plan');
+            const price = this.getAttribute('data-price');
+            const name = this.getAttribute('data-name');
             
-            if (planId) {
+            if (planId && window.paymentSystem) {
+                // Используем новую систему оплаты
+                window.paymentSystem.openPaymentModal({
+                    plan: planId,
+                    price: price,
+                    name: name
+                });
+            } else if (planId) {
+                // Старая система (запасной вариант)
                 openBuyModal(planId);
             }
         });

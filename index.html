@@ -10,6 +10,9 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
 </head>
 
 <body>
@@ -80,7 +83,7 @@
                                 <span>Серверы в РФ и Европе</span>
                             </div>
                         </div>
-                        <button class="simple-btn btn-primary buy-btn" data-plan="light">
+                        <button class="simple-btn btn-primary buy-btn" data-plan="light" data-price="299" data-name="Лайт VPN">
                             <i class="fas fa-shopping-cart"></i>
                             <span>Выбрать тариф</span>
                         </button>
@@ -118,7 +121,7 @@
                                 <span>Безлимитный трафик</span>
                             </div>
                         </div>
-                        <button class="simple-btn btn-primary buy-btn" data-plan="pro">
+                        <button class="simple-btn btn-primary buy-btn" data-plan="pro" data-price="599" data-name="Про VPN">
                             <i class="fas fa-shopping-cart"></i>
                             <span>Выбрать тариф</span>
                         </button>
@@ -156,11 +159,18 @@
                                 <span>Персональный менеджер</span>
                             </div>
                         </div>
-                        <button class="simple-btn btn-primary buy-btn" data-plan="flowi">
+                        <button class="simple-btn btn-primary buy-btn" data-plan="flowi" data-price="999" data-name="Флоуи VPN">
                             <i class="fas fa-shopping-cart"></i>
                             <span>Выбрать тариф</span>
                         </button>
                     </div>
+                </div>
+                
+                <!-- Кнопка для тестирования оплаты -->
+                <div style="margin-top: 30px; text-align: center;">
+                    <button class="simple-btn btn-secondary" id="testPaymentBtn">
+                        <i class="fas fa-credit-card"></i> Протестировать оплату
+                    </button>
                 </div>
             </section>
 
@@ -266,7 +276,97 @@
         </div>
     </div>
 
+    <!-- Модальное окно оплаты (новая система) -->
+    <div id="paymentModal" class="modal-overlay">
+        <div class="modal-container payment-modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-credit-card"></i> Оплата тарифа</h3>
+                <button class="modal-close" onclick="closePaymentModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="paymentPlanInfo" class="payment-plan-info"></div>
+                
+                <div class="payment-section">
+                    <h4><i class="fas fa-wallet"></i> Реквизиты для перевода</h4>
+                    <div class="payment-details-card">
+                        <div class="payment-detail-item">
+                            <div class="payment-detail-label">Номер карты:</div>
+                            <div class="payment-detail-value">5536 9138 2377 1845</div>
+                            <button class="copy-btn-small" data-text="5536 9138 2377 1845">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="payment-detail-item">
+                            <div class="payment-detail-label">Получатель:</div>
+                            <div class="payment-detail-value">Иванов Иван Иванович</div>
+                            <button class="copy-btn-small" data-text="Иванов Иван Иванович">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="payment-detail-item">
+                            <div class="payment-detail-label">Банк:</div>
+                            <div class="payment-detail-value">Тинькофф Банк</div>
+                            <button class="copy-btn-small" data-text="Тинькофф Банк">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="payment-instructions">
+                        <h5><i class="fas fa-list-ol"></i> Инструкция:</h5>
+                        <ol>
+                            <li>Скопируйте реквизиты карты</li>
+                            <li>Совершите перевод на указанную карту</li>
+                            <li>Сохраните скриншот или фото чека</li>
+                            <li>Загрузите чек в форму ниже</li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="payment-section">
+                    <h4><i class="fas fa-receipt"></i> Загрузите чек об оплате</h4>
+                    
+                    <form id="receiptUploadForm">
+                        <div class="form-group">
+                            <label for="payerName">Ваше имя (необязательно)</label>
+                            <input type="text" id="payerName" placeholder="Введите ваше имя" class="form-input">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="payerEmail">Email для связи (необязательно)</label>
+                            <input type="email" id="payerEmail" placeholder="Введите ваш email" class="form-input">
+                        </div>
+                        
+                        <div class="file-upload-area" id="fileUploadArea">
+                            <input type="file" id="receiptFile" accept="image/*" class="file-input-hidden">
+                            <div class="upload-placeholder">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p>Нажмите для загрузки чека</p>
+                                <small>JPG, PNG, GIF (макс. 5MB)</small>
+                            </div>
+                            <div id="filePreview" class="file-preview" style="display: none;">
+                                <img id="previewImage" src="" alt="Предпросмотр">
+                                <button type="button" class="remove-file-btn" onclick="removeUploadedFile()">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="simple-btn btn-primary btn-block" id="submitReceiptBtn" disabled>
+                            <i class="fas fa-paper-plane"></i> Отправить чек на проверку
+                        </button>
+                    </form>
+                </div>
+                
+                <div id="paymentStatus" class="payment-status" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
+    <script src="payment-system.js"></script>
 </body>
 
 </html>
