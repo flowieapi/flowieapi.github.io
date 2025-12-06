@@ -58,6 +58,249 @@ document.addEventListener('DOMContentLoaded', async function () {
 // Инициализация Telegram Web App
 const tg = window.Telegram?.WebApp;
 
+// Убираем заголовок Telegram и добавляем кастомные кнопки
+function customizeTelegramUI() {
+    if (!window.Telegram?.WebApp) return;
+    
+    const tg = window.Telegram.WebApp;
+    
+    // Скрываем заголовок Telegram
+    tg.setHeaderColor('bg_color');
+    tg.enableClosingConfirmation();
+    
+    // Убираем стандартные кнопки если они есть
+    if (tg.BackButton) {
+        tg.BackButton.hide();
+    }
+    
+    // Добавляем кастомный хедер
+    addCustomHeader();
+    
+    // Добавляем плавающую кнопку закрытия
+    addFloatingCloseButton();
+    
+    // Добавляем кнопки "свернуть" и "три точки"
+    addCustomActionButtons();
+}
+
+// Создаем кастомный хедер
+function addCustomHeader() {
+    const existingHeader = document.querySelector('.custom-telegram-header');
+    if (existingHeader) return;
+    
+    const headerHTML = `
+        <div class="custom-telegram-header">
+            <div class="custom-header-left">
+                <button class="custom-back-btn" onclick="window.history.back()">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            <div class="custom-header-center">
+                <div class="app-logo">
+                    <div class="logo-icon-small">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <span class="app-name">ФЛОУИ VPN</span>
+                </div>
+            </div>
+            <div class="custom-header-right">
+                <button class="custom-minimize-btn" onclick="minimizeApp()">
+                    <i class="fas fa-window-minimize"></i>
+                </button>
+                <button class="custom-more-btn" onclick="toggleMoreMenu()">
+                    <i class="fas fa-ellipsis-v"></i>
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('afterbegin', headerHTML);
+}
+
+// Добавляем плавающую кнопку закрытия
+function addFloatingCloseButton() {
+    const existingCloseBtn = document.querySelector('.floating-close-btn');
+    if (existingCloseBtn) return;
+    
+    const closeBtnHTML = `
+        <button class="floating-close-btn" onclick="closeApp()">
+            <i class="fas fa-times"></i>
+            <span class="btn-text">Close</span>
+        </button>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', closeBtnHTML);
+}
+
+// Добавляем кнопки действий (свернуть и три точки)
+function addCustomActionButtons() {
+    const actionMenuHTML = `
+        <div class="custom-action-menu" id="actionMenu">
+            <button class="action-menu-item" onclick="showSettings()">
+                <i class="fas fa-cog"></i>
+                <span>Настройки</span>
+            </button>
+            <button class="action-menu-item" onclick="showProfile()">
+                <i class="fas fa-user"></i>
+                <span>Профиль</span>
+            </button>
+            <button class="action-menu-item" onclick="showSupport()">
+                <i class="fas fa-headset"></i>
+                <span>Поддержка</span>
+            </button>
+            <button class="action-menu-item" onclick="showAbout()">
+                <i class="fas fa-info-circle"></i>
+                <span>О приложении</span>
+            </button>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', actionMenuHTML);
+}
+
+// Функции для кнопок
+function closeApp() {
+    if (window.Telegram?.WebApp?.close) {
+        window.Telegram.WebApp.close();
+    } else {
+        window.close();
+    }
+}
+
+function minimizeApp() {
+    if (window.Telegram?.WebApp?.switchInlineQuery) {
+        // Альтернативное действие если минимизация не доступна
+        showNotification('Приложение минимизировано', 'info');
+    }
+}
+
+function toggleMoreMenu() {
+    const menu = document.getElementById('actionMenu');
+    if (menu) {
+        menu.classList.toggle('show');
+    }
+}
+
+// Вспомогательные функции
+function showSettings() {
+    window.location.href = 'settings.html';
+    toggleMoreMenu();
+}
+
+function showProfile() {
+    window.location.href = 'profile.html';
+    toggleMoreMenu();
+}
+
+function showSupport() {
+    // Открываем поддержку в Telegram
+    if (window.Telegram?.WebApp?.openTelegramLink) {
+        window.Telegram.WebApp.openTelegramLink('https://t.me/flowivpn_support');
+    }
+    toggleMoreMenu();
+}
+
+function showAbout() {
+    const modalHTML = `
+        <div class="modal-overlay active" id="aboutModal">
+            <div class="modal-container">
+                <div class="modal-header">
+                    <h3><i class="fas fa-info-circle"></i> О приложении</h3>
+                    <button class="modal-close" onclick="closeModal('aboutModal')">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <div class="logo-icon" style="width: 80px; height: 80px; margin: 0 auto;">
+                            <i class="fas fa-shield-alt" style="font-size: 2rem;"></i>
+                        </div>
+                    </div>
+                    <h4 style="text-align: center; margin-bottom: 10px;">ФЛОУИ VPN</h4>
+                    <p style="text-align: center; color: var(--text-secondary); margin-bottom: 20px;">
+                        Версия 1.0.0
+                    </p>
+                    <div style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 12px; margin-bottom: 15px;">
+                        <p style="margin: 0; color: var(--text-secondary); font-size: 0.9rem;">
+                            Оптимизированный VPN для PUBG Mobile с низким пингом и стабильным соединением.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    toggleMoreMenu();
+}
+
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.remove();
+    }
+}
+
+// Инициализация при загрузке
+document.addEventListener('DOMContentLoaded', function() {
+    // Вызываем после инициализации Telegram
+    setTimeout(() => {
+        customizeTelegramUI();
+    }, 100);
+});
+
+function initTelegramWebApp() {
+    if (!window.Telegram?.WebApp) return;
+
+    const tg = window.Telegram.WebApp;
+    
+    // Добавляем класс для стилей
+    document.body.classList.add('telegram-webapp');
+
+    console.log('Telegram Web App инициализирован');
+
+    // Расширяем приложение на весь экран
+    if (tg.expand) {
+        tg.expand();
+    }
+
+    // Отключаем стандартные кнопки
+    if (tg.BackButton) {
+        tg.BackButton.hide();
+    }
+    
+    // Настраиваем тему
+    applyTelegramTheme();
+
+    // Подписываемся на изменения темы
+    tg.onEvent('themeChanged', applyTelegramTheme);
+
+    // Синхронизируем данные пользователя
+    const telegramUser = tg.initDataUnsafe?.user;
+    if (telegramUser) {
+        // Пробуем загрузить сохраненный аватар
+        const loadedFromCache = loadSavedAvatar();
+        
+        if (!loadedFromCache) {
+            syncTelegramAvatar(telegramUser);
+        }
+        
+        currentUser = {
+            telegramUser: telegramUser,
+            lastAvatarUpdate: Date.now()
+        };
+    }
+
+    // Кастомизируем UI
+    customizeTelegramUI();
+
+    // Готовим приложение
+    if (tg.ready) {
+        tg.ready();
+    }
+    
+    // Добавляем подтверждение закрытия
+    tg.enableClosingConfirmation();
+}
+
 
 function syncTelegramAvatar(user) {
     if (!user) return;

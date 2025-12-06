@@ -102,6 +102,392 @@ small {
     position: relative;
 }
 
+/* ===== КАСТОМНЫЙ TELEGRAM UI ===== */
+.custom-telegram-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 56px;
+    background: rgba(19, 19, 26, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    z-index: 2000;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.custom-header-left,
+.custom-header-right {
+    flex: 0 0 auto;
+}
+
+.custom-header-center {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+}
+
+.custom-back-btn,
+.custom-minimize-btn,
+.custom-more-btn {
+    width: 36px;
+    height: 36px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-primary);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.custom-back-btn:hover,
+.custom-minimize-btn:hover,
+.custom-more-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: var(--accent-1);
+    transform: translateY(-1px);
+}
+
+.custom-minimize-btn {
+    margin-right: 8px;
+}
+
+.app-logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: rgba(0, 255, 136, 0.1);
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(0, 255, 136, 0.2);
+}
+
+.logo-icon-small {
+    width: 28px;
+    height: 28px;
+    background: var(--primary-gradient);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.9rem;
+}
+
+.app-name {
+    font-size: 0.9rem;
+    font-weight: 700;
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 0.5px;
+}
+
+/* Плавающая кнопка закрытия */
+.floating-close-btn {
+    position: fixed;
+    bottom: 80px;
+    right: 16px;
+    background: rgba(255, 71, 87, 0.15);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 71, 87, 0.3);
+    border-radius: var(--radius-xl);
+    padding: 12px 20px;
+    color: var(--danger-color);
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 1000;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(255, 71, 87, 0.2);
+    animation: float 3s ease-in-out infinite;
+    -webkit-tap-highlight-color: transparent;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+.floating-close-btn:hover {
+    background: rgba(255, 71, 87, 0.25);
+    border-color: var(--danger-color);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 71, 87, 0.3);
+}
+
+.floating-close-btn i {
+    font-size: 1rem;
+}
+
+.floating-close-btn .btn-text {
+    display: inline;
+}
+
+/* Меню действий (три точки) */
+.custom-action-menu {
+    position: fixed;
+    top: 60px;
+    right: 16px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-lg);
+    padding: 8px;
+    min-width: 180px;
+    z-index: 2000;
+    opacity: 0;
+    transform: translateY(-10px);
+    visibility: hidden;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.custom-action-menu.show {
+    opacity: 1;
+    transform: translateY(0);
+    visibility: visible;
+}
+
+.action-menu-item {
+    width: 100%;
+    padding: 12px 16px;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.action-menu-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--accent-1);
+}
+
+.action-menu-item i {
+    width: 20px;
+    font-size: 0.9rem;
+}
+
+/* Меню для настройки цвета и скрытия кнопок */
+.settings-menu {
+    position: fixed;
+    top: 60px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    min-width: 280px;
+    z-index: 2000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+}
+
+.settings-menu.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}
+
+.settings-menu h4 {
+    color: var(--text-primary);
+    margin-bottom: 12px;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.color-options {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.color-option {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.color-option:hover {
+    transform: scale(1.1);
+}
+
+.color-option.active {
+    border-color: var(--text-primary);
+    box-shadow: 0 0 0 2px var(--accent-1);
+}
+
+.toggle-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.toggle-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.toggle-option:last-child {
+    border-bottom: none;
+}
+
+.toggle-option span {
+    font-size: 0.9rem;
+    color: var(--text-primary);
+}
+
+/* Адаптация основного контента под кастомный хедер */
+.app-container {
+    padding-top: 60px !important;
+}
+
+.glass-header {
+    display: none !important;
+}
+
+/* Адаптация для мобильных */
+@media (max-width: 380px) {
+    .custom-telegram-header {
+        height: 52px;
+        padding: 0 12px;
+    }
+    
+    .custom-back-btn,
+    .custom-minimize-btn,
+    .custom-more-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 0.9rem;
+    }
+    
+    .logo-icon-small {
+        width: 24px;
+        height: 24px;
+    }
+    
+    .app-name {
+        font-size: 0.8rem;
+    }
+    
+    .floating-close-btn {
+        bottom: 70px;
+        right: 12px;
+        padding: 10px 16px;
+        font-size: 0.85rem;
+    }
+    
+    .floating-close-btn .btn-text {
+        display: none;
+    }
+    
+    .custom-action-menu {
+        min-width: 160px;
+        right: 12px;
+    }
+    
+    .settings-menu {
+        min-width: 260px;
+        padding: 12px;
+    }
+}
+
+@media (max-width: 320px) {
+    .custom-telegram-header {
+        padding: 0 10px;
+    }
+    
+    .custom-minimize-btn {
+        margin-right: 6px;
+    }
+    
+    .floating-close-btn {
+        bottom: 65px;
+        right: 10px;
+    }
+    
+    .custom-action-menu {
+        min-width: 140px;
+    }
+}
+
+/* Показываем кнопки только в Telegram Mini App */
+.telegram-webapp .custom-telegram-header,
+.telegram-webapp .floating-close-btn,
+.telegram-webapp .custom-action-menu {
+    display: flex !important;
+}
+
+body:not(.telegram-webapp) .custom-telegram-header,
+body:not(.telegram-webapp) .floating-close-btn,
+body:not(.telegram-webapp) .custom-action-menu,
+body:not(.telegram-webapp) .settings-menu {
+    display: none !important;
+}
+
+/* Стиль для тела в Telegram */
+.telegram-webapp {
+    padding-top: 0;
+}
+
+/* Анимация для кнопок при нажатии */
+.custom-back-btn:active,
+.custom-minimize-btn:active,
+.custom-more-btn:active,
+.floating-close-btn:active,
+.action-menu-item:active {
+    transform: scale(0.95);
+}
+
+/* Прячем кнопки если пользователь выбрал скрыть */
+.hidden-element {
+    display: none !important;
+}
+
 /* ===== GLASS HEADER ===== */
 .glass-header {
     background: rgba(10, 10, 15, 0);
