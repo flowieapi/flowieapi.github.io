@@ -522,7 +522,7 @@ class PaymentSystem {
                     this.closeConfirmationModal();
                     
                     // Показываем уведомление об успехе
-                    this.showNotification('VPN успешно активирован! Приятной игры!', 'success');
+                    this.showNotification('Покупка прошла успешно, Приятной игры!', 'success');
                     
                     // Обновляем профиль пользователя
                     if (window.currentUser) {

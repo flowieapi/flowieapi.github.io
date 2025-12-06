@@ -2469,7 +2469,7 @@ body.modal-open .glass-nav {
     border-radius: var(--radius-xl);
     width: 100%;
     max-width: 480px;
-    max-height: auto;
+    max-height: 700px;
     overflow-y: auto;
     box-shadow: 0 20px 60px rgba(0, 255, 136, 0.2);
     animation: slideUp 0.4s ease;
