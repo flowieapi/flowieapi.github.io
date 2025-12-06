@@ -234,7 +234,6 @@ function applyFullscreenWithRetry() {
     tryFullscreen();
 }
 
-// Обновленная инициализация Telegram WebApp
 function initTelegramWebApp() {
     if (!window.Telegram?.WebApp) {
         console.log('Telegram WebApp не найден');
@@ -244,7 +243,7 @@ function initTelegramWebApp() {
     tg = window.Telegram.WebApp;
     console.log('Telegram WebApp инициализирован:', tg);
 
-    // 1. Сразу применяем принудительный fullscreen
+    // 1. Применяем принудительный fullscreen
     forceTelegramFullscreen();
 
     // 2. Запускаем повторные попытки
@@ -256,16 +255,13 @@ function initTelegramWebApp() {
     // 4. Подписываемся на изменения темы
     tg.onEvent('themeChanged', applyTelegramTheme);
 
-    // 5. Получаем данные пользователя
+    // 5. Получаем данные пользователя и синхронизируем аватар
     telegramUser = tg.initDataUnsafe?.user;
     if (telegramUser) {
         updateUserProfileFromTelegram(telegramUser);
-        initTelegramAvatar(telegramUser);
-
-        currentUser = {
-            telegramUser: telegramUser,
-            lastAvatarUpdate: Date.now()
-        };
+    } else {
+        // Пробуем загрузить сохраненный аватар
+        loadSavedAvatar();
     }
 
     // 6. Кастомизируем UI
@@ -277,40 +273,52 @@ function initTelegramWebApp() {
     if (tg.ready) {
         tg.ready();
     }
+}
 
-    // 8. Обработчик изменения размера окна
-    let lastHeight = 0;
-    const handleResize = () => {
-        const currentHeight = window.innerHeight;
-        if (Math.abs(currentHeight - lastHeight) > 50) {
-            console.log('Высота окна изменилась, применяем fullscreen');
-            forceTelegramFullscreen();
-            lastHeight = currentHeight;
+function updateProfileInfo(user) {
+    if (!window.location.pathname.includes('profile.html')) return;
+
+    const profileName = document.querySelector('.profile-info h2');
+    if (profileName) {
+        let fullName = '';
+        if (user.first_name) fullName += user.first_name;
+        if (user.last_name) fullName += ' ' + user.last_name;
+        if (!fullName.trim()) fullName = 'Пользователь Telegram';
+        profileName.textContent = fullName.trim();
+    }
+
+    const profileUsername = document.querySelector('.profile-username');
+    if (profileUsername) {
+        if (user.username) {
+            profileUsername.textContent = `@${user.username}`;
+        } else {
+            profileUsername.textContent = 'Без username';
         }
-    };
+    }
 
-    window.addEventListener('resize', handleResize);
-    window.addEventListener('orientationchange', () => {
-        setTimeout(() => {
-            forceTelegramFullscreen();
-        }, 300);
-    });
+    const profileLevel = document.querySelector('.profile-level');
+    if (profileLevel && user.is_premium) {
+        profileLevel.innerHTML = '<i class="fas fa-crown"></i> Telegram Premium';
+        profileLevel.style.background = 'rgba(255, 215, 0, 0.15)';
+        profileLevel.style.color = '#ffd700';
+        profileLevel.style.borderColor = 'rgba(255, 215, 0, 0.3)';
+    }
+    
+    // Обновляем статистику (опционально)
+    updateTelegramStats(user);
+}
 
-    // 9. Обработчик скролла для предотвращения появления нативного UI
-    let lastScrollTop = 0;
-    window.addEventListener('scroll', () => {
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-
-        // Если начался сильный скролл вверх - возможно показывается нативный UI
-        if (scrollTop < lastScrollTop - 100) {
-            console.log('Обнаружен скролл вверх - проверяем fullscreen');
-            setTimeout(() => {
-                if (tg.expand) tg.expand();
-            }, 50);
-        }
-
-        lastScrollTop = scrollTop;
-    });
+function updateTelegramStats(user) {
+    const stats = document.querySelectorAll('.stat-number');
+    if (stats.length >= 3) {
+        const userId = user.id.toString();
+        const seed = parseInt(userId.slice(-4)) || 1234;
+        
+        // Генерируем псевдорандомные данные на основе ID пользователя
+        stats[0].textContent = Math.floor((seed % 335) + 30); // дни
+        stats[1].textContent = Math.floor(((seed * 13) % 1900) + 100); // игры
+        stats[2].textContent = Math.floor(((seed * 7) % 25) + 70) + '%'; // точность
+    }
 }
 
 // Функция для проверки, запущено ли из чата
@@ -496,50 +504,49 @@ function applyTelegramTheme() {
 function syncTelegramAvatar(user) {
     if (!user) return;
 
-    const avatars = document.querySelectorAll('.user-avatar, .profile-avatar-large');
+    const avatars = document.querySelectorAll('.user-avatar img, .profile-avatar-large img');
     let telegramAvatarUrl = null;
 
+    // 1. Пробуем получить фото из Telegram (если пользователь его установил)
     if (user.photo_url) {
         telegramAvatarUrl = user.photo_url;
+        console.log('Используем аватар Telegram:', telegramAvatarUrl);
     }
 
+    // 2. Если фото нет в Telegram, используем DiceBear с уникальным seed на основе ID
     if (!telegramAvatarUrl) {
         const userId = user.id.toString();
         telegramAvatarUrl = `https://api.dicebear.com/7.x/thumbs/svg?seed=telegram_${userId}&backgroundColor=0088cc,34b7f1,00ff88&backgroundType=gradientLinear`;
+        console.log('Используем сгенерированный аватар:', telegramAvatarUrl);
     }
 
+    // 3. Обновляем все аватары на странице
     avatars.forEach(avatar => {
-        const img = avatar.querySelector('img');
-        if (img) {
-            img.src = telegramAvatarUrl;
-            img.onerror = function () {
-                this.src = `https://api.dicebear.com/7.x/thumbs/svg?seed=user_${Date.now()}&backgroundColor=00ff88,00ccff,9d4edd&backgroundType=gradientLinear`;
-            };
-        }
-        avatar.classList.add('telegram-synced');
+        const originalSrc = avatar.src;
+        avatar.src = telegramAvatarUrl;
+        
+        // Обработчик ошибки загрузки
+        avatar.onerror = function() {
+            console.log('Не удалось загрузить аватар Telegram, используем резервный');
+            this.src = originalSrc;
+        };
+        
+        // Добавляем класс для стилизации
+        avatar.parentElement.classList.add('telegram-synced');
     });
-
-    try {
-        localStorage.setItem('telegram_avatar_url', telegramAvatarUrl);
-        localStorage.setItem('telegram_user_id', user.id.toString());
-    } catch (e) {
-        console.log('Не удалось сохранить аватар в localStorage');
-    }
 }
 
+// Функция для загрузки сохраненного аватара при перезагрузке
 function loadSavedAvatar() {
     try {
         const savedAvatarUrl = localStorage.getItem('telegram_avatar_url');
         const savedUserId = localStorage.getItem('telegram_user_id');
-
+        
         if (savedAvatarUrl && savedUserId) {
-            const avatars = document.querySelectorAll('.user-avatar, .profile-avatar-large');
+            const avatars = document.querySelectorAll('.user-avatar img, .profile-avatar-large img');
             avatars.forEach(avatar => {
-                const img = avatar.querySelector('img');
-                if (img) {
-                    img.src = savedAvatarUrl;
-                    avatar.classList.add('telegram-synced');
-                }
+                avatar.src = savedAvatarUrl;
+                avatar.parentElement.classList.add('telegram-synced');
             });
             return true;
         }
@@ -553,7 +560,11 @@ function updateUserProfileFromTelegram(user) {
     if (!user) return;
 
     console.log('Данные пользователя Telegram:', user);
-    updateAllAvatars(user);
+    
+    // Синхронизируем аватар
+    syncTelegramAvatar(user);
+    
+    // Обновляем информацию профиля
     updateProfileInfo(user);
 
     currentUser = {
@@ -565,6 +576,12 @@ function updateUserProfileFromTelegram(user) {
         isPremium: user.is_premium || false,
         photoUrl: user.photo_url || null
     };
+    
+    // Сохраняем в localStorage для использования при перезагрузке
+    if (user.photo_url) {
+        localStorage.setItem('telegram_avatar_url', user.photo_url);
+        localStorage.setItem('telegram_user_id', user.id.toString());
+    }
 }
 
 function initTelegramAvatar(user) {
@@ -710,10 +727,12 @@ document.addEventListener('DOMContentLoaded', async function () {
 
         // Получаем данные пользователя
         telegramUser = window.Telegram.WebApp.initDataUnsafe?.user;
-
+        
         if (telegramUser) {
             updateUserProfileFromTelegram(telegramUser);
-            initTelegramAvatar(telegramUser);
+        } else {
+            // Если нет данных Telegram, пробуем загрузить сохраненный аватар
+            loadSavedAvatar();
         }
     }
 
@@ -730,6 +749,8 @@ document.addEventListener('DOMContentLoaded', async function () {
     initPingCheck();
     initBuyButtons();
     initModals();
+
+    loadSavedAvatar();
 
     // Шаг 6: Оптимизации для мобильных
     optimizeMobileExperience();

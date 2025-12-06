@@ -2860,6 +2860,31 @@ body.confirmation-active .notification {
     }
 }
 
+/* В файл style.css добавьте */
+.profile-avatar-large.telegram-synced {
+    border: 3px solid var(--primary-color);
+    box-shadow: 0 0 20px rgba(0, 136, 204, 0.3);
+}
+
+.profile-avatar-large.telegram-synced img {
+    border-radius: 50%;
+}
+
+.user-avatar.telegram-synced {
+    border: 2px solid var(--primary-color);
+}
+
+/* Анимация для обновления аватара */
+@keyframes avatarUpdate {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.avatar-updating {
+    animation: avatarUpdate 0.5s ease;
+}
+
 /* Анимации */
 @keyframes bounceIn {
     0% {
