@@ -16,420 +16,76 @@ let currentUser = null;
 let userPurchases = [];
 let userActiveSubscription = null;
 let telegramUser = null;
-let tg = null;
 
-// CSS для полноэкранного режима Telegram
-const fullscreenStyles = `
-    <style id="telegram-fullscreen-styles">
-        .telegram-webapp {
-            height: 100vh !important;
-            max-height: 100vh !important;
-            overflow: hidden !important;
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            right: 0 !important;
-            bottom: 0 !important;
-            width: 100% !important;
-        }
+document.addEventListener('DOMContentLoaded', async function () {
+    // Инициализация Telegram Web App с полноэкранным режимом
+    if (window.Telegram?.WebApp) {
+        initTelegramFullscreen();
         
-        .telegram-webapp body {
-            height: 100vh !important;
-            max-height: 100vh !important;
-            overflow: hidden !important;
-            position: fixed;
-            width: 100%;
-            margin: 0 !important;
-            padding: 0 !important;
-        }
+        // Получаем данные пользователя Telegram
+        telegramUser = window.Telegram.WebApp.initDataUnsafe?.user;
         
-        /* Для iOS */
-        @supports (-webkit-touch-callout: none) {
-            .telegram-webapp {
-                height: -webkit-fill-available !important;
-            }
-        }
-        
-        /* Скрываем скроллбар Telegram */
-        .telegram-webapp::-webkit-scrollbar {
-            display: none !important;
-        }
-        
-        /* Стили для кастомного хедера */
-        .custom-header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 60px;
-            background: var(--dark-bg);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 20px;
-            z-index: 1000;
-            border-bottom: 1px solid var(--card-border);
-        }
-        
-        /* Плавающая кнопка закрытия */
-        .floating-close-btn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: var(--danger-color);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 4px 20px rgba(255, 59, 48, 0.3);
-            z-index: 9999;
-            transition: all 0.3s ease;
-        }
-        
-        .floating-close-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 25px rgba(255, 59, 48, 0.4);
-        }
-        
-        .floating-close-btn i {
-            font-size: 1.2rem;
-            margin-bottom: 2px;
-        }
-        
-        .floating-close-btn .btn-text {
-            font-size: 0.7rem;
-            font-weight: 600;
-        }
-        
-        /* Кастомное меню действий */
-        .custom-action-menu {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 10px;
-            display: none;
-            flex-direction: column;
-            gap: 5px;
-            z-index: 1001;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            border: 1px solid var(--card-border);
-        }
-        
-        .custom-action-menu.show {
-            display: flex;
-            animation: fadeIn 0.2s ease;
-        }
-        
-        .action-menu-item {
-            background: none;
-            border: none;
-            color: var(--text-primary);
-            padding: 12px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transition: background 0.2s ease;
-            white-space: nowrap;
-        }
-        
-        .action-menu-item:hover {
-            background: rgba(255, 255, 255, 0.05);
-        }
-        
-        .action-menu-item i {
-            width: 20px;
-            text-align: center;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        /* Убираем стандартный хедер Telegram */
-        .tg-head {
-            display: none !important;
-        }
-    </style>
-`;
-
-// Добавляем стили в head
-document.head.insertAdjacentHTML('beforeend', fullscreenStyles);
-
-// Функция для принудительного полноэкранного режима
-async function forceTelegramFullscreen() {
-    if (!window.Telegram?.WebApp) return false;
-    
-    const tg = window.Telegram.WebApp;
-    
-    try {
-        console.log('Применяем принудительный полноэкранный режим...');
-        
-        // 1. Добавляем класс для стилей
-        document.documentElement.classList.add('telegram-webapp');
-        document.body.classList.add('telegram-webapp');
-        
-        // 2. Расширяем на весь экран (основной метод)
-        if (typeof tg.expand === 'function') {
-            tg.expand();
-            console.log('tg.expand() вызван');
-        }
-        
-        // 3. Скрываем ВСЕ элементы интерфейса Telegram
-        if (typeof tg.setHeaderColor === 'function') {
-            tg.setHeaderColor('secondary_bg_color');
-        }
-        
-        if (tg.BackButton && typeof tg.BackButton.hide === 'function') {
-            tg.BackButton.hide();
-        }
-        
-        if (tg.MainButton && typeof tg.MainButton.hide === 'function') {
-            tg.MainButton.hide();
-        }
-        
-        // 4. Отключаем свайпы
-        if (typeof tg.enableVerticalSwipes === 'function') {
-            tg.enableVerticalSwipes(false);
-        }
-        
-        // 5. Скрываем кнопку настроек (три точки)
-        if (typeof tg.showSettings === 'function') {
-            try {
-                tg.showSettings(false);
-            } catch (e) {
-                console.log('showSettings не поддерживается');
-            }
-        }
-        
-        // 6. Устанавливаем подтверждение закрытия
-        if (typeof tg.enableClosingConfirmation === 'function') {
-            tg.enableClosingConfirmation();
-        }
-        
-        // 7. Фиксируем размеры
-        setTimeout(() => {
-            if (tg.viewportHeight) {
-                document.body.style.height = `${tg.viewportHeight}px`;
-                document.body.style.overflow = 'hidden';
-                document.documentElement.style.height = `${tg.viewportHeight}px`;
-            }
-        }, 100);
-        
-        // 8. Для iOS дополнительные настройки
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-        if (isIOS) {
-            // Обновляем viewport meta для iOS
-            let meta = document.querySelector('meta[name="viewport"]');
-            if (!meta) {
-                meta = document.createElement('meta');
-                meta.name = 'viewport';
-                document.head.appendChild(meta);
-            }
-            meta.content = 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover';
+        if (telegramUser) {
+            // Обновляем профиль с данными из Telegram
+            updateUserProfileFromTelegram(telegramUser);
             
-            // Устанавливаем CSS переменные для safe areas
-            document.documentElement.style.setProperty('--safe-area-top', 'env(safe-area-inset-top, 0px)');
-            document.documentElement.style.setProperty('--safe-area-bottom', 'env(safe-area-inset-bottom, 0px)');
-            
-            // Фиксируем высоту
-            setTimeout(() => {
-                const height = window.innerHeight;
-                document.body.style.height = `${height}px`;
-                document.documentElement.style.height = `${height}px`;
-            }, 200);
-            
-            // Предотвращаем bounce эффект
-            document.body.addEventListener('touchmove', function(e) {
-                const isScrollable = e.target.closest('.scrollable-content');
-                if (!isScrollable) {
-                    e.preventDefault();
-                }
-            }, { passive: false });
+            // Инициализируем аватар с seed из Telegram
+            initTelegramAvatar(telegramUser);
         }
-        
-        console.log('Принудительный полноэкранный режим применен');
-        return true;
-        
-    } catch (error) {
-        console.error('Ошибка при применении полноэкранного режима:', error);
-        return false;
-    }
-}
-
-// Функция для многократных попыток применения fullscreen
-function applyFullscreenWithRetry() {
-    if (!window.Telegram?.WebApp) return;
-    
-    const tg = window.Telegram.WebApp;
-    let attempts = 0;
-    const maxAttempts = 10;
-    
-    const tryFullscreen = () => {
-        attempts++;
-        
-        try {
-            // Основные методы
-            if (typeof tg.expand === 'function') {
-                tg.expand();
-            }
-            
-            if (typeof tg.requestFullscreen === 'function') {
-                tg.requestFullscreen();
-            }
-            
-            // Скрываем элементы интерфейса
-            if (tg.BackButton) tg.BackButton.hide();
-            if (tg.MainButton) tg.MainButton.hide();
-            
-            // Устанавливаем цвет хедера
-            tg.setHeaderColor('secondary_bg_color');
-            
-            console.log(`Попытка fullscreen #${attempts} выполнена`);
-            
-        } catch (error) {
-            console.warn(`Попытка fullscreen #${attempts} не удалась:`, error);
-        }
-        
-        // Продолжаем попытки
-        if (attempts < maxAttempts) {
-            setTimeout(tryFullscreen, 300 + (attempts * 100));
-        }
-    };
-    
-    // Начинаем попытки
-    tryFullscreen();
-}
-
-// Обновленная инициализация Telegram WebApp
-function initTelegramWebApp() {
-    if (!window.Telegram?.WebApp) {
-        console.log('Telegram WebApp не найден');
-        return;
     }
     
-    tg = window.Telegram.WebApp;
-    console.log('Telegram WebApp инициализирован:', tg);
+    // Инициализация Firebase (раскомментируйте когда добавите свои ключи)
+    // initFirebase();
     
-    // 1. Сразу применяем принудительный fullscreen
-    forceTelegramFullscreen();
+    // Загрузка демо данных пока нет Firebase
+    loadDemoData();
     
-    // 2. Запускаем повторные попытки
-    applyFullscreenWithRetry();
+    // Запуск анимаций появления
+    initAppearanceAnimations();
     
-    // 3. Настраиваем тему
-    applyTelegramTheme();
+    // Остальная инициализация
+    initPingCheck();
+    initBuyButtons();
+    initModals();
     
-    // 4. Подписываемся на изменения темы
-    tg.onEvent('themeChanged', applyTelegramTheme);
+    // Оптимизации для мобильных
+    optimizeMobileExperience();
     
-    // 5. Получаем данные пользователя
-    telegramUser = tg.initDataUnsafe?.user;
-    if (telegramUser) {
-        updateUserProfileFromTelegram(telegramUser);
-        initTelegramAvatar(telegramUser);
-        
-        currentUser = {
-            telegramUser: telegramUser,
-            lastAvatarUpdate: Date.now()
-        };
-    }
-    
-    // 6. Кастомизируем UI
-    setTimeout(() => {
-        customizeTelegramUI();
-    }, 200);
-    
-    // 7. Готовим приложение
-    if (tg.ready) {
-        tg.ready();
-    }
-    
-    // 8. Обработчик изменения размера окна
-    let lastHeight = 0;
-    const handleResize = () => {
-        const currentHeight = window.innerHeight;
-        if (Math.abs(currentHeight - lastHeight) > 50) {
-            console.log('Высота окна изменилась, применяем fullscreen');
-            forceTelegramFullscreen();
-            lastHeight = currentHeight;
-        }
-    };
-    
-    window.addEventListener('resize', handleResize);
-    window.addEventListener('orientationchange', () => {
-        setTimeout(() => {
-            forceTelegramFullscreen();
-        }, 300);
-    });
-    
-    // 9. Обработчик скролла для предотвращения появления нативного UI
-    let lastScrollTop = 0;
-    window.addEventListener('scroll', () => {
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        
-        // Если начался сильный скролл вверх - возможно показывается нативный UI
-        if (scrollTop < lastScrollTop - 100) {
-            console.log('Обнаружен скролл вверх - проверяем fullscreen');
-            setTimeout(() => {
-                if (tg.expand) tg.expand();
-            }, 50);
-        }
-        
-        lastScrollTop = scrollTop;
-    });
-}
+    // Обновление UI с данными пользователя
+    updateUserInterface();
+});
 
-// Функция для проверки, запущено ли из чата
-function isLaunchedFromChat() {
-    if (!window.Telegram?.WebApp) return false;
-    
-    const tg = window.Telegram.WebApp;
-    const initData = tg.initData || '';
-    const startParam = tg.initDataUnsafe?.start_param;
-    
-    // Если есть start_param, значит запуск из inline режима
-    // Если start_param нет, но есть данные пользователя - возможно из чата
-    const hasUserData = !!tg.initDataUnsafe?.user;
-    const hasStartParam = !!startParam;
-    
-    return hasUserData && !hasStartParam;
-}
-
-// Обновленная функция customizeTelegramUI
-function customizeTelegramUI() {
+// Инициализация полноэкранного режима Telegram
+function initTelegramFullscreen() {
     if (!window.Telegram?.WebApp) return;
     
     const tg = window.Telegram.WebApp;
     
-    // Применяем fullscreen еще раз для надежности
+    // 1. Расширяем на весь экран
     if (tg.expand) {
         tg.expand();
     }
     
-    // Скрываем стандартные кнопки
-    tg.BackButton?.hide();
-    tg.MainButton?.hide();
+    // 2. Скрываем стандартные кнопки
+    if (tg.BackButton) {
+        tg.BackButton.hide();
+    }
     
-    // Устанавливаем цвет хедера под фон
-    tg.setHeaderColor('secondary_bg_color');
+    if (tg.MainButton) {
+        tg.MainButton.hide();
+    }
     
-    // Отключаем свайпы
+    // 3. Устанавливаем цвет хедера под фон
+    if (tg.setHeaderColor) {
+        tg.setHeaderColor('secondary_bg_color');
+    }
+    
+    // 4. Отключаем вертикальные свайпы
     if (tg.enableVerticalSwipes) {
         tg.enableVerticalSwipes(false);
     }
     
-    // Скрываем кнопку настроек если доступно
+    // 5. Скрываем кнопку настроек если доступно
     if (tg.showSettings) {
         try {
             tg.showSettings(false);
@@ -438,165 +94,34 @@ function customizeTelegramUI() {
         }
     }
     
-    // Добавляем кастомный хедер
-    addCustomHeader();
-    
-    // Добавляем плавающую кнопку закрытия
-    addFloatingCloseButton();
-    
-    // Добавляем меню действий
-    addCustomActionButtons();
-    
-    console.log('Telegram UI кастомизирован');
-}
-
-// Функция для добавления кастомного хедера
-function addCustomHeader() {
-    const existingHeader = document.querySelector('.custom-header');
-    if (existingHeader) return;
-    
-    const headerHTML = `
-        <div class="custom-header">
-            <div class="logo-container">
-                <div class="logo-icon" style="width: 32px; height: 32px; background: var(--primary-gradient); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-                    <i class="fas fa-shield-alt" style="color: white; font-size: 1rem;"></i>
-                </div>
-                <h1 style="font-size: 1.2rem; margin: 0 0 0 10px; color: var(--text-primary);">ФЛОУИ VPN</h1>
-            </div>
-            <div class="header-actions">
-                <button class="action-btn" onclick="toggleMoreMenu()" style="background: none; border: none; color: var(--text-primary); font-size: 1.2rem; cursor: pointer;">
-                    <i class="fas fa-ellipsis-v"></i>
-                </button>
-            </div>
-        </div>
-    `;
-    
-    document.body.insertAdjacentHTML('afterbegin', headerHTML);
-    
-    // Добавляем отступ для основного контента
-    const mainContent = document.querySelector('main') || document.querySelector('.main-content');
-    if (mainContent) {
-        mainContent.style.paddingTop = '70px';
+    // 6. Включаем подтверждение закрытия
+    if (tg.enableClosingConfirmation) {
+        tg.enableClosingConfirmation();
     }
-}
-
-// Функция для добавления плавающей кнопки закрытия
-function addFloatingCloseButton() {
-    const existingCloseBtn = document.querySelector('.floating-close-btn');
-    if (existingCloseBtn) return;
     
-    const closeBtnHTML = `
-        <button class="floating-close-btn" onclick="closeApp()">
-            <i class="fas fa-times"></i>
-            <span class="btn-text">Закрыть</span>
-        </button>
-    `;
+    // 7. Применяем тему Telegram
+    applyTelegramTheme();
     
-    document.body.insertAdjacentHTML('beforeend', closeBtnHTML);
-}
-
-// Функция для добавления меню действий
-function addCustomActionButtons() {
-    const existingMenu = document.querySelector('.custom-action-menu');
-    if (existingMenu) return;
-    
-    const actionMenuHTML = `
-        <div class="custom-action-menu" id="actionMenu">
-            <button class="action-menu-item" onclick="showSettings()">
-                <i class="fas fa-cog"></i>
-                <span>Настройки</span>
-            </button>
-            <button class="action-menu-item" onclick="showProfile()">
-                <i class="fas fa-user"></i>
-                <span>Профиль</span>
-            </button>
-            <button class="action-menu-item" onclick="showSupport()">
-                <i class="fas fa-headset"></i>
-                <span>Поддержка</span>
-            </button>
-            <button class="action-menu-item" onclick="showAbout()">
-                <i class="fas fa-info-circle"></i>
-                <span>О приложении</span>
-            </button>
-        </div>
-    `;
-    
-    document.body.insertAdjacentHTML('beforeend', actionMenuHTML);
-}
-
-// Функция для закрытия приложения
-function closeApp() {
-    if (window.Telegram?.WebApp?.close) {
-        window.Telegram.WebApp.close();
-    } else {
-        window.close();
+    // 8. Подписываемся на изменения темы
+    if (tg.onEvent) {
+        tg.onEvent('themeChanged', applyTelegramTheme);
     }
-}
-
-// Функция для переключения меню
-function toggleMoreMenu() {
-    const menu = document.getElementById('actionMenu');
-    if (menu) {
-        menu.classList.toggle('show');
-    }
-}
-
-// Функции для пунктов меню
-function showSettings() {
-    window.location.href = 'settings.html';
-    toggleMoreMenu();
-}
-
-function showProfile() {
-    window.location.href = 'profile.html';
-    toggleMoreMenu();
-}
-
-function showSupport() {
-    if (window.Telegram?.WebApp?.openTelegramLink) {
-        window.Telegram.WebApp.openTelegramLink('https://t.me/flowivpn_support');
-    }
-    toggleMoreMenu();
-}
-
-function showAbout() {
-    const modalHTML = `
-        <div class="modal-overlay active" id="aboutModal">
-            <div class="modal-container">
-                <div class="modal-header">
-                    <h3><i class="fas fa-info-circle"></i> О приложении</h3>
-                    <button class="modal-close" onclick="closeModal('aboutModal')">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <div style="text-align: center; margin-bottom: 20px;">
-                        <div class="logo-icon" style="width: 80px; height: 80px; margin: 0 auto;">
-                            <i class="fas fa-shield-alt" style="font-size: 2rem;"></i>
-                        </div>
-                    </div>
-                    <h4 style="text-align: center; margin-bottom: 10px;">ФЛОУИ VPN</h4>
-                    <p style="text-align: center; color: var(--text-secondary); margin-bottom: 20px;">
-                        Версия 1.0.0
-                    </p>
-                    <div style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 12px; margin-bottom: 15px;">
-                        <p style="margin: 0; color: var(--text-secondary); font-size: 0.9rem;">
-                            Оптимизированный VPN для PUBG Mobile с низким пингом и стабильным соединением.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
     
-    document.body.insertAdjacentHTML('beforeend', modalHTML);
-    toggleMoreMenu();
-}
-
-// Функция для закрытия модального окна
-function closeModal(modalId) {
-    const modal = document.getElementById(modalId);
-    if (modal) {
-        modal.remove();
+    // 9. Повторяем расширение для надежности
+    setTimeout(() => {
+        if (tg.expand) tg.expand();
+    }, 100);
+    
+    setTimeout(() => {
+        if (tg.expand) tg.expand();
+    }, 500);
+    
+    // 10. Помечаем приложение как готовое
+    if (tg.ready) {
+        tg.ready();
     }
+    
+    console.log('Telegram WebApp инициализирован в полноэкранном режиме');
 }
 
 // Применение темы Telegram
@@ -611,79 +136,22 @@ function applyTelegramTheme() {
         document.documentElement.style.setProperty('--card-bg', themeParams.secondary_bg_color || '#13131a');
         document.documentElement.style.setProperty('--dark-bg', themeParams.bg_color || '#0a0a0f');
         document.documentElement.style.setProperty('--card-border', themeParams.section_bg_color || '#2a2a3a');
-        
-        // Для кнопки закрытия используем цвет акцента
-        const closeBtn = document.querySelector('.floating-close-btn');
-        if (closeBtn && themeParams.button_color) {
-            closeBtn.style.background = themeParams.button_color;
-        }
     }
 }
 
-// Остальные функции (без изменений)
-function syncTelegramAvatar(user) {
-    if (!user) return;
-    
-    const avatars = document.querySelectorAll('.user-avatar, .profile-avatar-large');
-    let telegramAvatarUrl = null;
-    
-    if (user.photo_url) {
-        telegramAvatarUrl = user.photo_url;
-    }
-    
-    if (!telegramAvatarUrl) {
-        const userId = user.id.toString();
-        telegramAvatarUrl = `https://api.dicebear.com/7.x/thumbs/svg?seed=telegram_${userId}&backgroundColor=0088cc,34b7f1,00ff88&backgroundType=gradientLinear`;
-    }
-    
-    avatars.forEach(avatar => {
-        const img = avatar.querySelector('img');
-        if (img) {
-            img.src = telegramAvatarUrl;
-            img.onerror = function () {
-                this.src = `https://api.dicebear.com/7.x/thumbs/svg?seed=user_${Date.now()}&backgroundColor=00ff88,00ccff,9d4edd&backgroundType=gradientLinear`;
-            };
-        }
-        avatar.classList.add('telegram-synced');
-    });
-    
-    try {
-        localStorage.setItem('telegram_avatar_url', telegramAvatarUrl);
-        localStorage.setItem('telegram_user_id', user.id.toString());
-    } catch (e) {
-        console.log('Не удалось сохранить аватар в localStorage');
-    }
-}
-
-function loadSavedAvatar() {
-    try {
-        const savedAvatarUrl = localStorage.getItem('telegram_avatar_url');
-        const savedUserId = localStorage.getItem('telegram_user_id');
-        
-        if (savedAvatarUrl && savedUserId) {
-            const avatars = document.querySelectorAll('.user-avatar, .profile-avatar-large');
-            avatars.forEach(avatar => {
-                const img = avatar.querySelector('img');
-                if (img) {
-                    img.src = savedAvatarUrl;
-                    avatar.classList.add('telegram-synced');
-                }
-            });
-            return true;
-        }
-    } catch (e) {
-        console.log('Не удалось загрузить сохраненный аватар');
-    }
-    return false;
-}
-
+// Остальные функции без изменений
 function updateUserProfileFromTelegram(user) {
     if (!user) return;
     
     console.log('Данные пользователя Telegram:', user);
+    
+    // Обновляем аватар на всех страницах
     updateAllAvatars(user);
+    
+    // Обновляем информацию в профиле
     updateProfileInfo(user);
     
+    // Сохраняем пользователя для дальнейшего использования
     currentUser = {
         id: user.id.toString(),
         username: user.username || `user_${user.id}`,
@@ -733,6 +201,7 @@ function updateProfileInfo(user) {
         if (user.first_name) fullName += user.first_name;
         if (user.last_name) fullName += ' ' + user.last_name;
         if (!fullName.trim()) fullName = 'Пользователь Telegram';
+        
         profileName.textContent = fullName.trim();
     }
     
@@ -796,82 +265,6 @@ function updatePageHeaders() {
     }
 }
 
-// Основная инициализация при загрузке DOM
-document.addEventListener('DOMContentLoaded', async function () {
-    console.log('DOM загружен, инициализируем приложение...');
-    
-    // Шаг 1: Инициализация Telegram WebApp с приоритетом на fullscreen
-    if (window.Telegram?.WebApp) {
-        console.log('Telegram WebApp обнаружен, применяем fullscreen...');
-        
-        // Сразу добавляем CSS классы
-        document.documentElement.classList.add('telegram-webapp');
-        document.body.classList.add('telegram-webapp');
-        
-        // Инициализируем с задержкой для надежности
-        setTimeout(() => {
-            initTelegramWebApp();
-        }, 100);
-        
-        // Множественные попытки для разных случаев запуска
-        setTimeout(() => {
-            if (window.Telegram?.WebApp?.expand) {
-                window.Telegram.WebApp.expand();
-            }
-        }, 200);
-        
-        setTimeout(() => {
-            if (window.Telegram?.WebApp?.expand) {
-                window.Telegram.WebApp.expand();
-            }
-        }, 500);
-        
-        setTimeout(() => {
-            if (window.Telegram?.WebApp?.expand) {
-                window.Telegram.WebApp.expand();
-            }
-        }, 1000);
-        
-        // Получаем данные пользователя
-        telegramUser = window.Telegram.WebApp.initDataUnsafe?.user;
-        
-        if (telegramUser) {
-            updateUserProfileFromTelegram(telegramUser);
-            initTelegramAvatar(telegramUser);
-        }
-    }
-    
-    // Шаг 2: Инициализация Firebase (раскомментируйте когда добавите свои ключи)
-    // initFirebase();
-    
-    // Шаг 3: Загрузка демо данных пока нет Firebase
-    loadDemoData();
-    
-    // Шаг 4: Запуск анимаций появления
-    initAppearanceAnimations();
-    
-    // Шаг 5: Остальная инициализация
-    initPingCheck();
-    initBuyButtons();
-    initModals();
-    
-    // Шаг 6: Оптимизации для мобильных
-    optimizeMobileExperience();
-    
-    // Шаг 7: Обновление UI с данными пользователя
-    updateUserInterface();
-    
-    // Шаг 8: Финальная проверка fullscreen через 2 секунды
-    setTimeout(() => {
-        if (window.Telegram?.WebApp?.expand) {
-            window.Telegram.WebApp.expand();
-        }
-    }, 2000);
-    
-    console.log('Инициализация завершена');
-});
-
-// Остальные функции без изменений
 async function initFirebase() {
     try {
         if (!firebase.apps.length) {
@@ -887,6 +280,7 @@ async function initFirebase() {
 }
 
 async function setupTelegramAuth() {
+    const tg = window.Telegram?.WebApp;
     if (!tg?.initDataUnsafe?.user) {
         console.log('Пользователь Telegram не найден');
         return;

@@ -434,6 +434,7 @@ small {
 .telegram-webapp .custom-action-menu {
     display: flex !important;
 }
+
 body:not(.telegram-webapp) .floating-close-btn,
 body:not(.telegram-webapp) .custom-action-menu,
 body:not(.telegram-webapp) .settings-menu {
