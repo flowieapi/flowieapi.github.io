@@ -175,31 +175,6 @@ small {
     letter-spacing: 0.5px;
 }
 
-/* Плавающая кнопка закрытия */
-.floating-close-btn {
-    position: fixed;
-    bottom: 80px;
-    right: 16px;
-    background: rgba(255, 71, 87, 0.15);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 71, 87, 0.3);
-    border-radius: var(--radius-xl);
-    padding: 12px 20px;
-    color: var(--danger-color);
-    font-weight: 600;
-    font-size: 0.9rem;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    z-index: 1000;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(255, 71, 87, 0.2);
-    animation: float 3s ease-in-out infinite;
-    -webkit-tap-highlight-color: transparent;
-}
-
 @keyframes float {
     0%, 100% {
         transform: translateY(0px);
@@ -207,21 +182,6 @@ small {
     50% {
         transform: translateY(-5px);
     }
-}
-
-.floating-close-btn:hover {
-    background: rgba(255, 71, 87, 0.25);
-    border-color: var(--danger-color);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(255, 71, 87, 0.3);
-}
-
-.floating-close-btn i {
-    font-size: 1rem;
-}
-
-.floating-close-btn .btn-text {
-    display: inline;
 }
 
 /* Меню действий (три точки) */
@@ -364,7 +324,7 @@ small {
 
 /* Адаптация основного контента под кастомный хедер */
 .app-container {
-    padding-top: 60px !important;
+    padding-top: 0px !important;
 }
 
 .glass-header {
@@ -390,18 +350,7 @@ small {
     .app-name {
         font-size: 0.8rem;
     }
-    
-    .floating-close-btn {
-        bottom: 70px;
-        right: 12px;
-        padding: 10px 16px;
-        font-size: 0.85rem;
-    }
-    
-    .floating-close-btn .btn-text {
-        display: none;
-    }
-    
+
     .custom-action-menu {
         min-width: 160px;
         right: 12px;
@@ -418,24 +367,17 @@ small {
     .custom-minimize-btn {
         margin-right: 6px;
     }
-    
-    .floating-close-btn {
-        bottom: 65px;
-        right: 10px;
-    }
-    
-    .custom-action-menu {
+
+        .custom-action-menu {
         min-width: 140px;
     }
 }
 
 /* Показываем кнопки только в Telegram Mini App */
-.telegram-webapp .floating-close-btn,
 .telegram-webapp .custom-action-menu {
     display: flex !important;
 }
 
-body:not(.telegram-webapp) .floating-close-btn,
 body:not(.telegram-webapp) .custom-action-menu,
 body:not(.telegram-webapp) .settings-menu {
     display: none !important;
@@ -450,7 +392,6 @@ body:not(.telegram-webapp) .settings-menu {
 .custom-back-btn:active,
 .custom-minimize-btn:active,
 .custom-more-btn:active,
-.floating-close-btn:active,
 .action-menu-item:active {
     transform: scale(0.95);
 }
@@ -1609,12 +1550,13 @@ body:not(.telegram-webapp) .settings-menu {
     right: 0;
     display: flex;
     justify-content: space-around;
-    padding: 8px 16px;
+    padding: 16px 16px 20px; /* Увеличили верхний padding */
     z-index: 1000;
-    height: 64px;
-    backdrop-filter: blur(20px);
+    height: 80px; /* Увеличили высоту */
+    backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(20px);
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.3);
+    min-height: 80px; /* Добавили минимальную высоту */
 }
 
 .nav-item {
@@ -1625,9 +1567,9 @@ body:not(.telegram-webapp) .settings-menu {
     text-decoration: none;
     color: var(--text-tertiary);
     transition: all 0.2s ease;
-    padding: 6px;
     border-radius: var(--radius-md);
     width: 64px;
+    height: 50px;
     position: relative;
     -webkit-tap-highlight-color: transparent;
 }
@@ -1647,7 +1589,6 @@ body:not(.telegram-webapp) .settings-menu {
     z-index: -1;
     border-radius: var(--radius-md);
     opacity: 0;
-    transition: opacity 0.2s ease;
 }
 
 .nav-item.active {
@@ -1659,41 +1600,69 @@ body:not(.telegram-webapp) .settings-menu {
     opacity: 1;
 }
 
-.nav-item.active::after {
-    content: '';
-    position: absolute;
-    top: -3px;
-    width: 4px;
-    height: 4px;
-    background: var(--accent-1);
-    border-radius: 50%;
-    box-shadow: 0 0 6px rgba(0, 255, 136, 0.5);
-}
-
 .nav-icon {
-    font-size: 1.2rem;
-    margin-bottom: 4px;
+    font-size: 1.1rem; /* Увеличили иконки */
+    margin-bottom: 0px; /* Увеличили отступ */
     transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 24px;
-}
-
-.nav-item.active .nav-icon {
-    transform: translateY(-1px);
+    height: 26px; /* Увеличили высоту */
 }
 
 .nav-label {
-    font-size: 0.65rem;
+    font-size: 0.6rem; /* Чуть увеличили текст */
     font-weight: 500;
     letter-spacing: 0.2px;
-    line-height: 1;
+    line-height: 1.1;
+    min-height: 14px; /* Минимальная высота для текста */
 }
 
-/* Анимация при нажатии */
-.nav-item:active {
-    transform: scale(0.95);
+/* Для мобильных устройств - адаптация */
+@media (max-width: 380px) {
+    .glass-nav {
+        height: 76px; /* Чуть меньше на маленьких экранах */
+        min-height: 76px;
+        padding: 14px 12px 18px;
+    }
+    
+    .nav-item {
+        width: 64px;
+        padding: 7px 8px;
+    }
+    
+    .nav-icon {
+        font-size: 1.25rem;
+        height: 26px;
+        margin-bottom: 5px;
+    }
+    
+    .nav-label {
+        font-size: 0.68rem;
+    }
+}
+
+@media (max-width: 320px) {
+    .glass-nav {
+        height: 72px;
+        min-height: 72px;
+        padding: 12px 10px 16px;
+    }
+    
+    .nav-item {
+        width: 58px;
+        padding: 6px 7px;
+    }
+    
+    .nav-icon {
+        font-size: 1.2rem;
+        height: 24px;
+        margin-bottom: 4px;
+    }
+    
+    .nav-label {
+        font-size: 0.65rem;
+    }
 }
 
 /* ===== MODAL ===== */
@@ -1884,25 +1853,30 @@ body:not(.telegram-webapp) .settings-menu {
 /* ===== SAFE AREAS FOR iOS ===== */
 @supports (padding: max(0px)) {
     .glass-nav {
-        padding-bottom: max(8px, env(safe-area-inset-bottom));
+        padding-bottom: max(20px, calc(20px + env(safe-area-inset-bottom)));
+        padding-top: max(16px, calc(16px + env(safe-area-inset-bottom) * 0.3));
         padding-left: max(16px, env(safe-area-inset-left));
         padding-right: max(16px, env(safe-area-inset-right));
-        height: calc(64px + env(safe-area-inset-bottom));
+        height: calc(80px + env(safe-area-inset-bottom));
+        min-height: calc(80px + env(safe-area-inset-bottom));
     }
     
-    .app-container {
-        padding-bottom: max(80px, calc(80px + env(safe-area-inset-bottom)));
+    @media (max-width: 380px) {
+        .glass-nav {
+            padding-bottom: max(18px, calc(18px + env(safe-area-inset-bottom)));
+            padding-top: max(14px, calc(14px + env(safe-area-inset-bottom) * 0.3));
+            height: calc(76px + env(safe-area-inset-bottom));
+            min-height: calc(76px + env(safe-area-inset-bottom));
+        }
     }
     
-    .glass-header {
-        padding-top: max(12px, env(safe-area-inset-top));
-        padding-left: max(16px, env(safe-area-inset-left));
-        padding-right: max(16px, env(safe-area-inset-right));
-        min-height: calc(60px + env(safe-area-inset-top));
-    }
-    
-    .notification {
-        bottom: max(80px, calc(80px + env(safe-area-inset-bottom)));
+    @media (max-width: 320px) {
+        .glass-nav {
+            padding-bottom: max(16px, calc(16px + env(safe-area-inset-bottom)));
+            padding-top: max(12px, calc(12px + env(safe-area-inset-bottom) * 0.3));
+            height: calc(72px + env(safe-area-inset-bottom));
+            min-height: calc(72px + env(safe-area-inset-bottom));
+        }
     }
 }
 

@@ -20,111 +20,68 @@ let tg = null;
 
 // CSS для полноэкранного режима Telegram
 const fullscreenStyles = `
-    <style id="telegram-fullscreen-styles">
+<style id="telegram-fullscreen-styles">
+    .telegram-webapp {
+        height: 100vh !important;
+        max-height: 100vh !important;
+        position: relative !important;  /* Изменено с fixed */
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        width: 100% !important;
+    }
+    
+    .telegram-webapp body {
+        height: auto !important;  /* Изменено */
+        min-height: 100vh !important;
+        position: relative !important;
+        width: 100%;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow-y: auto !important;  /* Разрешаем скролл */
+        overflow-x: hidden !important;
+    }
+    
+    /* Для iOS */
+    @supports (-webkit-touch-callout: none) {
         .telegram-webapp {
-            height: 100vh !important;
-            max-height: 100vh !important;
-            overflow: hidden !important;
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            right: 0 !important;
-            bottom: 0 !important;
-            width: 100% !important;
+            height: -webkit-fill-available !important;
         }
-        
-        .telegram-webapp body {
-            height: 100vh !important;
-            max-height: 100vh !important;
-            overflow: hidden !important;
-            position: fixed;
-            width: 100%;
-            margin: 0 !important;
-            padding: 0 !important;
-        }
-        
-        /* Для iOS */
-        @supports (-webkit-touch-callout: none) {
-            .telegram-webapp {
-                height: -webkit-fill-available !important;
-            }
-        }
-        
-        /* Скрываем скроллбар Telegram */
-        .telegram-webapp::-webkit-scrollbar {
-            display: none !important;
-        }
-        
-        /* Стили для кастомного хедера */
-        .custom-header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 60px;
-            background: var(--dark-bg);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 20px;
-            z-index: 1000;
-            border-bottom: 1px solid var(--card-border);
-        }
-        
-        /* Кастомное меню действий */
-        .custom-action-menu {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 10px;
-            display: none;
-            flex-direction: column;
-            gap: 5px;
-            z-index: 1001;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            border: 1px solid var(--card-border);
-        }
-        
-        .custom-action-menu.show {
-            display: flex;
-            animation: fadeIn 0.2s ease;
-        }
-        
-        .action-menu-item {
-            background: none;
-            border: none;
-            color: var(--text-primary);
-            padding: 12px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transition: background 0.2s ease;
-            white-space: nowrap;
-        }
-        
-        .action-menu-item:hover {
-            background: rgba(255, 255, 255, 0.05);
-        }
-        
-        .action-menu-item i {
-            width: 20px;
-            text-align: center;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        /* Убираем стандартный хедер Telegram */
-        .tg-head {
-            display: none !important;
-        }
-    </style>
+    }
+    
+    /* Убираем скроллбар у самого WebApp, но оставляем у контента */
+    .telegram-webapp::-webkit-scrollbar {
+        display: none !important;
+    }
+    
+    /* Стили для кастомного хедера */
+    .custom-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 60px;
+        background: var(--dark-bg);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 20px;
+        z-index: 1000;
+        border-bottom: 1px solid var(--card-border);
+    }
+    
+    /* Добавляем padding-top для основного контента */
+    .main-content {
+        padding-top: 70px; /* Чтобы контент не скрывался под фиксированным хедером */
+    }
+    
+    /* Делаем контент скроллируемым */
+    .scrollable-content {
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch; /* Для плавного скролла на iOS */
+    }
+</style>
 `;
 
 // Добавляем стили в head
@@ -412,36 +369,6 @@ function customizeTelegramUI() {
     addCustomActionButtons();
     
     console.log('Telegram UI кастомизирован');
-}
-
-// Функция для добавления кастомного хедера
-function addCustomHeader() {
-    const existingHeader = document.querySelector('.custom-header');
-    if (existingHeader) return;
-    
-    const headerHTML = `
-        <div class="custom-header">
-            <div class="logo-container">
-                <div class="logo-icon" style="width: 32px; height: 32px; background: var(--primary-gradient); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-                    <i class="fas fa-shield-alt" style="color: white; font-size: 1rem;"></i>
-                </div>
-                <h1 style="font-size: 1.2rem; margin: 0 0 0 10px; color: var(--text-primary);">ФЛОУИ VPN</h1>
-            </div>
-            <div class="header-actions">
-                <button class="action-btn" onclick="toggleMoreMenu()" style="background: none; border: none; color: var(--text-primary); font-size: 1.2rem; cursor: pointer;">
-                    <i class="fas fa-ellipsis-v"></i>
-                </button>
-            </div>
-        </div>
-    `;
-    
-    document.body.insertAdjacentHTML('afterbegin', headerHTML);
-    
-    // Добавляем отступ для основного контента
-    const mainContent = document.querySelector('main') || document.querySelector('.main-content');
-    if (mainContent) {
-        mainContent.style.paddingTop = '70px';
-    }
 }
 
 // Функция для добавления меню действий
