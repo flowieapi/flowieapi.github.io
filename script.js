@@ -61,24 +61,31 @@ const tg = window.Telegram?.WebApp;
 // Убираем заголовок Telegram и добавляем кастомные кнопки
 function customizeTelegramUI() {
     if (!window.Telegram?.WebApp) return;
-    
+
     const tg = window.Telegram.WebApp;
-    
+
     // Скрываем заголовок Telegram
     tg.setHeaderColor('bg_color');
     tg.enableClosingConfirmation();
-    
-    // Убираем стандартные кнопки если они есть
-    if (tg.BackButton) {
-        tg.BackButton.hide();
+
+    tg.enableVerticalSwipes(false);
+
+    tg.expand(); // Обязательно!
+    tg.setHeaderColor('secondary_bg_color'); // Цвет заголовка как у фона
+    tg.MainButton.hide();
+    tg.BackButton.hide();
+
+    if (tg.platform !== 'unknown') {
+        // Для iOS/Android
+        tg.showSettings(false); // Скрыть кнопку настроек (три точки)
     }
-    
+
     // Добавляем кастомный хедер
     addCustomHeader();
-    
+
     // Добавляем плавающую кнопку закрытия
     addFloatingCloseButton();
-    
+
     // Добавляем кнопки "свернуть" и "три точки"
     addCustomActionButtons();
 }
@@ -87,14 +94,14 @@ function customizeTelegramUI() {
 function addFloatingCloseButton() {
     const existingCloseBtn = document.querySelector('.floating-close-btn');
     if (existingCloseBtn) return;
-    
+
     const closeBtnHTML = `
         <button class="floating-close-btn" onclick="closeApp()">
             <i class="fas fa-times"></i>
             <span class="btn-text">Close</span>
         </button>
     `;
-    
+
     document.body.insertAdjacentHTML('beforeend', closeBtnHTML);
 }
 
@@ -120,7 +127,7 @@ function addCustomActionButtons() {
             </button>
         </div>
     `;
-    
+
     document.body.insertAdjacentHTML('beforeend', actionMenuHTML);
 }
 
@@ -193,7 +200,7 @@ function showAbout() {
             </div>
         </div>
     `;
-    
+
     document.body.insertAdjacentHTML('beforeend', modalHTML);
     toggleMoreMenu();
 }
@@ -206,7 +213,7 @@ function closeModal(modalId) {
 }
 
 // Инициализация при загрузке
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Вызываем после инициализации Telegram
     setTimeout(() => {
         customizeTelegramUI();
@@ -217,7 +224,7 @@ function initTelegramWebApp() {
     if (!window.Telegram?.WebApp) return;
 
     const tg = window.Telegram.WebApp;
-    
+
     // Добавляем класс для стилей
     document.body.classList.add('telegram-webapp');
 
@@ -230,7 +237,7 @@ function initTelegramWebApp() {
     if (tg.BackButton) {
         tg.BackButton.hide();
     }
-    
+
     // Настраиваем тему
     applyTelegramTheme();
 
@@ -242,11 +249,11 @@ function initTelegramWebApp() {
     if (telegramUser) {
         // Пробуем загрузить сохраненный аватар
         const loadedFromCache = loadSavedAvatar();
-        
+
         if (!loadedFromCache) {
             syncTelegramAvatar(telegramUser);
         }
-        
+
         currentUser = {
             telegramUser: telegramUser,
             lastAvatarUpdate: Date.now()
@@ -260,7 +267,7 @@ function initTelegramWebApp() {
     if (tg.ready) {
         tg.ready();
     }
-    
+
     // Добавляем подтверждение закрытия
     tg.enableClosingConfirmation();
 }
@@ -268,39 +275,39 @@ function initTelegramWebApp() {
 
 function syncTelegramAvatar(user) {
     if (!user) return;
-    
+
     // Ищем все элементы с аватарками
     const avatars = document.querySelectorAll('.user-avatar, .profile-avatar-large');
-    
+
     // Пытаемся получить аватар из Telegram
     let telegramAvatarUrl = null;
-    
+
     // Если у пользователя есть фото в Telegram
     if (user.photo_url) {
         telegramAvatarUrl = user.photo_url;
     }
-    
+
     // Или создаем аватар на основе данных Telegram
     if (!telegramAvatarUrl) {
         const userId = user.id.toString();
         telegramAvatarUrl = `https://api.dicebear.com/7.x/thumbs/svg?seed=telegram_${userId}&backgroundColor=0088cc,34b7f1,00ff88&backgroundType=gradientLinear`;
     }
-    
+
     // Обновляем все аватары
     avatars.forEach(avatar => {
         const img = avatar.querySelector('img');
         if (img) {
             img.src = telegramAvatarUrl;
-            img.onerror = function() {
+            img.onerror = function () {
                 // Fallback если изображение не загрузилось
                 this.src = `https://api.dicebear.com/7.x/thumbs/svg?seed=user_${Date.now()}&backgroundColor=00ff88,00ccff,9d4edd&backgroundType=gradientLinear`;
             };
         }
-        
+
         // Добавляем класс для стилей Telegram
         avatar.classList.add('telegram-synced');
     });
-    
+
     // Сохраняем аватар в localStorage для кэширования
     try {
         localStorage.setItem('telegram_avatar_url', telegramAvatarUrl);
@@ -315,7 +322,7 @@ function loadSavedAvatar() {
     try {
         const savedAvatarUrl = localStorage.getItem('telegram_avatar_url');
         const savedUserId = localStorage.getItem('telegram_user_id');
-        
+
         if (savedAvatarUrl && savedUserId) {
             const avatars = document.querySelectorAll('.user-avatar, .profile-avatar-large');
             avatars.forEach(avatar => {
@@ -363,12 +370,12 @@ function initTelegramWebApp() {
     if (telegramUser) {
         // Пробуем загрузить сохраненный аватар
         const loadedFromCache = loadSavedAvatar();
-        
+
         // Если не загрузили из кэша или прошло много времени, обновляем
         if (!loadedFromCache) {
             syncTelegramAvatar(telegramUser);
         }
-        
+
         // Сохраняем данные пользователя для обновления аватара при необходимости
         currentUser = {
             telegramUser: telegramUser,
@@ -976,66 +983,66 @@ function simulatePingCheck() {
     const pingValue = document.getElementById('pingValue');
     const statusText = document.querySelector('.status-text');
     const indicators = document.querySelectorAll('.status-indicator');
-    
+
     if (!checkPingBtn || !pingValue) return;
-    
+
     // Если уже идет проверка, выходим
     if (checkPingBtn.classList.contains('checking')) return;
-    
+
     checkPingBtn.classList.add('checking');
     checkPingBtn.disabled = true;
-    
+
     // Сохраняем оригинальную высоту кнопки
     const originalHeight = checkPingBtn.offsetHeight;
     checkPingBtn.style.height = originalHeight + 'px';
     checkPingBtn.style.minHeight = originalHeight + 'px';
-    
+
     // Обновляем контент без изменения высоты
     const originalContent = checkPingBtn.innerHTML;
     checkPingBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Проверяем...</span>';
-    
+
     // Устанавливаем фиксированную ширину для спиннера и текста
     const spinner = checkPingBtn.querySelector('.fa-spinner');
     const textSpan = checkPingBtn.querySelector('span');
-    
+
     if (spinner) {
         spinner.style.fontSize = '1em';
         spinner.style.lineHeight = '1';
     }
-    
+
     if (textSpan) {
         textSpan.style.fontSize = '0.95rem';
         textSpan.style.lineHeight = '1';
     }
-    
+
     checkPingBtn.style.opacity = '0.7';
-    
+
     let dots = 0;
     const interval = setInterval(() => {
         pingValue.textContent = '•'.repeat(dots + 1);
         dots = (dots + 1) % 3;
     }, 200);
-    
+
     const delay = 2000 + Math.random() * 1000;
-    
+
     setTimeout(() => {
         clearInterval(interval);
-        
+
         const randomPing = Math.floor(Math.random() * (28 - 8 + 1)) + 8;
         pingValue.textContent = randomPing;
-        
+
         updatePingStatus(randomPing, statusText, indicators);
-        
+
         checkPingBtn.classList.remove('checking');
         checkPingBtn.disabled = false;
         checkPingBtn.innerHTML = '<i class="fas fa-sync-alt"></i><span>Проверить сейчас</span>';
-        
+
         // Восстанавливаем оригинальную высоту
         checkPingBtn.style.height = '';
         checkPingBtn.style.minHeight = '';
-        
+
         checkPingBtn.style.opacity = '1';
-        
+
         // Анимация успешной проверки
         pingValue.style.transform = 'scale(1.1)';
         pingValue.style.transition = 'transform 0.3s ease';
